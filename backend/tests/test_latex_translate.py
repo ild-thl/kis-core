@@ -13,7 +13,7 @@ from src.services.glossary import GlossaryService
 from src.services.llm_translation_client import LLMTranslationClient
 from src.services.translation import TranslationService
 from src.translators.latex import translatable_text, translate_latex_preserve_structure
-from src.translators.latex_source import decode_tex
+from src.translators.latex_source import decode_tex, decode_tex_with_codec, encode_tex
 from src.translators.latex_tags import TAG_RE, _map_text, repair_tags, tags_match
 
 
@@ -292,6 +292,30 @@ def test_tags_match_rules():
     assert not tags_match("a <g1>b</g1> <x2/>", "A <g1>B</g1>")
     assert not tags_match("a <g1><g2>b</g2></g1>", "A <g1><g2>B</g1></g2>")
     assert not tags_match("a <x1/>", "<x1/>")
+
+
+def test_latin1_result_keeps_its_encoding_and_writes_missing_characters_as_commands():
+    raw = "Größe".encode("cp1252")
+    out = encode_tex("Größe “outlier” — Gauss’s ő…", "cp1252", raw)
+    assert out.decode("latin-1") == "Größe ``outlier'' --- Gauss's \\H{o}\\ldots{}"
+
+
+def test_windows_1252_extras_are_kept_when_the_upload_used_them():
+    raw = "„Zitat“".encode("cp1252")
+    assert encode_tex("“Quote”", "cp1252", raw).decode("cp1252") == "“Quote”"
+
+
+def test_utf8_result_stays_utf8():
+    assert encode_tex("“Quote” — ő", "utf-8", b"x") == "“Quote” — ő".encode("utf-8")
+
+
+def test_latin1_document_keeps_its_inputenc():
+    doc = "\\usepackage[latin1]{inputenc}\n\\begin{document}\nGrüße\n\\end{document}"
+    text, codec = decode_tex_with_codec(doc.encode("cp1252"))
+    assert codec == "cp1252"
+    service = TranslationService(deepl_client=_Upper(), glossary=GlossaryService())
+    out = translate_latex_preserve_structure(text, "DE", "EN-US", service, utf8_output=False)
+    assert "\\usepackage[latin1]{inputenc}" in out and "GRÜSSE" in out
 
 
 def test_decode_tex_handles_old_encodings():

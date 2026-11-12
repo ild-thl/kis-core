@@ -919,9 +919,10 @@ class _Renderer:
         return "".join(out)
 
 
-def _parse(text: str, target_lang: str) -> tuple[list, list[Unit]]:
+def _parse(text: str, target_lang: str, utf8_output: bool = True) -> tuple[list, list[Unit]]:
     """Prepares the source and returns the template and the units worth translating."""
-    text = fix_inputenc(text)
+    if utf8_output:
+        text = fix_inputenc(text)
     text, german_shorthands = switch_language(text, target_lang)
     text = normalize_accents(text, german_shorthands)
 
@@ -943,12 +944,13 @@ def translatable_text(text: str) -> str:
 
 
 def translate_latex_preserve_structure(
-    text: str, source_lang: str, target_lang: str, service: TranslationService
+    text: str, source_lang: str, target_lang: str, service: TranslationService, utf8_output: bool = True
 ) -> str:
+    """Translates a LaTeX document, utf8_output False keeps the declared input encoding as it is."""
     if not text or not text.strip():
         return text
 
-    template, units = _parse(text, target_lang)
+    template, units = _parse(text, target_lang, utf8_output)
     tagged_texts = [_serialize(u) for u in units]
     translated = translate_tagged(tagged_texts, source_lang, target_lang, service, [u.previews for u in units])
 

@@ -1,8 +1,10 @@
-"""Reads a LaTeX file in any common encoding and adapts its preamble to UTF-8 and the target language."""
+"""Reads a LaTeX file in any common encoding, writes the result back in it and adapts the preamble to the target language."""
 
 import re
 import unicodedata
 from pathlib import Path
+
+from loguru import logger
 
 # The inputenc option names LaTeX uses, mapped to Python codecs.
 _INPUTENC_CODECS = {
@@ -20,14 +22,14 @@ _INPUTENC_BYTES_RE = re.compile(rb"\\usepackage[ \t]{0,20}\[([^\]]{0,200})\][ \t
 _INPUTENC_RE = re.compile(r"(\\usepackage[ \t]{0,20}\[)([^\]]{0,200})(\][ \t]{0,20}\{inputenc\})")
 
 
-def decode_tex(raw: bytes) -> str:
-    """Decodes UTF-8 first, then the encoding the file declares, then Windows-1252 and Latin-1."""
+def decode_tex_with_codec(raw: bytes) -> tuple[str, str]:
+    """Decodes UTF-8 first, then the encoding the file declares, then Windows-1252 and Latin-1, and names the codec."""
     if b"\x00" in raw:
         raise ValueError("binary content")
     if raw.startswith(b"\xef\xbb\xbf"):
         raw = raw[3:]
     try:
-        return raw.decode("utf-8")
+        return raw.decode("utf-8"), "utf-8"
     except UnicodeDecodeError:
         pass
     codecs: list[str] = []
@@ -38,10 +40,62 @@ def decode_tex(raw: bytes) -> str:
     codecs.extend(["cp1252", "latin-1"])
     for codec in codecs:
         try:
-            return raw.decode(codec)
+            return raw.decode(codec), codec
         except UnicodeDecodeError:
             continue
-    return raw.decode("latin-1")
+    return raw.decode("latin-1"), "latin-1"
+
+
+def decode_tex(raw: bytes) -> str:
+    """Decodes a LaTeX file in any common encoding."""
+    return decode_tex_with_codec(raw)[0]
+
+
+# Characters missing in an 8-bit encoding are written as LaTeX commands, which every encoding accepts.
+_TEX_FALLBACK = {
+    "“": "``", "”": "''", "‘": "`", "’": "'", "„": "\\quotedblbase{}", "‚": "\\quotesinglbase{}",
+    "«": "\\guillemotleft{}", "»": "\\guillemotright{}", "‹": "\\guilsinglleft{}", "›": "\\guilsinglright{}",
+    "–": "--", "—": "---", "…": "\\ldots{}", "€": "\\texteuro{}", "•": "\\textbullet{}",
+    "‰": "\\textperthousand{}", "™": "\\texttrademark{}", "−": "\\textminus{}", "†": "\\dag{}", "‡": "\\ddag{}",
+    "°": "\\textdegree{}", "×": "\\texttimes{}", "±": "\\textpm{}", "µ": "\\textmu{}", "ß": "\\ss{}",
+    "\u00a0": "~",
+}
+_ACCENT_COMMANDS = {
+    "\u0308": '\\"', "\u0301": "\\'", "\u0300": "\\`", "\u0302": "\\^", "\u0303": "\\~", "\u0327": "\\c",
+    "\u030b": "\\H", "\u030c": "\\v", "\u0306": "\\u", "\u0304": "\\=", "\u0307": "\\.", "\u0328": "\\k",
+    "\u030a": "\\r",
+}
+_C1_BYTES_RE = re.compile(rb"[\x80-\x9f]")
+
+
+def _tex_fallback(ch: str) -> str:
+    if ch in _TEX_FALLBACK:
+        return _TEX_FALLBACK[ch]
+    decomposed = unicodedata.normalize("NFD", ch)
+    if len(decomposed) == 2 and decomposed[1] in _ACCENT_COMMANDS and decomposed[0].isascii():
+        return _ACCENT_COMMANDS[decomposed[1]] + "{" + decomposed[0] + "}"
+    logger.warning("LaTeX: character U+{:04X} has no form in the file's encoding, written as ?", ord(ch))
+    return "?"
+
+
+def encode_tex(text: str, codec: str, raw: bytes) -> bytes:
+    """Writes the result in the encoding of the upload, so it still fits the files that include it."""
+    if codec == "utf-8":
+        return text.encode("utf-8")
+    # Windows-1252 only when the upload used its extra characters, otherwise plain Latin-1 that every 8-bit setup reads.
+    if codec == "cp1252":
+        codec = "cp1252" if _C1_BYTES_RE.search(raw) else "latin-1"
+    out: list[str] = []
+    for ch in text:
+        if ch.isascii():
+            out.append(ch)
+            continue
+        try:
+            ch.encode(codec)
+            out.append(ch)
+        except UnicodeEncodeError:
+            out.append(_tex_fallback(ch))
+    return "".join(out).encode(codec)
 
 
 # A LaTeX file may be this many times larger in bytes than the text limit, heavy markup included.
