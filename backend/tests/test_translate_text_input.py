@@ -83,3 +83,36 @@ def test_text_over_limit_is_rejected(monkeypatch):
             current_user={"user_id": 1}, locale="de",
         ))
     assert exc.value.status_code == 422
+
+
+def _upload(name: str, data: bytes):
+    import io
+    from starlette.datastructures import UploadFile
+    return UploadFile(file=io.BytesIO(data), filename=name)
+
+
+def test_latin1_tex_upload_is_accepted(monkeypatch):
+    from src.routes import translate as route
+    captured = _wire(monkeypatch, route)
+    data = "\\usepackage[latin1]{inputenc}\nGrüße aus der Vorlesung.".encode("cp1252")
+
+    asyncio.run(route.translate(
+        request=_Request(), file=_upload("skript.tex", data), text=None,
+        glossary="", provider_id=None, source_lang="", target_lang="",
+        current_user={"user_id": 1}, locale="de",
+    ))
+
+    assert captured["filename"] == "skript.tex"
+
+
+def test_binary_tex_upload_is_rejected(monkeypatch):
+    from src.routes import translate as route
+    _wire(monkeypatch, route)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(route.translate(
+            request=_Request(), file=_upload("skript.tex", b"\x00\x01\x02 binary"), text=None,
+            glossary="", provider_id=None, source_lang="", target_lang="",
+            current_user={"user_id": 1}, locale="de",
+        ))
+    assert exc.value.status_code == 400

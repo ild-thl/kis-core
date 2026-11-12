@@ -29,6 +29,7 @@ from src.utils.file_validation import (
     pages_or_raise,
     validate_or_raise,
 )
+from src.translators.latex_source import tex_plain_text
 from src.utils.text_extraction import EXTRACTORS
 from src.utils.upload_stream import stream_upload_to_path
 from src.dependencies_rbac import require_tool_access
@@ -140,10 +141,15 @@ async def translate(
             total, head = await stream_upload_to_path(file, tmp_path, max_upload_bytes(), locale)
             if not total:
                 raise HTTPException(status_code=400, detail=t("file.empty", locale))
-            validate_or_raise(head, ext, locale)
+            if ext == ".tex":
+                # LaTeX may come in any old encoding, the translator converts it, only binary content is refused.
+                if b"\x00" in head:
+                    raise HTTPException(status_code=400, detail=t("file.contentMismatch", locale))
+            else:
+                validate_or_raise(head, ext, locale)
             seiten = await asyncio.to_thread(pages_or_raise, ext, tmp_path, locale)
 
-            extractor = EXTRACTORS.get(ext)
+            extractor = tex_plain_text if ext == ".tex" else EXTRACTORS.get(ext)
             if extractor is not None:
                 extracted = await asyncio.to_thread(extractor, tmp_path)
                 zeichen = len(extracted)

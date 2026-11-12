@@ -150,7 +150,8 @@ def run_translate(
                 result_bytes = translated_text.encode("utf-8")
             elif ext == ".tex":
                 from src.translators.latex import translate_latex_preserve_structure
-                text = content.decode("utf-8")
+                from src.translators.latex_source import decode_tex
+                text = decode_tex(content)
                 translated_text = translate_latex_preserve_structure(text, source_lang, target_lang, service)
                 result_bytes = translated_text.encode("utf-8")
             elif ext == ".docx":
