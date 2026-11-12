@@ -116,3 +116,18 @@ def test_binary_tex_upload_is_rejected(monkeypatch):
             current_user={"user_id": 1}, locale="de",
         ))
     assert exc.value.status_code == 400
+
+
+def test_tex_length_counts_text_the_extractor_would_drop(monkeypatch):
+    from src.routes import translate as route
+    _wire(monkeypatch, route)
+    monkeypatch.setattr(route, "TRANSLATE_MAX_CHARS", 20)
+    data = b"\\begin{document}$x \\text{ein langer Text in einer Formel}$\\end{document}"
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(route.translate(
+            request=_Request(), file=_upload("skript.tex", data), text=None,
+            glossary="", provider_id=None, source_lang="", target_lang="",
+            current_user={"user_id": 1}, locale="de",
+        ))
+    assert exc.value.status_code == 422

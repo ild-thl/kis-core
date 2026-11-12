@@ -1,5 +1,6 @@
 """LaTeX translation keeps the document compilable with DeepL, an LLM or any other client."""
 import html
+import time
 import shutil
 import subprocess
 from types import SimpleNamespace
@@ -10,7 +11,7 @@ from src.services.deepl_client import DeepLClient
 from src.services.glossary import GlossaryService
 from src.services.llm_translation_client import LLMTranslationClient
 from src.services.translation import TranslationService
-from src.translators.latex import translate_latex_preserve_structure
+from src.translators.latex import translatable_text, translate_latex_preserve_structure
 from src.translators.latex_source import decode_tex
 from src.translators.latex_tags import TAG_RE, _map_text, tags_match
 
@@ -224,6 +225,25 @@ def test_decode_tex_handles_old_encodings():
     assert decode_tex(mac).endswith("Grüße")
     with pytest.raises(ValueError):
         decode_tex(b"\x00\x01binary")
+
+
+def test_length_count_is_what_the_translator_gets():
+    counted = translatable_text(
+        "\\title{Langer Titel}\\geometry{margin=2cm}\n\\begin{document}\nEs gilt $x \\text{für alle Seiten}$.\n\\end{document}"
+    )
+    assert "Langer Titel" in counted and "für alle Seiten" in counted
+    assert "margin" not in counted
+
+
+@pytest.mark.parametrize("doc", [
+    "{" * 300_000, "{\n\nWort " * 50_000, "\\foo[" * 60_000, "\\begin{verbatim}" * 20_000,
+    "\\usepackage[" * 25_000, "$" + "\\text{" * 50_000 + "$", "\\textbf{" * 5_000 + "a" + "}" * 5_000,
+    "\\foo{" + "1" * 300_000 + "x}", "\\title{a}" * 30_000 + "\\begin{document}x",
+])
+def test_hostile_input_is_parsed_in_linear_time(doc):
+    start = time.monotonic()
+    translatable_text(doc)
+    assert time.monotonic() - start < 3
 
 
 @pytest.mark.skipif(shutil.which("pdflatex") is None, reason="pdflatex not installed")

@@ -2,6 +2,7 @@
 
 import itertools
 import re
+from bisect import bisect_left, bisect_right
 from dataclasses import dataclass, field
 
 from src.services.translation import TranslationService
@@ -106,6 +107,7 @@ _MATH_ENVS = {
     "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*",
     "eqnarray", "eqnarray*", "math", "displaymath", "flalign", "flalign*", "alignat", "alignat*",
 }
+# Kept as written because printed text there is rare and mistakes would break compilation.
 _PROTECTED_ENVS = {
     "verbatim", "verbatim*", "Verbatim", "BVerbatim", "lstlisting", "minted", "comment",
     "filecontents", "filecontents*", "tikzpicture", "pgfpicture", "circuitikz", "forest",
@@ -120,7 +122,7 @@ _ENV_ARGS = {
     "thebibliography": "p", "otherlanguage": "p", "otherlanguage*": "p", "tcolorbox": "o",
     "mdframed": "o", "adjustbox": "p", "spacing": "p",
 }
-# Kept as written because printed text there is rare and mistakes would break compilation.
+# Commands inside formulas whose argument is printed as text.
 _TEXT_IN_MATH_RE = re.compile(r"\\(text|textrm|textnormal|textup|textit|textbf|textsf|mbox|intertext|shortintertext)\s*\{")
 _CAPTION_NAMES = {
     "\\figurename", "\\tablename", "\\contentsname", "\\listfigurename", "\\listtablename",
@@ -129,14 +131,75 @@ _CAPTION_NAMES = {
 }
 _PREAMBLE_RE = re.compile(r"\\(title|subtitle|date|newtheorem|renewcommand)(?![A-Za-z])")
 _BLANK_LINE_RE = re.compile(r"\n[ \t]*\n\s*")
-_DIMENSION_RE = re.compile(r"\s*[-+]?\d*\.?\d+\s*\\?[A-Za-z]{0,10}\s*")
+_STRUCTURE_RE = re.compile(r"\\(?:begin|item|par)(?![A-Za-z])")
+_BRACE_TOKEN_RE = re.compile(r"\\.|%[^\n]*\n?|[{}]", re.DOTALL)
+_BRACKET_TOKEN_RE = re.compile(r"\\.|[\[\]]", re.DOTALL)
+_TEXT_LETTER_RE = re.compile(r"\\[A-Za-z]+|\\.|([^\W\d_])", re.DOTALL)
+_DIMENSION_RE = re.compile(r"\s*[-+]?(?:\d+(?:\.\d*)?|\.\d+)\s*\\?[A-Za-z]{0,10}\s*")
+_BREAK_ARG_RE = re.compile(r"\s{0,20}\[" + _DIMENSION_RE.pattern + r"\]")
 _OVERLAY_RE = re.compile(r"<[^<>\n]{1,20}>")
 _ACCENT_CHARS = "\"'`^~=."
+# Deeper nesting is kept as written, which bounds the work per character.
+_MAX_DEPTH = 40
+
+
+class _Doc:
+    """The whole document with bracket pairs, comments and letters looked up once."""
+
+    def __init__(self, text: str):
+        self.text = text
+        self.braces: dict[int, int] = {}
+        self.comments: list[tuple[int, int]] = []
+        stack: list[int] = []
+        for m in _BRACE_TOKEN_RE.finditer(text):
+            token = m.group(0)
+            if token == "{":
+                stack.append(m.start())
+            elif token == "}":
+                if stack:
+                    self.braces[stack.pop()] = m.start()
+            elif token[0] == "%":
+                self.comments.append((m.start(), m.end()))
+        self.comment_starts = [start for start, _end in self.comments]
+        self.brackets: dict[int, int] = {}
+        stack = []
+        for m in _BRACKET_TOKEN_RE.finditer(text):
+            if m.group(0) == "[":
+                stack.append(m.start())
+            elif m.group(0) == "]" and stack:
+                self.brackets[stack.pop()] = m.start()
+        self.blanks = [m.start() for m in _BLANK_LINE_RE.finditer(text)]
+        self.structures = [m.start() for m in _STRUCTURE_RE.finditer(text)]
+        self.letters = [m.start(1) for m in _TEXT_LETTER_RE.finditer(text) if m.group(1)]
+
+    def group_end(self, start: int, hi: int, open_ch: str = "{") -> int | None:
+        """End after the closing bracket of the group opening at start, None when it does not close before hi."""
+        if start >= hi or self.text[start] != open_ch:
+            return None
+        close = (self.braces if open_ch == "{" else self.brackets).get(start)
+        return None if close is None or close >= hi else close + 1
+
+    @staticmethod
+    def _any_in(positions: list[int], a: int, b: int) -> bool:
+        idx = bisect_left(positions, a)
+        return idx < len(positions) and positions[idx] < b
+
+    def has_letters(self, a: int, b: int) -> bool:
+        return self._any_in(self.letters, a, b)
+
+    def inline_safe(self, a: int, b: int) -> bool:
+        return not self._any_in(self.blanks, a, b) and not self._any_in(self.structures, a, b)
+
+    def in_comment(self, idx: int) -> bool:
+        k = bisect_right(self.comment_starts, idx) - 1
+        return k >= 0 and self.comments[k][0] < idx < self.comments[k][1]
 
 
 @dataclass
 class _Ctx:
+    doc: _Doc
     theorems: set = field(default_factory=lambda: {"proof"})
+    depth: int = 0
 
 
 def _is_escaped(text: str, idx: int) -> bool:
@@ -148,35 +211,11 @@ def _is_escaped(text: str, idx: int) -> bool:
     return n % 2 == 1
 
 
-def _read_group(text: str, start: int, open_ch: str, close_ch: str) -> tuple[str | None, int]:
-    if start >= len(text) or text[start] != open_ch:
-        return None, start
-    depth = 0
-    i = start
-    while i < len(text):
-        ch = text[i]
-        if ch == "\\":
-            i += 2
-            continue
-        if ch == open_ch:
-            depth += 1
-        elif ch == close_ch:
-            depth -= 1
-            if depth == 0:
-                return text[start:i + 1], i + 1
-        elif ch == "%" and open_ch == "{":
-            nl = text.find("\n", i)
-            i = len(text) if nl == -1 else nl + 1
-            continue
-        i += 1
-    return None, start
-
-
-def _skip_space(text: str, i: int) -> int:
+def _skip_space(text: str, i: int, hi: int) -> int:
     """Skips spaces and at most one line break, like TeX between arguments."""
     j = i
     newlines = 0
-    while j < len(text) and text[j] in " \t\n":
+    while j < hi and text[j] in " \t\n":
         if text[j] == "\n":
             newlines += 1
             if newlines > 1:
@@ -192,113 +231,119 @@ def _has_letters(text: str) -> bool:
 def _textlike(text: str) -> bool:
     """Guesses whether an argument of an unknown command is readable text."""
     stripped = text.strip()
-    if not _has_letters(stripped) or "=" in stripped or _DIMENSION_RE.fullmatch(stripped):
+    if "=" in stripped or not _has_letters(stripped):
         return False
-    if re.fullmatch(r"[\w.:/#-]*\d[\w.:/#-]*|\S*[/.:]\S*", stripped):
+    if re.search(r"\s", stripped):
+        return True
+    # A single long token is an identifier or data, not prose.
+    if len(stripped) > 60 or _DIMENSION_RE.fullmatch(stripped):
         return False
-    return True
+    return not re.fullmatch(r"[\w.:/#-]*\d[\w.:/#-]*|\S*[/.:]\S*", stripped)
 
 
-def _inline_safe(text: str) -> bool:
-    return not _BLANK_LINE_RE.search(text) and not re.search(r"\\(begin|item|par)(?![A-Za-z])", text)
+def _find_env_end(text: str, start: int, hi: int, env: str) -> int:
+    m = re.compile(r"\\end\s*\{" + re.escape(env) + r"\}").search(text, start, hi)
+    return hi if m is None else m.end()
 
 
-def _find_env_end(text: str, start: int, env: str) -> int:
-    m = re.compile(r"\\end\s*\{" + re.escape(env) + r"\}").search(text, start)
-    return len(text) if m is None else m.end()
-
-
-def _find_math_end(text: str, start: int, delim: str) -> int:
+def _find_math_end(text: str, start: int, hi: int, delim: str) -> int:
     i = start
-    while i < len(text):
-        if text.startswith(delim, i) and not _is_escaped(text, i):
+    while True:
+        i = text.find(delim, i, hi)
+        if i == -1:
+            return hi
+        if not _is_escaped(text, i):
             return i + len(delim)
         i += 1
-    return len(text)
 
 
-def _math(src: str, ctx: _Ctx) -> X:
+def _math(a: int, b: int, ctx: _Ctx) -> X:
     """Keeps a formula and translates only the words inside \\text and similar."""
+    text = ctx.doc.text
     content: list = []
-    pos = 0
-    for m in _TEXT_IN_MATH_RE.finditer(src):
-        if m.start() < pos or _is_escaped(src, m.start()):
+    pos = a
+    for m in _TEXT_IN_MATH_RE.finditer(text, a, b):
+        if m.start() < pos or _is_escaped(text, m.start()):
             continue
-        group, end = _read_group(src, m.end() - 1, "{", "}")
-        if group is None:
+        end = ctx.doc.group_end(m.end() - 1, b)
+        if end is None:
             continue
-        inner = group[1:-1]
+        inner = text[m.end():end - 1]
         letters = sum(ch.isalpha() for ch in inner)
         if not (re.search(r"[^\W\d_]{2,}\s+[^\W\d_]", inner) or letters >= 4):
             continue
-        content.append(src[pos:m.end()])
-        content.extend(_block(inner, ctx))
+        content.append(text[pos:m.end()])
+        content.extend(_block(m.end(), end - 1, ctx))
         content.append("}")
         pos = end
-    content.append(src[pos:])
+    content.append(text[pos:b])
     return X(content)
 
 
-def _take_args(text: str, pos: int, spec: str) -> tuple[list[tuple[str, str, str]], int]:
-    """Reads the arguments a spec names, returns (kind, leading space, group) and the end."""
-    args: list[tuple[str, str, str]] = []
+def _take_args(doc: _Doc, pos: int, hi: int, spec: str) -> tuple[list[tuple[str, str, int, int]], int]:
+    """Reads the arguments a spec names, returns (kind, leading space, start, end) and the end."""
+    text = doc.text
+    args: list[tuple[str, str, int, int]] = []
     for kind in spec:
-        j = _skip_space(text, pos)
+        j = _skip_space(text, pos, hi)
         if kind in "oOU":
-            if j < len(text) and text[j] == "[":
-                group, end = _read_group(text, j, "[", "]")
-                if group is not None:
-                    args.append((kind, text[pos:j], group))
-                    pos = end
+            end = doc.group_end(j, hi, "[")
+            if end is not None:
+                args.append((kind, text[pos:j], j, end))
+                pos = end
             continue
-        if j < len(text) and text[j] == "{":
-            group, end = _read_group(text, j, "{", "}")
-            if group is None:
-                break
-            args.append((kind, text[pos:j], group))
+        end = doc.group_end(j, hi, "{")
+        if end is not None:
+            args.append((kind, text[pos:j], j, end))
             pos = end
-        elif kind == "p" and j < len(text) and text[j] == "\\":
-            m = re.compile(r"\\([A-Za-z]+|.)").match(text, j)
-            args.append((kind, text[pos:j], m.group(0)))
+        elif kind == "p" and j + 1 < hi and text[j] == "\\":
+            m = re.compile(r"\\([A-Za-z]+|.)", re.DOTALL).match(text, j, hi)
+            args.append((kind, text[pos:j], j, m.end()))
             pos = m.end()
         else:
             break
     return args, pos
 
 
-def _translatable(kind: str, group: str) -> bool:
-    inner = group[1:-1] if group[:1] in "[{" else ""
+def _translatable(doc: _Doc, kind: str, a: int, b: int) -> bool:
+    if doc.text[a] not in "[{":
+        return False
     if kind in "tO":
-        return _has_letters(inner)
+        return doc.has_letters(a + 1, b - 1)
     if kind == "U":
+        inner = doc.text[a + 1:b - 1]
         return _textlike(inner) and bool(re.search(r"\s", inner.strip()))
     return False
 
 
 def _command_item(head: str, args: list, mode: str, ctx: _Ctx):
     """Builds the item for a command from its head and parsed arguments."""
-    marks = [_translatable(kind, group) for kind, _ws, group in args]
+    doc = ctx.doc
+    text = doc.text
+    marks = [_translatable(doc, kind, a, b) for kind, _ws, a, b in args]
     if mode == "inline" and sum(marks) == 1:
         idx = marks.index(True)
-        kind, ws, group = args[idx]
-        if kind == "t" and _inline_safe(group[1:-1]):
-            open_ = head + "".join(w + g for _k, w, g in args[:idx]) + ws + "{"
-            close = "}" + "".join(w + g for _k, w, g in args[idx + 1:])
-            return G(open_, _inline(group[1:-1], ctx), close)
+        kind, ws, a, b = args[idx]
+        if kind == "t" and doc.inline_safe(a + 1, b - 1):
+            open_ = head + "".join(w + text[x:y] for _k, w, x, y in args[:idx]) + ws + "{"
+            close = "}" + "".join(w + text[x:y] for _k, w, x, y in args[idx + 1:])
+            return G(open_, _inline(a + 1, b - 1, ctx), close)
     content: list = [head]
-    for (kind, ws, group), mark in zip(args, marks):
+    for (kind, ws, a, b), mark in zip(args, marks):
         content.append(ws)
         if mark:
-            content.append(group[0])
-            content.extend(_block(group[1:-1], ctx))
-            content.append(group[-1])
+            content.append(text[a])
+            content.extend(_block(a + 1, b - 1, ctx))
+            content.append(text[b - 1])
         else:
-            content.append(group)
+            content.append(text[a:b])
     return X(content)
 
 
-def _scan(text: str, ctx: _Ctx) -> list:
+def _scan(lo: int, hi: int, ctx: _Ctx) -> list:
     """Splits LaTeX into text, inline markup and paragraph-ending items."""
+    doc = ctx.doc
+    text = doc.text
     items: list = []
     buf: list[str] = []
 
@@ -308,26 +353,25 @@ def _scan(text: str, ctx: _Ctx) -> list:
             buf.clear()
         items.append(_B(obj) if boundary else obj)
 
-    i = 0
-    n = len(text)
-    while i < n:
+    i = lo
+    while i < hi:
         ch = text[i]
         if ch == "%":
-            nl = text.find("\n", i)
-            end = n if nl == -1 else nl + 1
+            nl = text.find("\n", i, hi)
+            end = hi if nl == -1 else nl + 1
             emit(text[i:end], boundary=True)
             i = end
             continue
         if ch == "\n":
-            m = _BLANK_LINE_RE.match(text, i)
+            m = _BLANK_LINE_RE.match(text, i, hi)
             if m:
                 emit(m.group(0), boundary=True)
                 i = m.end()
                 continue
         if ch == "$":
             delim = "$$" if text.startswith("$$", i) else "$"
-            end = _find_math_end(text, i + len(delim), delim)
-            emit(_math(text[i:end], ctx))
+            end = _find_math_end(text, i + len(delim), hi, delim)
+            emit(_math(i, end, ctx))
             i = end
             continue
         if ch == "~":
@@ -339,12 +383,12 @@ def _scan(text: str, ctx: _Ctx) -> list:
             i += 1
             continue
         if ch == "{":
-            group, end = _read_group(text, i, "{", "}")
-            if group is not None and not _has_letters(group[1:-1]):
-                emit(X([group]))
+            end = doc.group_end(i, hi)
+            if end is not None and not doc.has_letters(i + 1, end - 1):
+                emit(X([text[i:end]]))
                 i = end
-            elif group is not None and _inline_safe(group[1:-1]):
-                emit(G("{", _inline(group[1:-1], ctx), "}"))
+            elif end is not None and doc.inline_safe(i + 1, end - 1):
+                emit(G("{", _inline(i + 1, end - 1, ctx), "}"))
                 i = end
             else:
                 emit("{", boundary=True)
@@ -355,7 +399,7 @@ def _scan(text: str, ctx: _Ctx) -> list:
             i += 1
             continue
         if ch == "\\":
-            i = _command(text, i, ctx, emit, buf)
+            i = _command(i, hi, ctx, emit, buf)
             continue
         buf.append(ch)
         i += 1
@@ -364,13 +408,14 @@ def _scan(text: str, ctx: _Ctx) -> list:
     return items
 
 
-def _command(text: str, i: int, ctx: _Ctx, emit, buf: list) -> int:
+def _command(i: int, hi: int, ctx: _Ctx, emit, buf: list) -> int:
     """Handles one backslash command and returns the position after it."""
-    n = len(text)
+    doc = ctx.doc
+    text = doc.text
     j = i + 1
-    if j >= n:
+    if j >= hi:
         emit(X(["\\"]))
-        return n
+        return hi
     c = text[j]
     if not c.isalpha():
         if c in "%&#_${}":
@@ -383,131 +428,134 @@ def _command(text: str, i: int, ctx: _Ctx, emit, buf: list) -> int:
             return j + 1
         if c in "([":
             closing = "\\)" if c == "(" else "\\]"
-            end = text.find(closing, j + 1)
-            end = n if end == -1 else end + 2
-            emit(_math(text[i:end], ctx))
+            end = text.find(closing, j + 1, hi)
+            end = hi if end == -1 else end + 2
+            emit(_math(i, end, ctx))
             return end
         if c == "\\":
             k = j + 1
-            if k < n and text[k] == "*":
+            if k < hi and text[k] == "*":
                 k += 1
-            m = re.compile(r"\s*\[" + _DIMENSION_RE.pattern + r"\]").match(text, k)
+            m = _BREAK_ARG_RE.match(text, k, hi)
             if m:
                 k = m.end()
             emit(text[i:k], boundary=True)
             return k
         k = j + 1
-        if c in _ACCENT_CHARS and k < n:
-            group, end = _read_group(text, k, "{", "}")
-            k = end if group is not None else (k + 1 if text[k].isalpha() else k)
+        if c in _ACCENT_CHARS and k < hi:
+            end = doc.group_end(k, hi)
+            k = end if end is not None else (k + 1 if text[k].isalpha() else k)
         emit(X([text[i:k]]))
         return k
 
     k = j
-    while k < n and text[k].isalpha():
+    while k < hi and text[k].isalpha():
         k += 1
     name = text[j:k]
 
     if name in ("verb", "lstinline", "mintinline"):
-        p = k + 1 if k < n and text[k] == "*" else k
+        p = k + 1 if k < hi and text[k] == "*" else k
         if name == "lstinline":
-            group, end = _read_group(text, p, "[", "]")
-            p = end if group else p
+            p = doc.group_end(p, hi, "[") or p
         if name == "mintinline":
-            for open_ch, close_ch in (("[", "]"), ("{", "}")):
-                group, end = _read_group(text, p, open_ch, close_ch)
-                p = end if group else p
-        if p < n and text[p] == "{":
-            _group, end = _read_group(text, p, "{", "}")
-        elif p < n:
-            close = text.find(text[p], p + 1)
-            end = n if close == -1 else close + 1
+            p = doc.group_end(p, hi, "[") or p
+            p = doc.group_end(p, hi, "{") or p
+        if p < hi and text[p] == "{":
+            end = doc.group_end(p, hi) or hi
+        elif p < hi:
+            close = text.find(text[p], p + 1, hi)
+            end = hi if close == -1 else close + 1
         else:
-            end = n
+            end = hi
         emit(X([text[i:end]]))
         return end
 
     if name in ("begin", "end"):
-        p = _skip_space(text, k)
-        group, end = _read_group(text, p, "{", "}")
-        if group is None:
+        p = _skip_space(text, k, hi)
+        end = doc.group_end(p, hi)
+        if end is None:
             emit(X([text[i:k]]))
             return k
-        env = group[1:-1].strip()
+        env = text[p + 1:end - 1].strip()
         if name == "end":
             emit(text[i:end], boundary=True)
             return end
         if env in _PROTECTED_ENVS:
-            stop = _find_env_end(text, end, env)
+            stop = _find_env_end(text, end, hi, env)
             emit(text[i:stop], boundary=True)
             return stop
         if env in _MATH_ENVS:
-            stop = _find_env_end(text, end, env)
-            emit(_math(text[i:stop], ctx))
+            stop = _find_env_end(text, end, hi, env)
+            emit(_math(i, stop, ctx))
             return stop
         head_end = end
-        m = _OVERLAY_RE.match(text, head_end)
+        m = _OVERLAY_RE.match(text, head_end, hi)
         if m:
             head_end = m.end()
         spec = "O" if env in ctx.theorems else _ENV_ARGS.get(env, "U")
-        args, stop = _take_args(text, head_end, spec)
+        args, stop = _take_args(doc, head_end, hi, spec)
         emit(_command_item(text[i:head_end], args, "block", ctx), boundary=True)
         return stop
 
     head_end = k
-    if head_end < n and text[head_end] == "*":
+    if head_end < hi and text[head_end] == "*":
         head_end += 1
-    m = _OVERLAY_RE.match(text, head_end)
-    if m and name in _RULES or (m and m.group(0)[1:2].isdigit()):
+    m = _OVERLAY_RE.match(text, head_end, hi)
+    if m and (name in _RULES or m.group(0)[1:2].isdigit()):
         head_end = m.end()
     head = text[i:head_end]
 
     if name in _RULES:
         spec, mode = _RULES[name]
-        args, stop = _take_args(text, head_end, spec)
-        item = _command_item(head, args, mode, ctx)
-        emit(item, boundary=(mode == "block"))
+        args, stop = _take_args(doc, head_end, hi, spec)
+        emit(_command_item(head, args, mode, ctx), boundary=(mode == "block"))
         return stop
 
+    args, stop = _unknown_args(doc, head_end, hi)
     if name.startswith(_PROTECTED_PREFIXES):
-        args, stop = _unknown_args(text, head_end)
-        emit(X([head] + [ws + g for _k, ws, g in args]))
+        emit(X([head] + [ws + text[a:b] for _k, ws, a, b in args]))
         return stop
-
-    args, stop = _unknown_args(text, head_end)
-    args = [(("t" if _textlike(g[1:-1]) else "p") if g[0] == "{" else "o", ws, g) for _k, ws, g in args]
+    args = [
+        (("t" if _textlike(text[a + 1:b - 1]) else "p") if text[a] == "{" else "o", ws, a, b)
+        for _k, ws, a, b in args
+    ]
     emit(_command_item(head, args, "inline", ctx))
     return stop
 
 
-def _unknown_args(text: str, pos: int) -> tuple[list[tuple[str, str, str]], int]:
+def _unknown_args(doc: _Doc, pos: int, hi: int) -> tuple[list[tuple[str, str, int, int]], int]:
     """Takes directly attached optional arguments and following brace groups of an unknown command."""
-    args: list[tuple[str, str, str]] = []
-    while pos < len(text) and text[pos] == "[":
-        group, end = _read_group(text, pos, "[", "]")
-        if group is None:
+    text = doc.text
+    args: list[tuple[str, str, int, int]] = []
+    while True:
+        end = doc.group_end(pos, hi, "[")
+        if end is None:
             break
-        args.append(("o", "", group))
+        args.append(("o", "", pos, end))
         pos = end
     while True:
         j = pos
-        while j < len(text) and text[j] in " \t":
+        while j < hi and text[j] in " \t":
             j += 1
-        if j < len(text) and text[j] == "{":
-            group, end = _read_group(text, j, "{", "}")
-            if group is None:
-                break
-            args.append(("p", text[pos:j], group))
-            pos = end
-        else:
+        end = doc.group_end(j, hi)
+        if end is None:
             break
+        args.append(("p", text[pos:j], j, end))
+        pos = end
     return args, pos
 
 
-def _inline(text: str, ctx: _Ctx) -> list:
+def _inline(a: int, b: int, ctx: _Ctx) -> list:
     """Parses text that stays inside one sentence, paragraph breaks become kept markup."""
+    if ctx.depth >= _MAX_DEPTH:
+        return [X([ctx.doc.text[a:b]])]
+    ctx.depth += 1
+    try:
+        items = _scan(a, b, ctx)
+    finally:
+        ctx.depth -= 1
     out: list = []
-    for item in _scan(text, ctx):
+    for item in items:
         if isinstance(item, _B):
             inner = item.item
             out.append(inner if isinstance(inner, X) else X([inner]))
@@ -520,33 +568,45 @@ def _is_edge(item) -> bool:
     return isinstance(item, X) or (isinstance(item, str) and not item.strip())
 
 
-def _block(text: str, ctx: _Ctx) -> list:
+def _block(a: int, b: int, ctx: _Ctx) -> list:
     """Parses LaTeX into kept markup and translatable units, one per paragraph-like run."""
+    if ctx.depth >= _MAX_DEPTH:
+        return [ctx.doc.text[a:b]]
     out: list = []
     current: list = []
 
     def flush() -> None:
         lead: list = []
         trail: list = []
-        while current and _is_edge(current[0]):
-            lead.append(current.pop(0))
-        while current and _is_edge(current[-1]):
-            trail.insert(0, current.pop())
-        if current and isinstance(current[0], str):
-            s = current[0]
+        start = 0
+        while start < len(current) and _is_edge(current[start]):
+            start += 1
+        stop = len(current)
+        while stop > start and _is_edge(current[stop - 1]):
+            stop -= 1
+        lead = current[:start]
+        trail = current[stop:]
+        middle = current[start:stop]
+        if middle and isinstance(middle[0], str):
+            s = middle[0]
             lead.append(s[: len(s) - len(s.lstrip())])
-            current[0] = s.lstrip()
-        if current and isinstance(current[-1], str):
-            s = current[-1]
+            middle[0] = s.lstrip()
+        if middle and isinstance(middle[-1], str):
+            s = middle[-1]
             trail.insert(0, s[len(s.rstrip()):])
-            current[-1] = s.rstrip()
+            middle[-1] = s.rstrip()
         out.extend(lead)
-        if current:
-            out.append(Unit(list(current)))
+        if middle:
+            out.append(Unit(middle))
         out.extend(trail)
         current.clear()
 
-    for item in _scan(text, ctx):
+    ctx.depth += 1
+    try:
+        items = _scan(a, b, ctx)
+    finally:
+        ctx.depth -= 1
+    for item in items:
         if isinstance(item, _B):
             flush()
             out.append(item.item)
@@ -556,35 +616,32 @@ def _block(text: str, ctx: _Ctx) -> list:
     return out
 
 
-def _in_comment(text: str, idx: int) -> bool:
-    line_start = text.rfind("\n", 0, idx) + 1
-    return any(text[k] == "%" and not _is_escaped(text, k) for k in range(line_start, idx))
-
-
-def _preamble(text: str, ctx: _Ctx) -> list:
+def _preamble(hi: int, ctx: _Ctx) -> list:
     """Keeps the preamble and translates only titles, theorem names and caption names."""
+    doc = ctx.doc
+    text = doc.text
     out: list = []
     pos = 0
-    for m in _PREAMBLE_RE.finditer(text):
-        if m.start() < pos or _is_escaped(text, m.start()) or _in_comment(text, m.start()):
+    for m in _PREAMBLE_RE.finditer(text, 0, hi):
+        if m.start() < pos or _is_escaped(text, m.start()) or doc.in_comment(m.start()):
             continue
         name = m.group(1)
         head_end = m.end() + (1 if text[m.end():m.end() + 1] == "*" else 0)
         if name == "newtheorem":
-            args, stop = _take_args(text, head_end, "poto")
-            if args and args[0][2].startswith("{"):
-                ctx.theorems.add(args[0][2][1:-1].strip())
+            args, stop = _take_args(doc, head_end, hi, "poto")
+            if args and text[args[0][2]] == "{":
+                ctx.theorems.add(text[args[0][2] + 1:args[0][3] - 1].strip())
         elif name == "renewcommand":
-            args, stop = _take_args(text, head_end, "pot")
-            first = args[0][2].strip("{}").strip() if args else ""
+            args, stop = _take_args(doc, head_end, hi, "pot")
+            first = text[args[0][2]:args[0][3]].strip("{}").strip() if args else ""
             if first not in _CAPTION_NAMES:
                 continue
         else:
-            args, stop = _take_args(text, head_end, "t" if name == "date" else "Ot")
+            args, stop = _take_args(doc, head_end, hi, "t" if name == "date" else "Ot")
         out.append(text[pos:m.start()])
         out.append(_command_item(text[m.start():head_end], args, "block", ctx))
         pos = stop
-    out.append(text[pos:])
+    out.append(text[pos:hi])
     return out
 
 
@@ -707,11 +764,27 @@ class _Renderer:
         return "".join(out)
 
 
-def _split_document(text: str) -> tuple[str, str]:
+def _parse(text: str, target_lang: str) -> tuple[list, list[Unit]]:
+    """Prepares the source and returns the template and the units worth translating."""
+    text = fix_inputenc(text)
+    text, german_shorthands = switch_language(text, target_lang)
+    text = normalize_accents(text, german_shorthands)
+
+    ctx = _Ctx(doc=_Doc(text))
+    body_start = 0
     for m in re.finditer(r"\\begin\s*\{document\}", text):
-        if not _in_comment(text, m.start()):
-            return text[:m.start()], text[m.start():]
-    return "", text
+        if not ctx.doc.in_comment(m.start()):
+            body_start = m.start()
+            break
+    template = _preamble(body_start, ctx) + _block(body_start, len(text), ctx)
+    units = [u for u in _units(template) if _text_runs(u.parts)]
+    return template, units
+
+
+def translatable_text(text: str) -> str:
+    """The text that will go to the translator, one unit per line, used for the length limit."""
+    _template, units = _parse(text, "")
+    return "\n".join(TAG_RE.sub("", _serialize(u)) for u in units)
 
 
 def translate_latex_preserve_structure(
@@ -720,15 +793,7 @@ def translate_latex_preserve_structure(
     if not text or not text.strip():
         return text
 
-    text = fix_inputenc(text)
-    text, german_shorthands = switch_language(text, target_lang)
-    text = normalize_accents(text, german_shorthands)
-
-    ctx = _Ctx()
-    preamble, body = _split_document(text)
-    template = _preamble(preamble, ctx) + _block(body, ctx)
-
-    units = [u for u in _units(template) if _text_runs(u.parts)]
+    template, units = _parse(text, target_lang)
     tagged_texts = [_serialize(u) for u in units]
     translated = translate_tagged(tagged_texts, source_lang, target_lang, service)
 

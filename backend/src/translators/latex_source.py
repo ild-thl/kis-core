@@ -15,8 +15,9 @@ _INPUTENC_CODECS = {
     "applemac": "mac_roman", "macce": "mac_latin2", "koi8-r": "koi8_r", "koi8-u": "koi8_u",
 }
 
-_INPUTENC_BYTES_RE = re.compile(rb"\\usepackage\s*\[([^\]]*)\]\s*\{inputenc\}")
-_INPUTENC_RE = re.compile(r"(\\usepackage\s*\[)([^\]]*)(\]\s*\{inputenc\})")
+# Option lists are capped so an unclosed bracket cannot make each match scan the rest of the file.
+_INPUTENC_BYTES_RE = re.compile(rb"\\usepackage[ \t]{0,20}\[([^\]]{0,200})\][ \t]{0,20}\{inputenc\}")
+_INPUTENC_RE = re.compile(r"(\\usepackage[ \t]{0,20}\[)([^\]]{0,200})(\][ \t]{0,20}\{inputenc\})")
 
 
 def decode_tex(raw: bytes) -> str:
@@ -44,9 +45,9 @@ def decode_tex(raw: bytes) -> str:
 
 
 def tex_plain_text(path: str | Path) -> str:
-    """Plain text of a LaTeX file in any encoding, used for the length check."""
-    from src.utils.text_extraction import extract_text_tex
-    return extract_text_tex(decode_tex(Path(path).read_bytes()).encode("utf-8"))
+    """The text a LaTeX file in any encoding sends to the translator, used for the length check."""
+    from src.translators.latex import translatable_text
+    return translatable_text(decode_tex(Path(path).read_bytes()))
 
 
 def fix_inputenc(text: str) -> str:
@@ -86,9 +87,9 @@ _LANGUAGE_OPTIONS = set(_BABEL_FOR_TARGET.values()) | {
 
 _GERMAN_OPTIONS = {"german", "ngerman", "austrian", "naustrian", "swissgerman", "nswissgerman", "ngermanb", "germanb"}
 
-_OPTIONS_RE = re.compile(r"(\\(?:documentclass|usepackage)\s*\[)([^\]]*)(\]\s*\{([^}]*)\})")
-_POLYGLOSSIA_RE = re.compile(r"\\set(?:default|main)language\s*(?:\[[^\]]*\])?\s*\{(\w+)\}")
-_SELECTLANGUAGE_RE = re.compile(r"(\\selectlanguage\s*\{)(\w+)(\})")
+_OPTIONS_RE = re.compile(r"(\\(?:documentclass|usepackage)[ \t]{0,20}\[)([^\]]{0,500})(\][ \t]{0,20}\{([^}]{0,200})\})")
+_POLYGLOSSIA_RE = re.compile(r"\\set(?:default|main)language[ \t]{0,20}(?:\[[^\]]{0,200}\])?[ \t]{0,20}\{(\w{1,40})\}")
+_SELECTLANGUAGE_RE = re.compile(r"(\\selectlanguage[ \t]{0,20}\{)(\w{1,40})(\})")
 
 
 def _swap_language(options: str, target: str) -> tuple[str, str | None]:
@@ -145,11 +146,10 @@ def switch_language(text: str, target_lang: str) -> tuple[str, bool]:
     return text, bool(old_languages & _GERMAN_OPTIONS)
 
 
-# Regions where backslashes and quotes are code and must stay as they are.
-_VERBATIM_RE = re.compile(
-    r"\\begin\s*\{(verbatim\*?|Verbatim|BVerbatim|lstlisting|minted|comment|filecontents\*?)\}.*?\\end\s*\{\1\}"
-    r"|\\verb\*?(.).*?\2|\\lstinline(?:\[[^\]]*\])?(?:\{[^}]*\}|(.).*?\3)",
-    re.DOTALL,
+# Openers of regions where backslashes and quotes are code and must stay as they are.
+_VERBATIM_OPEN_RE = re.compile(
+    r"\\begin[ \t]{0,20}\{(verbatim\*?|Verbatim|BVerbatim|lstlisting|minted|comment|filecontents\*?)\}"
+    r"|\\verb\*?([^A-Za-z*\s])|\\lstinline(?:\[[^\]\n]{0,200}\])?([^A-Za-z\s\[])"
 )
 
 _COMBINING = {'"': "\u0308", "'": "\u0301", "`": "\u0300", "^": "\u0302", "~": "\u0303"}
@@ -185,9 +185,20 @@ def normalize_accents(text: str, german_shorthands: bool) -> str:
     """Turns accent commands and babel quote shorthands into plain characters so words stay whole."""
     out: list[str] = []
     pos = 0
-    for m in _VERBATIM_RE.finditer(text):
+    while True:
+        m = _VERBATIM_OPEN_RE.search(text, pos)
+        if m is None:
+            break
+        # An unclosed region runs to the end, so every opener is searched past at most once.
+        if m.group(1):
+            closer = re.compile(r"\\end[ \t]{0,20}\{" + re.escape(m.group(1)) + r"\}").search(text, m.end())
+            end = len(text) if closer is None else closer.end()
+        else:
+            delim = m.group(2) or m.group(3)
+            k = text.find("}" if delim == "{" else delim, m.end())
+            end = len(text) if k == -1 else k + 1
         out.append(_normalize_plain(text[pos:m.start()], german_shorthands))
-        out.append(m.group(0))
-        pos = m.end()
+        out.append(text[m.start():end])
+        pos = end
     out.append(_normalize_plain(text[pos:], german_shorthands))
     return "".join(out)

@@ -141,17 +141,21 @@ async def translate(
             total, head = await stream_upload_to_path(file, tmp_path, max_upload_bytes(), locale)
             if not total:
                 raise HTTPException(status_code=400, detail=t("file.empty", locale))
+            extracted: str | None = None
             if ext == ".tex":
-                # LaTeX may come in any old encoding, the translator converts it, only binary content is refused.
-                if b"\x00" in head:
-                    raise HTTPException(status_code=400, detail=t("file.contentMismatch", locale))
+                # LaTeX may come in any encoding and is counted as the translator will send it, only binary is refused.
+                try:
+                    extracted = await asyncio.to_thread(tex_plain_text, tmp_path)
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=t("file.contentMismatch", locale)) from None
             else:
                 validate_or_raise(head, ext, locale)
             seiten = await asyncio.to_thread(pages_or_raise, ext, tmp_path, locale)
 
-            extractor = tex_plain_text if ext == ".tex" else EXTRACTORS.get(ext)
-            if extractor is not None:
+            extractor = EXTRACTORS.get(ext)
+            if extracted is None and extractor is not None:
                 extracted = await asyncio.to_thread(extractor, tmp_path)
+            if extracted is not None:
                 zeichen = len(extracted)
                 if len(extracted) > TRANSLATE_MAX_CHARS:
                     raise HTTPException(
