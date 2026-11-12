@@ -156,6 +156,7 @@ _VERBATIM_OPEN_RE = re.compile(
     r"|\\verb\*?([^A-Za-z*\s])|\\lstinline(?:\[[^\]\n]{0,200}\])?([^A-Za-z\s\[])"
 )
 
+_OPTIONS_END_RE = re.compile(r"\[(?:[^\[\]{}]|\{[^{}]{0,500}\}){0,2000}\]")
 _COMBINING = {'"': "\u0308", "'": "\u0301", "`": "\u0300", "^": "\u0302", "~": "\u0303"}
 _ACCENT_RE = re.compile(r"\{\\([\"'`^~])\s*\{?([A-Za-z])\}?\}|\\([\"'`^~])\s*\{([A-Za-z])\}|\\([\"'`^~])([A-Za-z])")
 _SS_RE = re.compile(r"\{\\ss\}|\\ss\{\}|\\ss(?![A-Za-z])[ \t]?")
@@ -163,9 +164,14 @@ _MIDWORD_UMLAUT_RE = re.compile(r'(?<=[A-Za-z])(?<!\\)"([aouAOUs])')
 _SHORTHAND_RE = re.compile(r'(?<!\\)"([aouAOUsz`\'<>\-|~="])')
 _SHORTHAND_MAP = {
     "a": "ä", "o": "ö", "u": "ü", "A": "Ä", "O": "Ö", "U": "Ü", "s": "ß", "z": "ß",
-    "`": r"\glqq{}", "'": r"\grqq{}", "<": r"\flqq{}", ">": r"\frqq{}",
+    "`": "„", "'": "“", "<": "«", ">": "»",
     "-": "", "|": "", '"': "", "~": "-", "=": "-",
 }
+
+
+# Quote commands become characters so the translator can turn them into the target language's quotes.
+_QUOTE_CHARS = {"glqq": "„", "grqq": "“", "glq": "‚", "grq": "‘", "flqq": "«", "frqq": "»", "flq": "‹", "frq": "›"}
+_QUOTE_RE = re.compile(r"\\(glqq|grqq|glq|grq|flqq|frqq|flq|frq)(?![A-Za-z])(\{\}|\\ |[ \t]*)")
 
 
 def _accent(mark: str, letter: str) -> str:
@@ -180,6 +186,7 @@ def _normalize_plain(text: str, german_shorthands: bool) -> str:
 
     text = _ACCENT_RE.sub(accent, text)
     text = _SS_RE.sub("ß", text)
+    text = _QUOTE_RE.sub(lambda m: _QUOTE_CHARS[m.group(1)] + (" " if m.group(2) == "\\ " else ""), text)
     if german_shorthands:
         return _SHORTHAND_RE.sub(lambda m: _SHORTHAND_MAP[m.group(1)], text)
     return _MIDWORD_UMLAUT_RE.sub(lambda m: _SHORTHAND_MAP[m.group(1)], text)
@@ -194,15 +201,20 @@ def normalize_accents(text: str, german_shorthands: bool) -> str:
         if m is None:
             break
         # An unclosed region runs to the end, so every opener is searched past at most once.
+        keep_from = m.start()
         if m.group(1):
             closer = re.compile(r"\\end[ \t]{0,20}\{" + re.escape(m.group(1)) + r"\}").search(text, m.end())
             end = len(text) if closer is None else closer.end()
+            # The options of a listing hold its printed caption, so they are normalized like text.
+            options = _OPTIONS_END_RE.match(text, m.end())
+            if options:
+                keep_from = options.end()
         else:
             delim = m.group(2) or m.group(3)
             k = text.find("}" if delim == "{" else delim, m.end())
             end = len(text) if k == -1 else k + 1
-        out.append(_normalize_plain(text[pos:m.start()], german_shorthands))
-        out.append(text[m.start():end])
+        out.append(_normalize_plain(text[pos:keep_from], german_shorthands))
+        out.append(text[keep_from:end])
         pos = end
     out.append(_normalize_plain(text[pos:], german_shorthands))
     return "".join(out)

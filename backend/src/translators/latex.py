@@ -15,6 +15,7 @@ from src.translators.latex_tags import TAG_RE, translate_tagged
 class X:
     """Markup kept as it is, possibly with nested translatable units."""
     content: list
+    display: bool = False
 
 
 @dataclass(eq=False)
@@ -30,6 +31,8 @@ class Unit:
     """One paragraph-like run of text and inline markup that is translated as a whole."""
     parts: list
     tags: dict = field(default_factory=dict)
+    previews: dict = field(default_factory=dict)
+    spacing: dict = field(default_factory=dict)
 
 
 @dataclass(eq=False)
@@ -100,6 +103,12 @@ _rule("DeclareMathOperator", "pp", "inline")
 _rule("lstinputlisting verbatiminput", "op", "block")
 _rule("inputminted", "opp", "block")
 _rule("includepdf", "op", "block")
+_rule("If ElsIf For ForAll While Until", "t", "block")
+_rule("State Statex Else EndIf EndFor EndWhile Repeat Loop EndLoop EndFunction EndProcedure Return "
+      "Require Ensure", "", "block")
+_rule("Function Procedure", "pp", "block")
+_rule("Comment", "t", "nested")
+_rule("Call", "pp", "inline")
 
 _PROTECTED_PREFIXES = ("setbeamer", "usebeamer", "usetheme", "usecolortheme", "usefonttheme",
                        "useinnertheme", "useoutertheme")
@@ -112,7 +121,7 @@ _MATH_ENVS = {
 _PROTECTED_ENVS = {
     "verbatim", "verbatim*", "Verbatim", "BVerbatim", "lstlisting", "minted", "comment",
     "filecontents", "filecontents*", "tikzpicture", "pgfpicture", "circuitikz", "forest",
-    "algorithmic", "tikzcd", "dot2tex",
+    "tikzcd", "dot2tex", "thebibliography",
 }
 _ENV_ARGS = {
     "tabular": "op", "tabular*": "pop", "tabularx": "pop", "tabulary": "pop", "longtable": "op",
@@ -120,7 +129,7 @@ _ENV_ARGS = {
     "wrapfigure": "opop", "wraptable": "opop", "subfigure": "op", "multicols": "pO",
     "multicols*": "pO", "itemize": "o", "enumerate": "o", "description": "o", "frame": "ott",
     "block": "t", "alertblock": "t", "exampleblock": "t", "column": "op", "columns": "o",
-    "thebibliography": "p", "otherlanguage": "p", "otherlanguage*": "p", "tcolorbox": "o",
+    "otherlanguage": "p", "otherlanguage*": "p", "tcolorbox": "o",
     "mdframed": "o", "adjustbox": "p", "spacing": "p",
 }
 # Commands inside formulas whose argument is printed as text.
@@ -130,7 +139,12 @@ _CAPTION_NAMES = {
     "\\refname", "\\bibname", "\\indexname", "\\chaptername", "\\partname", "\\abstractname",
     "\\appendixname", "\\proofname", "\\lstlistingname", "\\lstlistlistingname",
 }
-_PREAMBLE_RE = re.compile(r"\\(title|subtitle|date|newtheorem|renewcommand)(?![A-Za-z])")
+_PREAMBLE_RE = re.compile(r"\\(title|subtitle|date|newtheorem|renewcommand|newcommand|providecommand)(?![A-Za-z])")
+# Labels inside drawings and the caption of a code listing are printed text, the rest is code.
+_DRAWING_ENVS = {"tikzpicture", "pgfpicture", "circuitikz"}
+_DRAWING_SLOT_RE = re.compile(r"(?<![A-Za-z])node(?![A-Za-z])|\b(?:xlabel|ylabel|zlabel|title)\s{0,20}=\s{0,20}(?=\{)|\\addlegendentry\s{0,20}(?=\{)")
+_LISTING_SLOT_RE = re.compile(r"\b(?:caption|title)\s{0,20}=\s{0,20}(?=\{)")
+_FORBIDDEN_IN_TEXT_MACRO = set("\\$#{}&%^_~")
 _BLANK_LINE_RE = re.compile(r"\n[ \t]*\n\s*")
 _STRUCTURE_RE = re.compile(r"\\(?:begin|item|par)(?![A-Za-z])")
 _BRACE_TOKEN_RE = re.compile(r"\\.|%[^\n]*\n?|[{}]", re.DOTALL)
@@ -144,6 +158,10 @@ _ACCENT_CHARS = "\"'`^~=."
 _MAX_DEPTH = 40
 # Longest command or environment name worth reading, longer arguments are not names.
 _MAX_NAME = 60
+_PREVIEW_CHARS = 80
+# Plain spaces only, protected and thin spaces are meaningful characters here.
+_SPACES = " \t\r\n"
+_SPACE_RUN_RE = re.compile(r"[ \t\r\n]+")
 
 
 class _Doc:
@@ -261,7 +279,67 @@ def _find_math_end(text: str, start: int, hi: int, delim: str) -> int:
         i += 1
 
 
-def _math(a: int, b: int, ctx: _Ctx) -> X:
+def _slots(a: int, b: int, starts: list[int], ctx: _Ctx) -> X:
+    """Keeps text between a and b as written except the brace groups at the given starts, which are translated."""
+    doc = ctx.doc
+    content: list = []
+    pos = a
+    for start in starts:
+        end = doc.group_end(start, b)
+        if start < pos or end is None or not doc.has_letters(start + 1, end - 1):
+            continue
+        content.append(doc.text[pos:start + 1])
+        content.extend(_block(start + 1, end - 1, ctx))
+        content.append("}")
+        pos = end
+    content.append(doc.text[pos:b])
+    return X(content)
+
+
+def _node_text_start(doc: _Doc, pos: int, hi: int) -> int | None:
+    """Start of the label group of a TikZ node, skipping its options, name and position."""
+    text = doc.text
+    for _ in range(8):
+        pos = _skip_space(text, pos, hi)
+        if pos >= hi:
+            return None
+        ch = text[pos]
+        if ch == "{":
+            return pos
+        if ch == "[":
+            end = doc.group_end(pos, hi, "[")
+        elif ch == "(":
+            close = text.find(")", pos, min(hi, pos + 200))
+            end = None if close == -1 else close + 1
+        elif text.startswith("at", pos):
+            end = pos + 2
+        else:
+            return None
+        if end is None:
+            return None
+        pos = end
+    return None
+
+
+def _protected(i: int, head_end: int, stop: int, env: str, ctx: _Ctx) -> X:
+    """Keeps a code or drawing environment and translates only its printed labels and captions."""
+    doc = ctx.doc
+    starts: list[int] = []
+    if env in _DRAWING_ENVS:
+        for m in _DRAWING_SLOT_RE.finditer(doc.text, head_end, stop):
+            if doc.in_comment(m.start()):
+                continue
+            start = _node_text_start(doc, m.end(), stop) if m.group(0) == "node" else m.end()
+            if start is not None:
+                starts.append(start)
+    elif env == "lstlisting":
+        options_end = doc.group_end(head_end, stop, "[")
+        if options_end is not None:
+            starts = [m.end() for m in _LISTING_SLOT_RE.finditer(doc.text, head_end, options_end)]
+    return _slots(i, stop, starts, ctx)
+
+
+def _math(a: int, b: int, ctx: _Ctx, display: bool = False) -> X:
     """Keeps a formula and translates only the words inside \\text and similar."""
     text = ctx.doc.text
     content: list = []
@@ -281,7 +359,7 @@ def _math(a: int, b: int, ctx: _Ctx) -> X:
         content.append("}")
         pos = end
     content.append(text[pos:b])
-    return X(content)
+    return X(content, display=display)
 
 
 def _take_args(doc: _Doc, pos: int, hi: int, spec: str) -> tuple[list[tuple[str, str, int, int]], int]:
@@ -375,11 +453,11 @@ def _scan(lo: int, hi: int, ctx: _Ctx) -> list:
         if ch == "$":
             delim = "$$" if text.startswith("$$", i) else "$"
             end = _find_math_end(text, i + len(delim), hi, delim)
-            emit(_math(i, end, ctx))
+            emit(_math(i, end, ctx, display=(delim == "$$")))
             i = end
             continue
         if ch == "~":
-            emit(X(["~"]))
+            buf.append("\u00a0")
             i += 1
             continue
         if ch == "&":
@@ -430,11 +508,14 @@ def _command(i: int, hi: int, ctx: _Ctx, emit, buf: list) -> int:
         if c in " \n":
             buf.append(" ")
             return j + 1
+        if c == ",":
+            buf.append("\u202f")
+            return j + 1
         if c in "([":
             closing = "\\)" if c == "(" else "\\]"
             end = text.find(closing, j + 1, hi)
             end = hi if end == -1 else end + 2
-            emit(_math(i, end, ctx))
+            emit(_math(i, end, ctx, display=(c == "[")))
             return end
         if c == "\\":
             k = j + 1
@@ -486,11 +567,11 @@ def _command(i: int, hi: int, ctx: _Ctx, emit, buf: list) -> int:
             return end
         if env in _PROTECTED_ENVS:
             stop = _find_env_end(text, end, hi, env)
-            emit(text[i:stop], boundary=True)
+            emit(_protected(i, end, stop, env, ctx), boundary=True)
             return stop
         if env in _MATH_ENVS:
             stop = _find_env_end(text, end, hi, env)
-            emit(_math(i, stop, ctx))
+            emit(_math(i, stop, ctx, display=True))
             return stop
         head_end = end
         m = _OVERLAY_RE.match(text, head_end, hi)
@@ -569,7 +650,7 @@ def _inline(a: int, b: int, ctx: _Ctx) -> list:
 
 
 def _is_edge(item) -> bool:
-    return isinstance(item, X) or (isinstance(item, str) and not item.strip())
+    return isinstance(item, X) or (isinstance(item, str) and not item.strip(_SPACES))
 
 
 def _block(a: int, b: int, ctx: _Ctx) -> list:
@@ -593,12 +674,12 @@ def _block(a: int, b: int, ctx: _Ctx) -> list:
         middle = current[start:stop]
         if middle and isinstance(middle[0], str):
             s = middle[0]
-            lead.append(s[: len(s) - len(s.lstrip())])
-            middle[0] = s.lstrip()
+            lead.append(s[: len(s) - len(s.lstrip(_SPACES))])
+            middle[0] = s.lstrip(_SPACES)
         if middle and isinstance(middle[-1], str):
             s = middle[-1]
-            trail.insert(0, s[len(s.rstrip()):])
-            middle[-1] = s.rstrip()
+            trail.insert(0, s[len(s.rstrip(_SPACES)):])
+            middle[-1] = s.rstrip(_SPACES)
         out.extend(lead)
         if middle:
             out.append(Unit(middle))
@@ -637,11 +718,14 @@ def _preamble(hi: int, ctx: _Ctx) -> list:
             args, stop = _take_args(doc, head_end, hi, "poto")
             if args and text[args[0][2]] == "{" and args[0][3] - args[0][2] <= _MAX_NAME:
                 ctx.theorems.add(text[args[0][2] + 1:args[0][3] - 1].strip())
-        elif name == "renewcommand":
-            args, stop = _take_args(doc, head_end, hi, "pot")
+        elif name in ("renewcommand", "newcommand", "providecommand"):
+            args, stop = _take_args(doc, head_end, hi, "poot")
             short = bool(args) and args[0][3] - args[0][2] <= _MAX_NAME
             first = text[args[0][2]:args[0][3]].strip("{}").strip() if short else ""
-            if first not in _CAPTION_NAMES:
+            body = args[-1] if args and args[-1][0] == "t" else None
+            caption = name == "renewcommand" and first in _CAPTION_NAMES
+            plain = body is not None and all(k != "o" for k, *_ in args) and _text_macro(text[body[2] + 1:body[3] - 1])
+            if body is None or not (caption or plain):
                 skip = stop
                 continue
         else:
@@ -651,6 +735,16 @@ def _preamble(hi: int, ctx: _Ctx) -> list:
         pos = stop
     out.append(text[pos:hi])
     return out
+
+
+def _text_macro(body: str) -> bool:
+    """A macro without parameters whose body is plain words, such as a course name."""
+    stripped = body.strip()
+    if not stripped or len(stripped) > 200 or any(ch in _FORBIDDEN_IN_TEXT_MACRO for ch in stripped):
+        return False
+    if not any(ch.isalpha() for ch in stripped):
+        return False
+    return bool(re.search(r"\s", stripped)) or (stripped[0].isupper() and len(stripped) >= 4)
 
 
 def _units(items: list) -> list[Unit]:
@@ -673,17 +767,32 @@ def _units_in_part(part) -> list[Unit]:
     return []
 
 
+def _preview(x: X) -> str:
+    """Short source of a kept piece that DeepL sees as untranslated content to place it well."""
+    raw = _Renderer({}, {}).items(x.content)
+    if len(raw) <= _PREVIEW_CHARS:
+        return raw
+    if raw.startswith(("$", "\\(", "\\[", "\\begin")):
+        return raw[:_PREVIEW_CHARS]
+    m = re.match(r"\\[A-Za-z@]+\*?", raw)
+    return m.group(0) if m else raw[:_PREVIEW_CHARS]
+
+
 def _serialize(unit: Unit) -> str:
     counter = itertools.count(1)
 
     def ser(parts: list) -> str:
         out: list[str] = []
-        for p in parts:
+        for n, p in enumerate(parts):
             if isinstance(p, str):
-                out.append(re.sub(r"\s+", " ", p))
+                out.append(_SPACE_RUN_RE.sub(" ", p))
             elif isinstance(p, X):
                 key = f"x{next(counter)}"
                 unit.tags[key] = p
+                unit.previews[key] = _preview(p)
+                before = n > 0 and isinstance(parts[n - 1], str) and parts[n - 1][-1:] in _SPACES
+                after = n + 1 < len(parts) and isinstance(parts[n + 1], str) and parts[n + 1][:1] in _SPACES
+                unit.spacing[key] = (before, after)
                 out.append(f"<{key}/>")
             else:
                 key = f"g{next(counter)}"
@@ -718,10 +827,26 @@ def _text_runs(parts: list) -> list[str]:
     return runs
 
 
+_QUOTE_PAIRS = {"DE": ("„", "“")}
+
+
+def _smart_quotes(text: str, target_lang: str) -> str:
+    """Turns straight double quotes from the translator into typographic ones, which every babel language accepts."""
+    if '"' not in text:
+        return text
+    opening, closing = _QUOTE_PAIRS.get((target_lang or "").split("-")[0].upper(), ("“", "”"))
+    parts = text.split('"')
+    out = [parts[0]]
+    for n, part in enumerate(parts[1:]):
+        out.append((opening if n % 2 == 0 and n < len(parts) - 2 else closing) + part)
+    return "".join(out)
+
+
 class _Renderer:
-    def __init__(self, tagged: dict, pieces: dict):
+    def __init__(self, tagged: dict, pieces: dict, target_lang: str = ""):
         self.tagged = tagged
         self.pieces = pieces
+        self.target_lang = target_lang
 
     def items(self, items: list) -> str:
         out: list[str] = []
@@ -741,17 +866,39 @@ class _Renderer:
         return self.parts(unit.parts, iter(self.pieces.get(id(unit), [])))
 
     def from_tags(self, unit: Unit, translated: str) -> str:
+        translated = _smart_quotes(translated, self.target_lang)
         out: list[str] = []
         pos = 0
+        after_display = False
+        space_after = False
         for m in TAG_RE.finditer(translated):
-            out.append(_escape(translated[pos:m.start()]))
-            obj = unit.tags[m.group(2) + m.group(3)]
-            if isinstance(obj, X):
+            segment = translated[pos:m.start()]
+            if space_after and segment[:1].isalnum():
+                segment = " " + segment
+            out.append(_escape(segment.lstrip(" ") if after_display else segment))
+            after_display = False
+            space_after = False
+            key = m.group(2) + m.group(3)
+            obj = unit.tags[key]
+            before, after = unit.spacing.get(key, (False, False))
+            # Translators sometimes drop the space next to a kept piece, the source spacing restores it.
+            if isinstance(obj, X) and not obj.display and before and out[-1][-1:].isalnum():
+                out.append(" ")
+            space_after = isinstance(obj, X) and after
+            if isinstance(obj, X) and obj.display:
+                # A displayed formula keeps its own lines as in the source.
+                out[-1] = out[-1].rstrip(" ")
+                out.append("\n" + self.items(obj.content) + "\n")
+                after_display = True
+            elif isinstance(obj, X):
                 out.append(self.items(obj.content))
             else:
                 out.append(obj.close if m.group(1) else obj.open)
             pos = m.end()
-        out.append(_escape(translated[pos:]))
+        tail = translated[pos:]
+        if space_after and tail[:1].isalnum():
+            tail = " " + tail
+        out.append(_escape(tail.lstrip(" ") if after_display else tail))
         return "".join(out)
 
     def parts(self, parts: list, pieces) -> str:
@@ -763,7 +910,7 @@ class _Renderer:
                     if piece is not None:
                         lead = p[: len(p) - len(p.lstrip())]
                         trail = p[len(p.rstrip()):]
-                        p = lead + piece.strip() + trail
+                        p = lead + _smart_quotes(piece.strip(), self.target_lang) + trail
                 out.append(_escape(p))
             elif isinstance(p, X):
                 out.append(self.items(p.content))
@@ -803,7 +950,7 @@ def translate_latex_preserve_structure(
 
     template, units = _parse(text, target_lang)
     tagged_texts = [_serialize(u) for u in units]
-    translated = translate_tagged(tagged_texts, source_lang, target_lang, service)
+    translated = translate_tagged(tagged_texts, source_lang, target_lang, service, [u.previews for u in units])
 
     tagged: dict = {}
     failed: list[Unit] = []
@@ -820,4 +967,4 @@ def translate_latex_preserve_structure(
         for (unit, _run), answer in zip(runs, answers):
             pieces.setdefault(id(unit), []).append(answer)
 
-    return _Renderer(tagged, pieces).items(template)
+    return _Renderer(tagged, pieces, target_lang).items(template)

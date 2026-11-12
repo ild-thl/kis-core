@@ -19,9 +19,12 @@ from src.services.translation import TranslationService
 TAG_RE = re.compile(r"<(/?)([gx])(\d+)(/?)>")
 _LOOSE_TAG_RE = re.compile(r"<\s*(/?)\s*([gxGX])\s*(\d+)\s*(/?)\s*>")
 
-# DeepL takes at most 50 texts per request, the character cap keeps requests well below its size limit.
-_DEEPL_MAX_TEXTS = 50
+# Small batches keep the shared context close to every text, DeepL allows 50 and the cap keeps requests small.
+_DEEPL_MAX_TEXTS = 20
 _DEEPL_MAX_CHARS = 60_000
+_DEEPL_CONTEXT_BEFORE = 5
+_DEEPL_CONTEXT_CHARS = 5_000
+_DEEPL_X_RE = re.compile(r'<x i="(\d+)"\s*(?:/>|>.*?</x>)', re.DOTALL)
 _LLM_MAX_CHARS = 6_000
 
 _TAG_RULES = (
@@ -67,6 +70,41 @@ def normalize_tags(text: str) -> str:
     return _LOOSE_TAG_RE.sub(fix, text)
 
 
+def repair_tags(text: str) -> str:
+    """Fixes tag spellings and keeps only the first copy of a tag the translator repeated."""
+    text = normalize_tags(text)
+    seen_x: set[str] = set()
+    open_g: set[str] = set()
+    done_g: set[str] = set()
+    dropped: dict[str, int] = {}
+    out: list[str] = []
+    pos = 0
+    for m in TAG_RE.finditer(text):
+        closing, kind, num = m.group(1), m.group(2), m.group(3)
+        keep = True
+        if kind == "x":
+            keep = num not in seen_x
+            seen_x.add(num)
+        elif not closing:
+            if num in open_g or num in done_g:
+                dropped[num] = dropped.get(num, 0) + 1
+                keep = False
+            else:
+                open_g.add(num)
+        elif dropped.get(num) and num not in open_g:
+            dropped[num] -= 1
+            keep = False
+        elif num in open_g:
+            open_g.discard(num)
+            done_g.add(num)
+        out.append(text[pos:m.start()])
+        if keep:
+            out.append(m.group(0))
+        pos = m.end()
+    out.append(text[pos:])
+    return "".join(out)
+
+
 def _map_text(tagged: str, fn) -> str:
     """Applies fn to the text between tags and leaves the tags alone."""
     out: list[str] = []
@@ -100,23 +138,52 @@ def _batches(texts: list[str], max_items: int, max_chars: int) -> list[list[int]
     return batches
 
 
-def _via_deepl(client: DeepLClient, texts: list[str], source_lang: str, target_lang: str) -> list[str | None]:
+def _plain(tagged: str) -> str:
+    return re.sub(r"\s+", " ", TAG_RE.sub(" ", tagged)).strip()
+
+
+def _to_deepl(tagged: str, previews: dict) -> str:
+    """Escapes the text and gives each kept piece its source as ignored content, so DeepL can place it."""
+    out: list[str] = []
+    pos = 0
+    for m in TAG_RE.finditer(tagged):
+        out.append(html.escape(tagged[pos:m.start()], quote=False))
+        if m.group(2) == "x":
+            preview = html.escape(previews.get("x" + m.group(3), ""), quote=False)
+            out.append(f'<x i="{m.group(3)}">{preview}</x>')
+        else:
+            out.append(m.group(0))
+        pos = m.end()
+    out.append(html.escape(tagged[pos:], quote=False))
+    return "".join(out)
+
+
+def _from_deepl(answer: str) -> str:
+    return _map_text(_DEEPL_X_RE.sub(lambda m: f"<x{m.group(1)}/>", answer), html.unescape)
+
+
+def _via_deepl(
+    client: DeepLClient, texts: list[str], previews: list[dict], source_lang: str, target_lang: str
+) -> list[str | None]:
     source = source_lang.split("-")[0] if source_lang else None
     results: list[str | None] = [None] * len(texts)
     for batch in _batches(texts, _DEEPL_MAX_TEXTS, _DEEPL_MAX_CHARS):
-        escaped = [_map_text(texts[i], lambda s: html.escape(s, quote=False)) for i in batch]
+        # DeepL translates each text on its own, the neighbouring text as context resolves short titles.
+        first = max(0, batch[0] - _DEEPL_CONTEXT_BEFORE)
+        context = " ".join(_plain(texts[i]) for i in range(first, batch[-1] + 1))[:_DEEPL_CONTEXT_CHARS]
         answer = client.raw.translate_text(
-            escaped, source_lang=source, target_lang=target_lang,
+            [_to_deepl(texts[i], previews[i]) for i in batch], source_lang=source, target_lang=target_lang,
             tag_handling="xml", outline_detection=False, split_sentences="nonewlines",
+            ignore_tags=["x"], context=context,
         )
         for i, r in zip(batch, answer):
-            results[i] = _map_text(r.text, html.unescape)
+            results[i] = _from_deepl(r.text)
     return results
 
 
 def _llm_single(client: LLMTranslationClient, text: str, system: str) -> str | None:
     raw, finish = client._completion_with_retry(system, text)
-    return None if finish == "length" else normalize_tags(raw.strip())
+    return None if finish == "length" else repair_tags(raw.strip())
 
 
 def _via_llm(client: LLMTranslationClient, texts: list[str], source_lang: str, target_lang: str) -> list[str | None]:
@@ -133,7 +200,7 @@ def _via_llm(client: LLMTranslationClient, texts: list[str], source_lang: str, t
         numbered = "\n".join(f"{n + 1}. {t}" for n, t in enumerate(items))
         raw, finish = client._completion_with_retry(batch_prompt, numbered, item_count=len(items))
         parsed = [None] * len(items) if finish == "length" else client._parse_numbered(raw, len(items))[0]
-        parsed = [normalize_tags(p) if p is not None else None for p in parsed]
+        parsed = [repair_tags(p) if p is not None else None for p in parsed]
         # An entry with missing or broken tags gets a second chance on its own.
         return [
             p if p is not None and tags_match(t, p) else _llm_single(client, t, single_prompt)
@@ -150,7 +217,8 @@ def _via_llm(client: LLMTranslationClient, texts: list[str], source_lang: str, t
 
 
 def translate_tagged(
-    texts: list[str], source_lang: str, target_lang: str, service: TranslationService
+    texts: list[str], source_lang: str, target_lang: str, service: TranslationService,
+    previews: list[dict] | None = None,
 ) -> list[str | None]:
     """Translates tagged paragraphs, None marks an entry whose tags did not survive."""
     if not texts:
@@ -165,7 +233,7 @@ def translate_tagged(
 
     client = service.deepl_client
     if isinstance(client, DeepLClient):
-        raw = _via_deepl(client, prepared, source_lang, target_lang)
+        raw = _via_deepl(client, prepared, previews or [{} for _ in texts], source_lang, target_lang)
     elif isinstance(client, LLMTranslationClient):
         raw = _via_llm(client, prepared, source_lang, target_lang)
     else:
@@ -173,7 +241,7 @@ def translate_tagged(
 
     results: list[str | None] = []
     for text, out, reps in zip(texts, raw, replacements):
-        restored = glossary.restore_text(out, reps) if out is not None else None
+        restored = repair_tags(glossary.restore_text(out, reps)) if out is not None else None
         results.append(restored if restored is not None and tags_match(text, restored) else None)
     failed = sum(1 for r in results if r is None)
     if failed:

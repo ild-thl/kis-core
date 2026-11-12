@@ -136,7 +136,8 @@ def run_translate(
             raise RuntimeError("No translation provider configured")
 
         service = TranslationService(deepl_client=translation_client, glossary=glossary)
-        translated_filename = service.translate_filename(filename, source_lang, target_lang)
+        # A LaTeX file keeps its name because other files of the project load it by that name.
+        translated_filename = filename if ext == ".tex" else service.translate_filename(filename, source_lang, target_lang)
 
         with job_heartbeat(job_uuid):
             if ext == ".txt":

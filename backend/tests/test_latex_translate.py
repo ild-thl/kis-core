@@ -1,5 +1,6 @@
 """LaTeX translation keeps the document compilable with DeepL, an LLM or any other client."""
 import html
+import re
 import time
 import shutil
 import subprocess
@@ -13,7 +14,7 @@ from src.services.llm_translation_client import LLMTranslationClient
 from src.services.translation import TranslationService
 from src.translators.latex import translatable_text, translate_latex_preserve_structure
 from src.translators.latex_source import decode_tex
-from src.translators.latex_tags import TAG_RE, _map_text, tags_match
+from src.translators.latex_tags import TAG_RE, _map_text, repair_tags, tags_match
 
 
 class _Upper:
@@ -82,7 +83,7 @@ def test_markup_and_preamble_stay_as_written():
     for kept in (
         r"\geometry{a4paper, margin=2cm}", r"\newcommand{\R}{\mathbb{R}}",
         r"\definecolor{hell}{RGB}{0,80,160}", r"\author{Max Muster}", r"\begin{figure}[htbp]",
-        r"\begin{tabular}{|l|c|}", r"node[above] {Punkt};", r"\vspace{1cm}", r"\texttt{print()}",
+        r"\begin{tabular}{|l|c|}", r"\draw (0,0) -- (1,1) node[above]", r"\vspace{1cm}", r"\texttt{print()}",
         r'\verb|"a{|', 'x = "Hallo"', "% Kommentar", r"\label{sec:a}", r"SIEHE~\ref{sec:a}",
         r"\textcolor{red}{ACHTUNG}",
     ):
@@ -94,7 +95,7 @@ def test_text_titles_and_nested_pieces_are_translated():
     for translated in (
         r"\title{EINFÜHRUNG}", r"\newtheorem{satz}{SATZ}[section]", r"\section{EINLEITUNG}",
         r"\textbf{WICHTIGER}", r"\footnote{EINE FUSSNOTE.}", r"\begin{satz}[SATZ VON PYTHAGORAS]",
-        r"\text{FÜR ALLE SEITEN}", r"\caption{EIN BILD}", r"NAME & WERT \\ \hline",
+        r"\text{FÜR ALLE SEITEN}", r"\caption{EIN BILD}", r"NAME & WERT \\ \hline", r"node[above] {PUNKT};",
     ):
         assert translated in out, translated
 
@@ -102,8 +103,65 @@ def test_text_titles_and_nested_pieces_are_translated():
 def test_whole_sentence_goes_out_with_tags():
     _out, client = _run(DOC)
     sentence = next(t for t in client.texts if t.startswith("Dies ist"))
-    assert sentence == "Dies ist ein <g1>wichtiger</g1> Satz mit <x2/>, siehe<x3/><x4/>. Zweiter Satz<x5/> hier."
+    assert sentence == "Dies ist ein <g1>wichtiger</g1> Satz mit <x2/>, siehe\u00a0<x3/>. Zweiter Satz<x4/> hier."
     assert not client.pieces
+
+
+SPECIAL = r"""\newcommand{\kursname}{Werkstoffkunde}
+\newcommand{\farbe}{blue}
+\newcommand{\R}{\mathbb{R}}
+\begin{document}
+\begin{lstlisting}[caption={Sortieren durch Einf\"ugen}, language=Python]
+x = "Hallo"  # Kommentar
+\end{lstlisting}
+\begin{tikzpicture}
+\node[draw] (a) at (0,0) {Eingabe};
+\begin{axis}[xlabel={Zeit in s}, node distance=2cm]
+\end{axis}
+\end{tikzpicture}
+\begin{algorithmic}
+\For{$i \gets 2$ \textbf{bis} $n$}
+  \State $s \gets A[i]$ \Comment{aktuelles Element}
+\EndFor
+\end{algorithmic}
+Es gilt
+\[ a = b \]
+wobei $a$ klein ist.
+\begin{thebibliography}{9}
+\bibitem{k} D. Knuth: \emph{Die Kunst des Programmierens}.
+\end{thebibliography}
+\end{document}"""
+
+
+def test_labels_captions_pseudocode_and_text_macros_are_translated():
+    out, _ = _run(SPECIAL)
+    for expected in (
+        r"\newcommand{\kursname}{WERKSTOFFKUNDE}", r"\newcommand{\farbe}{blue}", r"\newcommand{\R}{\mathbb{R}}",
+        r"caption={SORTIEREN DURCH EINFÜGEN}, language=Python]", 'x = "Hallo"  # Kommentar',
+        r"(a) at (0,0) {EINGABE};", r"xlabel={ZEIT IN S}, node distance=2cm]",
+        r"\For{$i \gets 2$ \textbf{BIS} $n$}", r"\State $s \gets A[i]$ \Comment{AKTUELLES ELEMENT}", r"\EndFor",
+        r"\emph{Die Kunst des Programmierens}",
+    ):
+        assert expected in out, expected
+
+
+def test_displayed_formula_keeps_its_own_lines():
+    out, _ = _run(SPECIAL)
+    assert "ES GILT\n\\[ a = b \\]\nWOBEI $a$ KLEIN IST." in out
+
+
+def test_space_next_to_kept_pieces_is_restored():
+    client = _llm(lambda user: "Wir fügen<x1/>hinzu.<x2/>Die Wahl.")
+    out, _ = _run(r"We add $x$ here.\footnote{Note.} The choice.", client=client, target="DE")
+    assert out.startswith(r"Wir fügen $x$ hinzu.\footnote{") and out.endswith("} Die Wahl.")
+
+
+def test_straight_quotes_from_the_translator_become_typographic():
+    client = _llm(lambda user: 'He said "hello" <x1/>.')
+    out, _ = _run(r"Er sagte hallo $x$.", client=client, target="EN-US")
+    assert out == "He said “hello” $x$."
+    out, _ = _run(r"He said hello $x$.", client=client, target="DE")
+    assert out == "He said „hello“ $x$."
 
 
 def test_paragraph_breaks_survive():
@@ -128,7 +186,7 @@ def test_babel_language_in_class_options_and_polyglossia():
 
 def test_accents_and_german_shorthands_become_letters():
     out, client = _run('\\usepackage[ngerman]{babel}\n\\begin{document}\n"Arger "`gro"s"\' und M\\"adchen.\n\\end{document}')
-    assert "ÄRGER \\glqq{}GROSS\\grqq{} UND MÄDCHEN." in out
+    assert "ÄRGER „GROSS“ UND MÄDCHEN." in out
     assert any("Ärger" in t and "Mädchen" in t for t in client.texts)
 
 
@@ -145,29 +203,35 @@ def test_special_characters_in_the_translation_are_escaped():
 
 def test_escaped_source_characters_reach_the_translator_as_plain_text():
     out, client = _run(r"Gewinn 50\,\% \& mehr")
-    assert client.texts == ["Gewinn 50<x1/>% & mehr"]
+    assert client.texts == ["Gewinn 50\u202f% & mehr"]
     assert out == r"GEWINN 50\,\% \& MEHR"
 
 
 class _FakeDeepL:
     def __init__(self):
         self.kwargs: dict = {}
+        self.sent: list[str] = []
 
     def translate_text(self, texts, **kwargs):
         self.kwargs = kwargs
-        return [
-            SimpleNamespace(text=_map_text(t, lambda s: html.escape(html.unescape(s).upper(), quote=False)))
-            for t in texts
-        ]
+        self.sent.extend(texts)
+
+        def upper(text):
+            parts = re.split(r'(<x i="\d+">.*?</x>|<[^>]+>)', text)
+            return "".join(p if p.startswith("<") else html.escape(html.unescape(p).upper(), quote=False) for p in parts)
+
+        return [SimpleNamespace(text=upper(t)) for t in texts]
 
 
-def test_deepl_gets_xml_tags_and_escaped_text():
+def test_deepl_gets_formula_sources_as_ignored_content_and_context():
     client = DeepLClient.__new__(DeepLClient)
     fake = _FakeDeepL()
     client._translator = fake
-    out, _ = _run(r"Ein \textbf{fetter} Text mit a < b \& c.", client=client)
-    assert fake.kwargs["tag_handling"] == "xml"
-    assert out == r"EIN \textbf{FETTER} TEXT MIT A < B \& C."
+    out, _ = _run("\\section{Folgen}\nEin \\textbf{fetter} Text mit $a<b$ und a < b \\& c.", client=client)
+    assert fake.kwargs["tag_handling"] == "xml" and fake.kwargs["ignore_tags"] == ["x"]
+    assert '<x i="2">$a&lt;b$</x>' in fake.sent[1]
+    assert "Folgen" in fake.kwargs["context"] and "fetter Text" in fake.kwargs["context"]
+    assert out == "\\section{FOLGEN}\nEIN \\textbf{FETTER} TEXT MIT $a<b$ UND A < B \\& C."
 
 
 def _llm(answer):
@@ -197,10 +261,16 @@ def test_lost_tags_fall_back_to_piece_by_piece():
     assert out == r"EIN \textbf{FETTER} TEXT MIT $x$."
 
 
-def test_quote_tags_written_as_pairs_are_repaired():
-    client = _llm(lambda user: "Girls are <x1>great<x2/>.")
-    out, _ = _run("M\\\"adchen sind \\glqq{}toll\\grqq{}.", client=client)
-    assert out == r"Girls are \glqq{}great\grqq{}."
+def test_tags_written_as_pairs_are_repaired():
+    client = _llm(lambda user: "See <x1>and<x2/>.")
+    out, _ = _run(r"Siehe \ref{a} und \ref{b}.", client=client)
+    assert out == r"See \ref{a} and \ref{b}."
+
+
+def test_german_quote_commands_become_quote_characters():
+    out, client = _run(r"Eine \glqq Nullfolge\grqq{} hier.")
+    assert client.texts == ["Eine „Nullfolge“ hier."]
+    assert out == "EINE „NULLFOLGE“ HIER."
 
 
 def test_glossary_applies_inside_tagged_paragraphs():
@@ -209,6 +279,12 @@ def test_glossary_applies_inside_tagged_paragraphs():
     out, client = _run(r"Die \emph{Hochschule} ist gross.", glossary=glossary)
     assert "__GLOSSARY_0__" in client.texts[0]
     assert r"\emph{University}" in out
+
+
+def test_repeated_tag_pairs_keep_only_the_first():
+    assert repair_tags("A <g1>material</g1> is a <g1>substance</g1>.") == "A <g1>material</g1> is a substance."
+    assert repair_tags("<x1/> and <x1/> <x2>") == "<x1/> and  <x2/>"
+    assert tags_match("Ein <g1>Werkstoff</g1> ist", repair_tags("A <g1>a</g1> b <g1>c</g1>"))
 
 
 def test_tags_match_rules():
