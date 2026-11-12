@@ -2,6 +2,7 @@
 
 import itertools
 import re
+from array import array
 from bisect import bisect_left, bisect_right
 from dataclasses import dataclass, field
 
@@ -141,6 +142,8 @@ _OVERLAY_RE = re.compile(r"<[^<>\n]{1,20}>")
 _ACCENT_CHARS = "\"'`^~=."
 # Deeper nesting is kept as written, which bounds the work per character.
 _MAX_DEPTH = 40
+# Longest command or environment name worth reading, longer arguments are not names.
+_MAX_NAME = 60
 
 
 class _Doc:
@@ -160,7 +163,7 @@ class _Doc:
                     self.braces[stack.pop()] = m.start()
             elif token[0] == "%":
                 self.comments.append((m.start(), m.end()))
-        self.comment_starts = [start for start, _end in self.comments]
+        self.comment_starts = array("q", (start for start, _end in self.comments))
         self.brackets: dict[int, int] = {}
         stack = []
         for m in _BRACKET_TOKEN_RE.finditer(text):
@@ -168,9 +171,10 @@ class _Doc:
                 stack.append(m.start())
             elif m.group(0) == "]" and stack:
                 self.brackets[stack.pop()] = m.start()
-        self.blanks = [m.start() for m in _BLANK_LINE_RE.finditer(text)]
-        self.structures = [m.start() for m in _STRUCTURE_RE.finditer(text)]
-        self.letters = [m.start(1) for m in _TEXT_LETTER_RE.finditer(text) if m.group(1)]
+        # Compact arrays keep the lookups small even for the largest accepted file.
+        self.blanks = array("q", (m.start() for m in _BLANK_LINE_RE.finditer(text)))
+        self.structures = array("q", (m.start() for m in _STRUCTURE_RE.finditer(text)))
+        self.letters = array("q", (m.start(1) for m in _TEXT_LETTER_RE.finditer(text) if m.group(1)))
 
     def group_end(self, start: int, hi: int, open_ch: str = "{") -> int | None:
         """End after the closing bracket of the group opening at start, None when it does not close before hi."""
@@ -622,19 +626,23 @@ def _preamble(hi: int, ctx: _Ctx) -> list:
     text = doc.text
     out: list = []
     pos = 0
+    # Matches inside a skipped definition are skipped too, so each character is looked at once.
+    skip = 0
     for m in _PREAMBLE_RE.finditer(text, 0, hi):
-        if m.start() < pos or _is_escaped(text, m.start()) or doc.in_comment(m.start()):
+        if m.start() < max(pos, skip) or _is_escaped(text, m.start()) or doc.in_comment(m.start()):
             continue
         name = m.group(1)
         head_end = m.end() + (1 if text[m.end():m.end() + 1] == "*" else 0)
         if name == "newtheorem":
             args, stop = _take_args(doc, head_end, hi, "poto")
-            if args and text[args[0][2]] == "{":
+            if args and text[args[0][2]] == "{" and args[0][3] - args[0][2] <= _MAX_NAME:
                 ctx.theorems.add(text[args[0][2] + 1:args[0][3] - 1].strip())
         elif name == "renewcommand":
             args, stop = _take_args(doc, head_end, hi, "pot")
-            first = text[args[0][2]:args[0][3]].strip("{}").strip() if args else ""
+            short = bool(args) and args[0][3] - args[0][2] <= _MAX_NAME
+            first = text[args[0][2]:args[0][3]].strip("{}").strip() if short else ""
             if first not in _CAPTION_NAMES:
+                skip = stop
                 continue
         else:
             args, stop = _take_args(doc, head_end, hi, "t" if name == "date" else "Ot")

@@ -29,7 +29,7 @@ from src.utils.file_validation import (
     pages_or_raise,
     validate_or_raise,
 )
-from src.translators.latex_source import tex_plain_text
+from src.translators.latex_source import TEX_BYTES_PER_CHAR, tex_plain_text
 from src.utils.text_extraction import EXTRACTORS
 from src.utils.upload_stream import stream_upload_to_path
 from src.dependencies_rbac import require_tool_access
@@ -143,6 +143,13 @@ async def translate(
                 raise HTTPException(status_code=400, detail=t("file.empty", locale))
             extracted: str | None = None
             if ext == ".tex":
+                # Markup only adds bytes, so a file far above the text limit is refused before it is parsed.
+                tex_max_bytes = TRANSLATE_MAX_CHARS * TEX_BYTES_PER_CHAR
+                if total > tex_max_bytes:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=t("file.tooLargeMb", locale, max=max(1, round(tex_max_bytes / (1024 * 1024)))),
+                    )
                 # LaTeX may come in any encoding and is counted as the translator will send it, only binary is refused.
                 try:
                     extracted = await asyncio.to_thread(tex_plain_text, tmp_path)

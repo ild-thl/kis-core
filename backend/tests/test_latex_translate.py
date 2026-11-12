@@ -239,6 +239,8 @@ def test_length_count_is_what_the_translator_gets():
     "{" * 300_000, "{\n\nWort " * 50_000, "\\foo[" * 60_000, "\\begin{verbatim}" * 20_000,
     "\\usepackage[" * 25_000, "$" + "\\text{" * 50_000 + "$", "\\textbf{" * 5_000 + "a" + "}" * 5_000,
     "\\foo{" + "1" * 300_000 + "x}", "\\title{a}" * 30_000 + "\\begin{document}x",
+    "\\renewcommand{" * 60_000 + "x" + "}" * 60_000 + "\\begin{document}x",
+    "\\newtheorem{" * 60_000 + "x" + "}" * 60_000 + "\\begin{document}x",
 ])
 def test_hostile_input_is_parsed_in_linear_time(doc):
     start = time.monotonic()

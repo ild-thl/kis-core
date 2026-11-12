@@ -131,3 +131,18 @@ def test_tex_length_counts_text_the_extractor_would_drop(monkeypatch):
             current_user={"user_id": 1}, locale="de",
         ))
     assert exc.value.status_code == 422
+
+
+def test_tex_far_above_the_text_limit_is_refused_before_parsing(monkeypatch):
+    from src.routes import translate as route
+    _wire(monkeypatch, route)
+    monkeypatch.setattr(route, "TRANSLATE_MAX_CHARS", 10)
+    monkeypatch.setattr(route, "tex_plain_text", lambda path: pytest.fail("parsed"))
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(route.translate(
+            request=_Request(), file=_upload("skript.tex", b"x" * 500), text=None,
+            glossary="", provider_id=None, source_lang="", target_lang="",
+            current_user={"user_id": 1}, locale="de",
+        ))
+    assert exc.value.status_code == 413

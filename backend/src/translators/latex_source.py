@@ -44,6 +44,10 @@ def decode_tex(raw: bytes) -> str:
     return raw.decode("latin-1")
 
 
+# A LaTeX file may be this many times larger in bytes than the text limit, heavy markup included.
+TEX_BYTES_PER_CHAR = 10
+
+
 def tex_plain_text(path: str | Path) -> str:
     """The text a LaTeX file in any encoding sends to the translator, used for the length check."""
     from src.translators.latex import translatable_text
