@@ -151,13 +151,13 @@ def run_translate(
                 result_bytes = translated_text.encode("utf-8")
             elif ext == ".tex":
                 from src.translators.latex import translate_latex_preserve_structure
-                from src.translators.latex_source import decode_tex_with_codec, encode_tex
-                # The result keeps the upload's encoding so it still fits the project files that include it.
-                text, codec = decode_tex_with_codec(content)
+                from src.translators.latex_source import read_tex, write_tex
+                # The result keeps the upload's encoding and line endings so it still fits the project files around it.
+                source = read_tex(content)
                 translated_text = translate_latex_preserve_structure(
-                    text, source_lang, target_lang, service, utf8_output=(codec == "utf-8")
+                    source.text, source_lang, target_lang, service, utf8_output=source.utf8_output
                 )
-                result_bytes = encode_tex(translated_text, codec, content)
+                result_bytes = write_tex(translated_text, source)
             elif ext == ".docx":
                 from src.translators.docx import translate_docx
                 result_bytes = translate_docx(content, source_lang, target_lang, service)

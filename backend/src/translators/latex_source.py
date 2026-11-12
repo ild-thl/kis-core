@@ -2,6 +2,7 @@
 
 import re
 import unicodedata
+from dataclasses import dataclass
 from pathlib import Path
 
 from loguru import logger
@@ -58,7 +59,8 @@ _TEX_FALLBACK = {
     "–": "--", "—": "---", "…": "\\ldots{}", "€": "\\texteuro{}", "•": "\\textbullet{}",
     "‰": "\\textperthousand{}", "™": "\\texttrademark{}", "−": "\\textminus{}", "†": "\\dag{}", "‡": "\\ddag{}",
     "°": "\\textdegree{}", "×": "\\texttimes{}", "±": "\\textpm{}", "µ": "\\textmu{}", "ß": "\\ss{}",
-    "\u00a0": "~",
+    "\u00a0": "~", "ł": "\\l{}", "Ł": "\\L{}", "ø": "\\o{}", "Ø": "\\O{}", "æ": "\\ae{}", "Æ": "\\AE{}",
+    "œ": "\\oe{}", "Œ": "\\OE{}", "đ": "\\dj{}", "Đ": "\\DJ{}", "ı": "\\i{}", "¿": "?`", "¡": "!`",
 }
 _ACCENT_COMMANDS = {
     "\u0308": '\\"', "\u0301": "\\'", "\u0300": "\\`", "\u0302": "\\^", "\u0303": "\\~", "\u0327": "\\c",
@@ -68,34 +70,76 @@ _ACCENT_COMMANDS = {
 _C1_BYTES_RE = re.compile(rb"[\x80-\x9f]")
 
 
-def _tex_fallback(ch: str) -> str:
+def _tex_fallback(ch: str) -> str | None:
     if ch in _TEX_FALLBACK:
         return _TEX_FALLBACK[ch]
     decomposed = unicodedata.normalize("NFD", ch)
     if len(decomposed) == 2 and decomposed[1] in _ACCENT_COMMANDS and decomposed[0].isascii():
-        return _ACCENT_COMMANDS[decomposed[1]] + "{" + decomposed[0] + "}"
-    logger.warning("LaTeX: character U+{:04X} has no form in the file's encoding, written as ?", ord(ch))
-    return "?"
+        command = _ACCENT_COMMANDS[decomposed[1]]
+        return command + (decomposed[0] if not command[-1].isalpha() else "{" + decomposed[0] + "}")
+    return None
 
 
-def encode_tex(text: str, codec: str, raw: bytes) -> bytes:
-    """Writes the result in the encoding of the upload, so it still fits the files that include it."""
-    if codec == "utf-8":
-        return text.encode("utf-8")
-    # Windows-1252 only when the upload used its extra characters, otherwise plain Latin-1 that every 8-bit setup reads.
-    if codec == "cp1252":
-        codec = "cp1252" if _C1_BYTES_RE.search(raw) else "latin-1"
-    out: list[str] = []
-    for ch in text:
-        if ch.isascii():
-            out.append(ch)
-            continue
-        try:
-            ch.encode(codec)
-            out.append(ch)
-        except UnicodeEncodeError:
-            out.append(_tex_fallback(ch))
-    return "".join(out).encode(codec)
+# Signs that the author writes umlauts in ASCII, as an accent command or a babel shorthand inside a word.
+_ASCII_STYLE_RE = re.compile(r'\\"[A-Za-z{]|\\ss(?![A-Za-z])|[A-Za-z]"[aouAOUs][a-z]')
+
+
+@dataclass
+class TexFile:
+    """A decoded LaTeX upload with what is needed to write the result back the same way."""
+    text: str
+    codec: str
+    crlf: bool = False
+
+    @property
+    def utf8_output(self) -> bool:
+        return self.codec == "utf-8"
+
+
+def read_tex(raw: bytes) -> TexFile:
+    """Decodes an upload and notes its encoding and line endings."""
+    text, codec = decode_tex_with_codec(raw)
+    crlf = "\r\n" in text
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    if codec == "cp1252" and not _C1_BYTES_RE.search(raw):
+        # Plain Latin-1 unless the upload used the Windows extras, every 8-bit setup reads that.
+        codec = "latin-1"
+    if codec == "utf-8" and text.isascii():
+        # An ASCII file fits any main file, it stays ASCII when it is a fragment or already spells umlauts in ASCII.
+        fragment = "\\begin{document}" not in text
+        declares_8bit = bool(_INPUTENC_RE.search(text)) and "utf8" not in _INPUTENC_RE.search(text).group(2)
+        if fragment or declares_8bit or _ASCII_STYLE_RE.search(text):
+            codec = "ascii"
+    return TexFile(text=text, codec=codec, crlf=crlf)
+
+
+def write_tex(text: str, source: TexFile) -> bytes:
+    """Writes the result in the encoding and line endings of the upload, so it still fits the files that include it."""
+    codec = source.codec
+    if codec != "utf-8":
+        out: list[str] = []
+        for ch in text:
+            if ch.isascii():
+                out.append(ch)
+                continue
+            try:
+                ch.encode(codec)
+                out.append(ch)
+            except UnicodeEncodeError:
+                fallback = _tex_fallback(ch)
+                if fallback is None:
+                    # The target language needs characters this encoding cannot hold, so the file becomes UTF-8.
+                    logger.warning("LaTeX: U+{:04X} does not fit {}, result written as UTF-8.", ord(ch), codec)
+                    out = []
+                    break
+                out.append(fallback)
+        if out or not text:
+            text = "".join(out)
+        else:
+            text, codec = fix_inputenc(text), "utf-8"
+    if source.crlf:
+        text = text.replace("\n", "\r\n")
+    return text.encode(codec)
 
 
 # A LaTeX file may be this many times larger in bytes than the text limit, heavy markup included.
@@ -105,11 +149,11 @@ TEX_BYTES_PER_CHAR = 10
 def tex_plain_text(path: str | Path) -> str:
     """The text a LaTeX file in any encoding sends to the translator, used for the length check."""
     from src.translators.latex import translatable_text
-    return translatable_text(decode_tex(Path(path).read_bytes()))
+    return translatable_text(read_tex(Path(path).read_bytes()).text)
 
 
 def fix_inputenc(text: str) -> str:
-    """Sets inputenc to utf8 because the result is always written as UTF-8."""
+    """Sets inputenc to utf8 for a result that is written as UTF-8."""
     return _INPUTENC_RE.sub(lambda m: m.group(1) + "utf8" + m.group(3), text)
 
 
@@ -147,6 +191,10 @@ _GERMAN_OPTIONS = {"german", "ngerman", "austrian", "naustrian", "swissgerman", 
 
 _OPTIONS_RE = re.compile(r"(\\(?:documentclass|usepackage)[ \t]{0,20}\[)([^\]]{0,500})(\][ \t]{0,20}\{([^}]{0,200})\})")
 _POLYGLOSSIA_RE = re.compile(r"\\set(?:default|main)language[ \t]{0,20}(?:\[[^\]]{0,200}\])?[ \t]{0,20}\{(\w{1,40})\}")
+# The old german packages turn the shorthands on without babel.
+_GERMAN_PACKAGES = {"german", "ngerman"}
+_PACKAGE_LIST_RE = re.compile(r"\\usepackage[ \t]{0,20}\{([^}\[\]]{0,300})\}")
+_SHORTHAND_EVIDENCE_RE = re.compile(r'[A-Za-z]"[aou][a-z]')
 _SELECTLANGUAGE_RE = re.compile(r"(\\selectlanguage[ \t]{0,20}\{)(\w{1,40})(\})")
 
 
@@ -193,6 +241,19 @@ def switch_language(text: str, target_lang: str) -> tuple[str, bool]:
 
     text = _OPTIONS_RE.sub(options, text)
 
+    def german_package(m: re.Match) -> str:
+        names = [n.strip() for n in m.group(1).split(",")]
+        if not set(names) & _GERMAN_PACKAGES:
+            return m.group(0)
+        old_languages.add("ngerman")
+        if target is None or target in _GERMAN_OPTIONS:
+            return m.group(0)
+        others = [n for n in names if n not in _GERMAN_PACKAGES]
+        rest = "\\usepackage{" + ",".join(others) + "}" if others else ""
+        return rest + "\\usepackage[" + target + "]{babel}"
+
+    text = _PACKAGE_LIST_RE.sub(german_package, text)
+
     for m in _POLYGLOSSIA_RE.finditer(text):
         old_languages.add(m.group(1))
     if target is not None:
@@ -201,7 +262,11 @@ def switch_language(text: str, target_lang: str) -> tuple[str, bool]:
         text = _SELECTLANGUAGE_RE.sub(
             lambda m: m.group(1) + target + m.group(3) if m.group(2) in old_languages else m.group(0), text
         )
-    return text, bool(old_languages & _GERMAN_OPTIONS)
+    german = bool(old_languages & _GERMAN_OPTIONS)
+    if not old_languages and len(_SHORTHAND_EVIDENCE_RE.findall(text)) >= 2:
+        # A chapter file names no language, umlaut shorthands inside words show that German shorthands are on.
+        german = True
+    return text, german
 
 
 # Openers of regions where backslashes and quotes are code and must stay as they are.

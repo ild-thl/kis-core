@@ -159,6 +159,7 @@ _MAX_DEPTH = 40
 # Longest command or environment name worth reading, longer arguments are not names.
 _MAX_NAME = 60
 _PREVIEW_CHARS = 80
+_INDEX_COMMANDS = {"index", "glossary", "nomenclature"}
 # Plain spaces only, protected and thin spaces are meaningful characters here.
 _SPACES = " \t\r\n"
 _SPACE_RUN_RE = re.compile(r"[ \t\r\n]+")
@@ -600,8 +601,10 @@ def _command(i: int, hi: int, ctx: _Ctx, emit, buf: list) -> int:
     if name.startswith(_PROTECTED_PREFIXES):
         emit(X([head] + [ws + text[a:b] for _k, ws, a, b in args]))
         return stop
+    # Index entries with sorting or nesting syntax are kept, a translator would damage the syntax.
+    keep = name in _INDEX_COMMANDS and any(ch in text[a:b] for _k, _ws, a, b in args for ch in "!@|")
     args = [
-        (("t" if _textlike(text[a + 1:b - 1]) else "p") if text[a] == "{" else "o", ws, a, b)
+        (("t" if not keep and _textlike(text[a + 1:b - 1]) else "p") if text[a] == "{" else "o", ws, a, b)
         for _k, ws, a, b in args
     ]
     emit(_command_item(head, args, "inline", ctx))

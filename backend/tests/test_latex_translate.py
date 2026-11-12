@@ -13,7 +13,7 @@ from src.services.glossary import GlossaryService
 from src.services.llm_translation_client import LLMTranslationClient
 from src.services.translation import TranslationService
 from src.translators.latex import translatable_text, translate_latex_preserve_structure
-from src.translators.latex_source import decode_tex, decode_tex_with_codec, encode_tex
+from src.translators.latex_source import decode_tex, read_tex, write_tex
 from src.translators.latex_tags import TAG_RE, _map_text, repair_tags, tags_match
 
 
@@ -190,6 +190,14 @@ def test_accents_and_german_shorthands_become_letters():
     assert any("Ärger" in t and "Mädchen" in t for t in client.texts)
 
 
+class _Echo(_Upper):
+    """Returns the text unchanged, to look at what the pipeline itself does."""
+
+    def translate_text(self, text, source_lang, target_lang):
+        self.texts.append(text)
+        return text
+
+
 class _Specials(_Upper):
     def translate_text(self, text, source_lang, target_lang):
         self.texts.append(text)
@@ -294,28 +302,68 @@ def test_tags_match_rules():
     assert not tags_match("a <x1/>", "<x1/>")
 
 
+def _roundtrip(raw: bytes, target: str = "EN-US", client=None) -> bytes:
+    source = read_tex(raw)
+    service = TranslationService(deepl_client=client or _Upper(), glossary=GlossaryService())
+    out = translate_latex_preserve_structure(source.text, "DE", target, service, utf8_output=source.utf8_output)
+    return write_tex(out, source)
+
+
 def test_latin1_result_keeps_its_encoding_and_writes_missing_characters_as_commands():
-    raw = "Größe".encode("cp1252")
-    out = encode_tex("Größe “outlier” — Gauss’s ő…", "cp1252", raw)
-    assert out.decode("latin-1") == "Größe ``outlier'' --- Gauss's \\H{o}\\ldots{}"
+    source = read_tex("Größe".encode("cp1252"))
+    assert source.codec == "latin-1"
+    assert write_tex("Größe “outlier” — Gauss’s ő…", source).decode("latin-1") == "Größe ``outlier'' --- Gauss's \\H{o}\\ldots{}"
 
 
 def test_windows_1252_extras_are_kept_when_the_upload_used_them():
-    raw = "„Zitat“".encode("cp1252")
-    assert encode_tex("“Quote”", "cp1252", raw).decode("cp1252") == "“Quote”"
+    source = read_tex("„Zitat“".encode("cp1252"))
+    assert write_tex("“Quote”", source).decode("cp1252") == "“Quote”"
 
 
 def test_utf8_result_stays_utf8():
-    assert encode_tex("“Quote” — ő", "utf-8", b"x") == "“Quote” — ő".encode("utf-8")
+    assert write_tex("“Quote” — ő", read_tex("Grüße".encode("utf-8"))) == "“Quote” — ő".encode("utf-8")
 
 
 def test_latin1_document_keeps_its_inputenc():
     doc = "\\usepackage[latin1]{inputenc}\n\\begin{document}\nGrüße\n\\end{document}"
-    text, codec = decode_tex_with_codec(doc.encode("cp1252"))
-    assert codec == "cp1252"
-    service = TranslationService(deepl_client=_Upper(), glossary=GlossaryService())
-    out = translate_latex_preserve_structure(text, "DE", "EN-US", service, utf8_output=False)
+    out = _roundtrip(doc.encode("cp1252")).decode("latin-1")
     assert "\\usepackage[latin1]{inputenc}" in out and "GRÜSSE" in out
+
+
+def test_ascii_chapter_stays_ascii_so_it_fits_any_main_file():
+    out = _roundtrip(b'\\section{"Ubung}\nDie W"arme flie"st, die Gr\\"o\\ss e z"ahlt.\n', client=_Echo())
+    assert out.isascii()
+    assert out.decode() == '\\section{\\"Ubung}\nDie W\\"arme flie\\ss{}t, die Gr\\"o\\ss{}e z\\"ahlt.\n'
+
+
+def test_modern_ascii_document_may_get_utf8_umlauts():
+    client = _llm(lambda user: "Grüße")
+    out = _roundtrip(b"\\documentclass{article}\n\\begin{document}\nGreetings\n\\end{document}\n", target="DE", client=client)
+    assert "Grüße".encode("utf-8") in out
+
+
+def test_target_script_outside_the_encoding_switches_the_file_to_utf8():
+    client = _llm(lambda user: "Привет")
+    doc = "\\usepackage[latin1]{inputenc}\n\\begin{document}\nGrüße\n\\end{document}"
+    out = _roundtrip(doc.encode("cp1252"), target="RU", client=client).decode("utf-8")
+    assert "\\usepackage[utf8]{inputenc}" in out and "Привет" in out
+
+
+def test_windows_line_endings_keep_paragraphs_apart():
+    out = _roundtrip("Erster Absatz.\r\n\r\nZweiter Absatz.\r\n".encode("cp1252"))
+    assert out == b"ERSTER ABSATZ.\r\n\r\nZWEITER ABSATZ.\r\n"
+
+
+def test_old_german_package_turns_shorthands_on_and_becomes_babel():
+    doc = '\\documentclass{article}\n\\usepackage{german,epsfig}\n\\begin{document}\nDie "Anderung "`hier"\'.\n\\end{document}\n'
+    out, client = _run(doc)
+    assert "\\usepackage{epsfig}\\usepackage[english]{babel}" in out
+    assert client.texts == ["Die Änderung „hier“."]
+
+
+def test_index_entries_with_syntax_are_kept():
+    out, _ = _run(r"Text\index{Norm!alte}\index{Wort} hier.")
+    assert r"\index{Norm!alte}" in out and r"\index{WORT}" in out
 
 
 def test_decode_tex_handles_old_encodings():
