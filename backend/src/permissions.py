@@ -2,7 +2,6 @@
 """Permission model: a person holds a set of keys from the catalogue."""
 from dataclasses import dataclass, field
 
-from src.dependencies import get_settings
 from src.modules import active_modules
 from src.permissions_registry import (
     PERM_AIA_USE,
@@ -86,9 +85,9 @@ def resolve_user_permissions(
     custom_role_id: int | None,
     is_env_admin: bool,
 ) -> Permissions:
-    """Computes the effective permissions, with the LDAP switch on top."""
+    """Computes the effective permissions, creating accounts comes with user administration."""
     base = _resolve_base_permissions(role, custom_role_id, is_env_admin)
-    if PERM_SET_USERS_ALL in base.keys and get_settings().account_creation_enabled:
+    if PERM_SET_USERS_ALL in base.keys:
         return Permissions(keys=base.keys, allow_ldap_user_create=True)
     return base
 

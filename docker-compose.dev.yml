@@ -1,35 +1,47 @@
-# Local development: hot reload, Adminer and Langfuse. Switched on via COMPOSE_FILE
-# in .env, see the development lines in .env.example. Not used on the servers.
+# Local development: hot reload, Adminer and Langfuse, switched on via COMPOSE_FILE (see README).
+
+# The project keys Langfuse creates below, so traces arrive without any .env entry.
+x-langfuse-env: &langfuse-env
+  LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-lf-pk-local}
+  LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-lf-sk-local}
+  LANGFUSE_HOST: ${LANGFUSE_HOST:-http://kis-langfuse:3000}
 
 services:
   # ── Hot-Reload-Tweaks ──────────────────────────────────────────────────
   backend:
     # --timeout-graceful-shutdown: otherwise the reload hangs forever on open SSE streams
     command: python -m uvicorn src.app:app --host 0.0.0.0 --port 8000 --reload --timeout-graceful-shutdown 5
+    environment: *langfuse-env
     volumes:
       - ./backend/src:/app/src
 
   celery-worker-screencast:
+    environment: *langfuse-env
     volumes:
       - ./backend/src:/app/src
 
   celery-worker-general:
+    environment: *langfuse-env
     volumes:
       - ./backend/src:/app/src
 
   celery-worker-aia:
+    environment: *langfuse-env
     volumes:
       - ./backend/src:/app/src
 
   celery-worker-voice:
+    environment: *langfuse-env
     volumes:
       - ./backend/src:/app/src
 
   celery-worker-control:
+    environment: *langfuse-env
     volumes:
       - ./backend/src:/app/src
 
   celery-beat:
+    environment: *langfuse-env
     volumes:
       - ./backend/src:/app/src
 
@@ -83,6 +95,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Port 3000 belongs to the Next.js dev server, so the container only starts with the profile "app".
+  # Port 3000 belongs to npm run dev.
   frontend:
     profiles: ["app"]

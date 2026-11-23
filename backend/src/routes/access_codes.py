@@ -6,7 +6,7 @@ from loguru import logger
 from pydantic import BaseModel, Field
 
 from src import database
-from src.dependencies import get_session_store, get_settings
+from src.dependencies import get_session_store
 from src.features.access_codes import repository as repo
 from src.features.access_codes.service import new_username, normalize_code, status_of
 from src.features.accounts.demo_onboarding import demo_module_zuweisen
@@ -18,12 +18,6 @@ from src.features.accounts.login import authenticate
 from src.routes._shared import set_session_cookie
 
 router = APIRouter(prefix="/access-codes", tags=["access codes"])
-
-
-def _require_feature(locale: str) -> None:
-    """Access codes hang off the same switch as creating accounts."""
-    if not get_settings().account_creation_enabled:
-        raise HTTPException(status_code=404, detail=t("access.featureDisabled", locale))
 
 
 def _live_code(code: str, locale: str, *, seat_needed: bool) -> dict:
@@ -59,19 +53,12 @@ def _set_session(response: Response, daten: dict) -> None:
     set_session_cookie(response, get_session_store().create(data=daten))
 
 
-@router.get("/enabled")
-def feature_enabled():
-    """Tells the public login page whether the link is worth showing."""
-    return {"enabled": bool(get_settings().account_creation_enabled)}
-
-
 class RedeemPayload(BaseModel):
     code: str = Field(..., min_length=3, max_length=32)
 
 
 @router.post("/redeem")
 def redeem(payload: RedeemPayload, response: Response, locale: str = Depends(get_locale)):
-    _require_feature(locale)
     eintrag = _live_code(payload.code, locale, seat_needed=True)
 
     # A deleted custom role would blow up halfway through, so the code counts as dead.
@@ -145,7 +132,6 @@ class RenewPayload(BaseModel):
 
 @router.post("/renew")
 def renew(payload: RenewPayload, response: Response, locale: str = Depends(get_locale)):
-    _require_feature(locale)
 
     konto = authenticate(payload.username.strip(), payload.password)
     if konto is None:

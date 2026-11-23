@@ -1,7 +1,9 @@
-# Defaults for every backend container, a value in the .env always wins.
+# Backend defaults, the .env overrides them.
 x-backend-env: &backend-env
   DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-kis}:${POSTGRES_PASSWORD:-kis-local-dev}@postgres:5432/${POSTGRES_DB:-kis}}
   S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
+  # The browser cannot resolve minio.
+  S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-${S3_ENDPOINT:-http://localhost:9000}}
   S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
   S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
   S3_BUCKET: ${S3_BUCKET:-kis}
@@ -411,7 +413,7 @@ services:
       - backend
     restart: unless-stopped
 
-  # Local object storage, deploy/docker-compose.server.yml leaves it out on the servers.
+  # Local only, servers use external S3.
   minio:
     image: minio/minio
     container_name: kis-minio

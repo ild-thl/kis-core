@@ -154,10 +154,6 @@ MESSAGES: dict[str, dict[str, str]] = {
         "de": "LDAP-Eintrag fehlgeschlagen",
         "en": "LDAP add failed",
     },
-    "admin.ldap.featureDisabled": {
-        "de": "LDAP-Benutzererstellung ist deaktiviert",
-        "en": "LDAP user creation is disabled",
-    },
     "admin.ldap.invalidCustomRole": {
         "de": "Custom Role nicht gefunden",
         "en": "Custom role not found",

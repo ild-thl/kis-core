@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from src.dependencies import get_session_store, get_settings
+from src.dependencies import get_session_store
 from src.features.accounts.demo_onboarding import demo_module_zuweisen
 from src.features.accounts.provisioning import provision_account
 from src.features.invites import repository as repo
@@ -18,9 +18,6 @@ router = APIRouter(prefix="/invites", tags=["invites"])
 
 def _open_invite_or_error(token: str, locale: str) -> dict:
     """Fetches the invitation and lets only an open one through."""
-    if not get_settings().account_creation_enabled:
-        raise HTTPException(status_code=404, detail=t("invite.featureDisabled", locale))
-
     invite = repo.get_invite_by_token(token)
     if invite is None:
         raise HTTPException(status_code=404, detail=t("invite.notFound", locale))

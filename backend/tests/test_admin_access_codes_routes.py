@@ -14,7 +14,6 @@ MORGEN = datetime.now() + timedelta(days=30)
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "true")
     monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
     monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
@@ -35,7 +34,6 @@ def client(monkeypatch):
 @pytest.fixture
 def limited_client(monkeypatch):
     """An admin whose custom role holds only user administration, nothing else."""
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "true")
     monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
     monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
@@ -62,7 +60,6 @@ def limited_client(monkeypatch):
 @pytest.fixture
 def client_ohne_recht(monkeypatch):
     """A caller with no admin rights at all, to prove the gate itself holds."""
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "true")
     monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
     monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 

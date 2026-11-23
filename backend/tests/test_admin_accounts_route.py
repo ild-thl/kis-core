@@ -11,7 +11,6 @@ ADMIN = {"user_id": 1, "username": "chefin", "display_name": "Chefin",
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "true")
     monkeypatch.setenv("ADMIN_EMAIL", "admin@th-luebeck.de")
     from src.app import app
     from src.dependencies import get_current_user, get_settings
@@ -113,13 +112,3 @@ def test_a_failing_creation_reports_a_server_error(client):
     assert r.status_code == 500
 
 
-def test_the_route_is_gone_when_the_switch_is_off(client, monkeypatch):
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "false")
-    from src.dependencies import get_settings
-    get_settings.cache_clear()
-
-    with patch("src.routes.admin.accounts.provision_account") as anlegen:
-        r = client.post("/admin/accounts", json=_payload())
-
-    assert r.status_code == 404
-    anlegen.assert_not_called()
