@@ -3,11 +3,11 @@
 # Run from the repo root: bash deploy/start-nginx.sh [up|down|restart]
 cd "$(dirname "$0")/.." || exit 1
 
-COMPOSE_FILES="-f docker-compose.yml -f deploy/docker-compose.prod.yml"
+COMPOSE_FILES="-f docker-compose.yml -f deploy/docker-compose.server.yml -f deploy/docker-compose.prod.yml"
 
-# Compose starts services with "profiles" only when their profile is named.
+# The module workers carry a profile on the servers, Compose starts them only when it is named.
 MODULES_WERT=$(grep -E '^MODULES[[:space:]]*=' .env 2>/dev/null | tail -1 | cut -d= -f2- | cut -d'#' -f1 | tr -d " \"'")
-export COMPOSE_PROFILES="${MODULES_WERT:-aia,tools},app"
+export COMPOSE_PROFILES="${MODULES_WERT:-aia,tools}"
 echo "Modul-Profil: $COMPOSE_PROFILES"
 
 # Without a size limit the prune drops the unshared build stages, so npm ci ran again on every frontend change.

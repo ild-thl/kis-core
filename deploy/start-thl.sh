@@ -4,11 +4,11 @@
 cd "$(dirname "$0")/.." || exit 1
 
 # -f explicit so a COMPOSE_FILE from the .env cannot add anything.
-COMPOSE_FILES="-f docker-compose.yml"
+COMPOSE_FILES="-f docker-compose.yml -f deploy/docker-compose.server.yml"
 
-# Compose starts services with "profiles" only when their profile is named.
+# The module workers carry a profile on the servers, Compose starts them only when it is named.
 MODULES_WERT=$(grep -E '^MODULES[[:space:]]*=' .env 2>/dev/null | tail -1 | cut -d= -f2- | cut -d'#' -f1 | tr -d " \"'")
-export COMPOSE_PROFILES="${MODULES_WERT:-aia,tools},app"
+export COMPOSE_PROFILES="${MODULES_WERT:-aia,tools}"
 # The HPC tunnel starts only when the GWDG key is present.
 [ -f "${HPC_SSH_KEY:-$HOME/.ssh/kis-hpc}" ] && COMPOSE_PROFILES="$COMPOSE_PROFILES,hpc"
 echo "Modul-Profil: $COMPOSE_PROFILES"

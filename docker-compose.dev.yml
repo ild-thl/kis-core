@@ -83,3 +83,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Port 3000 belongs to the Next.js dev server, so the container only starts with the profile "app".
+  frontend:
+    profiles: ["app"]

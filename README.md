@@ -45,7 +45,14 @@ Open `http://localhost:3000` and log in with `admin` / `adminpw`.
 ## Development setup
 
 For working on the code, the frontend runs from the Next.js dev server instead of the container.
-In `.env`, replace the `COMPOSE_PROFILES` line with the three development lines below it, then:
+Add these two lines to `.env`:
+
+```dotenv
+COMPOSE_PATH_SEPARATOR=:
+COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
+```
+
+Then:
 
 ```bash
 docker compose up -d
@@ -63,7 +70,7 @@ into `.env` only to change it.
 |---|---|---|
 | `ADMIN_USERNAME` | part of `ADMIN_EMAIL` before the @ | login name of the admin |
 | `SESSION_SECRET` | derived from `KIS_SECRETS_KEY` | signs the session cookies |
-| `MODULES` | `aia,tools` | modules this installation runs, needs a restart |
+| `MODULES` | `aia,tools` | modules this installation runs, needs a restart, locally the workers of both start anyway |
 | `ACCOUNT_CREATION_ENABLED` | `false` | unlocks invitations, access codes and accounts created by hand |
 | `AUTH_DISABLED` | `false` | no login at all, local use only |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `kis`, `kis-local-dev`, `kis` | database account |

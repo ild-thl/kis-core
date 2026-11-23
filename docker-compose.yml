@@ -159,7 +159,6 @@ services:
   celery-worker-screencast:
     image: kis-backend
     container_name: kis-celery-screencast
-    profiles: ["tools"]
     # Ceiling from the cores instead of fixed. On today's 4-core box the formula
     # gives exactly the previous 2, but it grows with a bigger server. Screencast
     # stays the most frugal worker on purpose: rendering and PPTX conversion keep
@@ -338,7 +337,6 @@ services:
   celery-worker-aia:
     image: kis-backend
     container_name: kis-celery-aia
-    profiles: ["aia"]
     # One process per slot of the Francis pool (AIA_PARALLEL_SLOTS = 28), the pool
     # decides what runs, so no job waits here behind another. Tools mostly wait on
     # the language model, sources are capped at 3 (AIA_AREA_CAPS) because a
@@ -396,10 +394,7 @@ services:
         max-size: "10m"
         max-file: "7"
 
-  # Profile "app": on for a normal start and on the servers, off in development,
-  # where port 3000 belongs to the Next.js dev server.
   frontend:
-    profiles: ["app"]
     build:
       context: ./frontend
       args:
@@ -416,9 +411,8 @@ services:
       - backend
     restart: unless-stopped
 
-  # Profile "minio": local object storage, the servers use an external S3 instead.
+  # Local object storage, deploy/docker-compose.server.yml leaves it out on the servers.
   minio:
-    profiles: ["minio"]
     image: minio/minio
     container_name: kis-minio
     command: server /data --console-address ":9001"

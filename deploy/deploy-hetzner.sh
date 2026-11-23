@@ -8,7 +8,7 @@ main() {
     cd "$(dirname "$0")/.."
 
     local mode="${SSH_ORIGINAL_COMMAND:-${1:-normal}}"
-    local files="-f docker-compose.yml -f deploy/docker-compose.prod.yml"
+    local files="-f docker-compose.yml -f deploy/docker-compose.server.yml -f deploy/docker-compose.prod.yml"
     log() { echo "[deploy] $*"; }
     free_gb() { df --output=avail -BG / | tail -1 | tr -dc '0-9'; }
 
@@ -49,10 +49,10 @@ main() {
     new=$(git rev-parse --short HEAD)
     log "main $old -> $new"
 
-    # Compose starts services with "profiles" only when their profile is named.
+    # The module workers carry a profile on the servers, Compose starts them only when it is named.
     local modules
     modules=$(grep -E '^MODULES[[:space:]]*=' .env 2>/dev/null | tail -1 | cut -d= -f2- | cut -d'#' -f1 | tr -d " \"'" || true)
-    export COMPOSE_PROFILES="${modules:-aia,tools},app"
+    export COMPOSE_PROFILES="${modules:-aia,tools}"
     export PRODUCTION=true
 
     # The box has little memory, so the idle workers make room for the build and come back with the recreate.
