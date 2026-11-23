@@ -55,8 +55,26 @@ main() {
     export COMPOSE_PROFILES="${modules:-aia,tools},app"
     export PRODUCTION=true
 
-    log "Building images while the old version keeps running."
-    docker compose $files build
+    # The box has little memory, so the idle workers make room for the build and come back with the recreate.
+    local workers
+    workers=$(docker compose $files config --services | grep -E '^celery-' | tr '\n' ' ')
+    log "Stopping the workers during the build: $workers"
+    docker compose $files stop $workers
+
+    log "Building images while the site keeps running."
+    local oom_before oom_after
+    oom_before=$(dmesg 2>/dev/null | grep -c 'Out of memory' || true)
+    if ! docker compose $files build; then
+        log "Build failed, starting the workers again with the old version."
+        docker compose $files start $workers
+        exit 1
+    fi
+    oom_after=$(dmesg 2>/dev/null | grep -c 'Out of memory' || true)
+    if [ "$oom_after" -gt "$oom_before" ]; then
+        log "WARNING: the kernel killed $((oom_after - oom_before)) process(es) for lack of memory during the build."
+    else
+        log "No process was killed for lack of memory during the build."
+    fi
     docker compose $files up -d --remove-orphans
 
     # Mounted source code and the single-file nginx config only reach a fresh container.
