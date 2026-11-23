@@ -88,6 +88,11 @@ async def lifespan(app: FastAPI):
         raise RuntimeError(
             "Refusing to start: production=True but ADMIN_PASSWORD is still the example value."
         )
+    # Unsigned session cookies would let anybody forge a login.
+    if settings.production and not settings.session_secret:
+        raise RuntimeError(
+            "Refusing to start: production=True but neither SESSION_SECRET nor KIS_SECRETS_KEY is set."
+        )
     # Let only one process create the schema, the others skip it.
     with run_once_across_processes(_LOCK_INIT_DB) as am_first:
         if am_first:

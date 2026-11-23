@@ -1,11 +1,18 @@
+import hashlib
+import hmac
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     """Settings from the environment, without provider credentials."""
 
-    # Security
-    session_secret: str = "change-me-in-production"
+    # Signs the session cookies, derived from kis_secrets_key when left empty.
+    session_secret: str = ""
+
+    # Master secret that encrypts provider API keys, see services/export_crypto.py.
+    kis_secrets_key: str = ""
 
     # The admin account, written onto the row on every start.
     admin_username: str = ""
@@ -28,6 +35,15 @@ class Settings(BaseSettings):
 
     # Key used to encrypt provider credentials on read and write.
     kis_export_key: str = ""
+
+    @model_validator(mode="after")
+    def _derive_session_secret(self) -> "Settings":
+        # Derive instead of reusing the master secret so a leaked cookie key reveals nothing about it.
+        if not self.session_secret and self.kis_secrets_key.strip():
+            self.session_secret = hmac.new(
+                self.kis_secrets_key.strip().encode("utf-8"), b"kis-session", hashlib.sha256
+            ).hexdigest()
+        return self
 
     @property
     def is_local_mode(self) -> bool:

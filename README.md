@@ -45,7 +45,7 @@ Open `http://localhost:3000` and log in with `admin` / `adminpw`.
 ## Development setup
 
 For working on the code, the frontend runs from the Next.js dev server instead of the container.
-In `.env`, swap the two `COMPOSE_` lines for the development lines below them, then:
+In `.env`, replace the `COMPOSE_PROFILES` line with the three development lines below it, then:
 
 ```bash
 docker compose up -d
@@ -53,6 +53,28 @@ cd frontend && npm install && npm run dev
 ```
 
 Adds backend reload, Adminer and Langfuse. API docs: `http://localhost:8000/docs`.
+
+## Further settings
+
+`.env.example` holds only what every installation sets. Everything below has a default and goes
+into `.env` only to change it.
+
+| Setting | Default | Purpose |
+|---|---|---|
+| `ADMIN_USERNAME` | part of `ADMIN_EMAIL` before the @ | login name of the admin |
+| `SESSION_SECRET` | derived from `KIS_SECRETS_KEY` | signs the session cookies |
+| `MODULES` | `aia,tools` | modules this installation runs, needs a restart |
+| `ACCOUNT_CREATION_ENABLED` | `false` | unlocks invitations, access codes and accounts created by hand |
+| `AUTH_DISABLED` | `false` | no login at all, local use only |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `kis`, `kis-local-dev`, `kis` | database account |
+| `DATABASE_URL` | built from the three above | database connection |
+| `S3_ENDPOINT`, `S3_BUCKET` | `http://minio:9000`, `kis` | object storage |
+| `S3_ACCESS_KEY`, `S3_SECRET_KEY` | `minioadmin` | object storage account, also used by the local MinIO |
+| `WEB_CONCURRENCY` | cores minus one, at most 8 | backend processes |
+| `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_HOST` | empty | tracing, in development `LANGFUSE_HOST=http://kis-langfuse:3000` |
+| `HPC_LOGIN` | empty | SSH login for the `hpc` profile |
+
+A real installation changes at least `POSTGRES_PASSWORD` and the two `S3_` keys.
 
 ## AI providers
 
