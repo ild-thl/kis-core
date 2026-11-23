@@ -32,12 +32,6 @@ MAX_WORKSPACES = 50
 MAX_OWNER_HITS = 20
 
 
-def _require_feature(locale: str) -> None:
-    """Access codes hang off the same switch as creating LDAP users."""
-    if not get_settings().account_creation_enabled:
-        raise HTTPException(status_code=404, detail=t("access.featureDisabled", locale))
-
-
 class CreateCodePayload(BaseModel):
     label: str = Field(..., min_length=1, max_length=64)
     max_uses: int = Field(50, ge=1, le=MAX_SEATS)
@@ -112,7 +106,6 @@ def create_access_code(
     admin: dict = Depends(_require),
     locale: str = Depends(get_locale),
 ):
-    _require_feature(locale)
 
     _assert_may_hand_out(admin, payload.kis_role, payload.custom_role_id, locale)
 
@@ -146,7 +139,6 @@ def create_access_code(
 
 @router.get("/access-codes")
 def list_access_codes(admin: dict = Depends(_require), locale: str = Depends(get_locale)):
-    _require_feature(locale)
     jetzt = datetime.now()
     workspaces = repo.workspaces_by_code()
     return {
@@ -179,7 +171,6 @@ def list_access_code_workspace_owners(
     locale: str = Depends(get_locale),
 ):
     """People who may create workspaces and own some, found by search or by id, never the whole list."""
-    _require_feature(locale)
     suche = q.strip()
     if not suche and not user_ids:
         return {"owners": []}
@@ -200,7 +191,6 @@ def patch_access_code(
     admin: dict = Depends(_require),
     locale: str = Depends(get_locale),
 ):
-    _require_feature(locale)
 
     if payload.active is not None:
         if not repo.set_active(code_id, payload.active):
@@ -245,7 +235,6 @@ def delete_access_code(
     locale: str = Depends(get_locale),
 ):
     """Removes only the code, every account it created stays."""
-    _require_feature(locale)
     if not repo.delete_code(code_id):
         raise HTTPException(status_code=404, detail=t("access.notFound", locale))
     return {"status": "ok"}
@@ -257,7 +246,6 @@ def list_access_code_users(
     admin: dict = Depends(_require),
     locale: str = Depends(get_locale),
 ):
-    _require_feature(locale)
     return {"users": _with_status(repo.list_users_for_code(code_id))}
 
 
@@ -294,7 +282,6 @@ def bulk_access_code_users(
     locale: str = Depends(get_locale),
 ):
     """Locks or deletes every account one code created."""
-    _require_feature(locale)
     if repo.get_code_by_id(payload.code_id) is None:
         raise HTTPException(status_code=404, detail=t("access.notFound", locale))
     user_ids = repo.list_user_ids_for_code(payload.code_id)
@@ -330,7 +317,6 @@ def set_access_code_user_active(
     locale: str = Depends(get_locale),
 ):
     """Switches the login of one code account on or off."""
-    _require_feature(locale)
     _code_account(user_id, locale)
     if payload.active:
         repo.set_users_active([user_id], True)
@@ -346,7 +332,6 @@ def delete_access_code_user(
     locale: str = Depends(get_locale),
 ):
     """Removes one code account with everything it owns."""
-    _require_feature(locale)
     _code_account(user_id, locale)
     if not delete_accounts([user_id]):
         raise HTTPException(status_code=500, detail=t("access.deleteAccountFailed", locale))
@@ -361,7 +346,6 @@ def reset_access_code_user_password(
     locale: str = Depends(get_locale),
 ):
     """Gives an account made from a code a brand new password, never a real staff or admin account."""
-    _require_feature(locale)
     konto = _code_account(user_id, locale)
 
     password = generate_password()
@@ -382,7 +366,6 @@ def access_code_user_activity(
     locale: str = Depends(get_locale),
 ):
     """Read-only look at a test account's modules and chat history, never for a real account."""
-    _require_feature(locale)
     _code_account(user_id, locale)
 
     return {

@@ -1,10 +1,6 @@
 """Text fragments for the access codes."""
 
 MESSAGES: dict[str, dict[str, str]] = {
-    "access.featureDisabled": {
-        "de": "Zugangscodes sind abgeschaltet",
-        "en": "Access codes are disabled",
-    },
     "access.codeUnknown": {
         "de": "Diesen Zugangscode gibt es nicht",
         "en": "This access code does not exist",

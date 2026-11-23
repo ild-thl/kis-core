@@ -1,10 +1,6 @@
 """Text fragments for the invitations."""
 
 MESSAGES: dict[str, dict[str, str]] = {
-    "invite.featureDisabled": {
-        "de": "Einladungen sind abgeschaltet",
-        "en": "Invitations are disabled",
-    },
     "invite.noUsableUid": {
         "de": "Aus dieser Eingabe laesst sich kein Benutzername bilden",
         "en": "No usable username can be derived from this input",

@@ -11,7 +11,6 @@ R = "src.routes.admin.access_codes"
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "true")
 
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -29,7 +28,6 @@ def client(monkeypatch):
 
 @pytest.fixture
 def client_ohne_recht(monkeypatch):
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "true")
 
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth

@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, model_validator
 
 from src import database
-from src.dependencies import get_settings
 from src.dependencies_rbac import require_permission
 from src.features.invites import repository as repo
 from src.features.invites.service import (
@@ -22,12 +21,6 @@ router = APIRouter(tags=["admin: invites"])
 _require = require_permission(PERM_SET_USERS_ALL)
 
 MAX_DAYS = 30
-
-
-def _require_feature(locale: str) -> None:
-    """Invitations hang off the same switch as creating accounts."""
-    if not get_settings().account_creation_enabled:
-        raise HTTPException(status_code=404, detail=t("invite.featureDisabled", locale))
 
 
 class CreateInvitePayload(BaseModel):
@@ -52,7 +45,6 @@ def create_invite(
     admin: dict = Depends(_require),
     locale: str = Depends(get_locale),
 ):
-    _require_feature(locale)
 
     try:
         uid = uid_from_username(payload.username)
@@ -99,7 +91,6 @@ def create_invite(
 
 @router.get("/invites")
 def list_invites(admin: dict = Depends(_require), locale: str = Depends(get_locale)):
-    _require_feature(locale)
     jetzt = datetime.now()
     return {
         "invites": [
@@ -125,7 +116,6 @@ def delete_invite(
     admin: dict = Depends(_require),
     locale: str = Depends(get_locale),
 ):
-    _require_feature(locale)
     if not repo.delete_invite(invite_id):
         raise HTTPException(status_code=404, detail=t("invite.notFound", locale))
     return {"status": "ok"}

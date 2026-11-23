@@ -88,7 +88,7 @@ async def lifespan(app: FastAPI):
         raise RuntimeError(
             "Refusing to start: production=True but ADMIN_PASSWORD is still the example value."
         )
-    # Unsigned session cookies would let anybody forge a login.
+    # Without a secret anybody could forge a login.
     if settings.production and not settings.session_secret:
         raise RuntimeError(
             "Refusing to start: production=True but neither SESSION_SECRET nor KIS_SECRETS_KEY is set."

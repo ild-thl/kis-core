@@ -4,7 +4,6 @@ from loguru import logger
 from pydantic import BaseModel, Field, model_validator
 
 from src import database
-from src.dependencies import get_settings
 from src.dependencies_rbac import require_permission
 from src.features.accounts.passwords import generate_password
 from src.features.accounts.provisioning import provision_account
@@ -41,9 +40,6 @@ def admin_create_account(
     admin: dict = Depends(_require),
     locale: str = Depends(get_locale),
 ):
-    if not get_settings().account_creation_enabled:
-        raise HTTPException(status_code=404, detail=t("admin.ldap.featureDisabled", locale))
-
     if not ist_anmeldename(payload.uid):
         raise HTTPException(status_code=400, detail=t("admin.ldap.invalidUid", locale))
 

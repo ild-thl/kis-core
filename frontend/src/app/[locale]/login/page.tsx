@@ -29,7 +29,6 @@ export default function LoginPage() {
   const [checking, setChecking] = useState(true);
   const [loading, setLoading] = useState(false);
   const [maintenanceOn, setMaintenanceOn] = useState(false);
-  const [zugangOffen, setZugangOffen] = useState(false);
   const [abgelaufen, setAbgelaufen] = useState(false);
   const [tab, setTab] = useState<"login" | "code">("login");
   const accessCode = useAccessCode();
@@ -86,13 +85,6 @@ export default function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    fetch("/api/access-codes/enabled", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setZugangOffen(!!d?.enabled))
-      .catch(() => {});
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -121,7 +113,7 @@ export default function LoginPage() {
       <h2 className="text-2xl font-semibold tracking-[-0.01em] text-foreground">
         {fertig ? tc("doneTitle") : t("title")}
       </h2>
-      {zugangOffen && !fertig && (
+      {!fertig && (
         <Tabs
           items={[
             { key: "login", label: t("tabAccount") },

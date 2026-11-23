@@ -31,7 +31,6 @@ def _code(**abweichungen):
 
 
 def _umgebung(monkeypatch):
-    monkeypatch.setenv("ACCOUNT_CREATION_ENABLED", "true")
     monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
     monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
     monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
@@ -405,12 +404,6 @@ def test_renewing_with_a_wrong_password_is_refused(client):
 
     assert r.status_code == 401
     frist.assert_not_called()
-
-
-def test_the_switch_is_readable_without_logging_in(client):
-    r = client.get("/access-codes/enabled")
-    assert r.status_code == 200
-    assert r.json() == {"enabled": True}
 
 
 # Without the entry in _OPEN_PREFIXES every route below answers 401.
