@@ -233,7 +233,12 @@ def init_storage() -> None:
         try:
             _s3().head_bucket(Bucket=_S3_BUCKET)
         except ClientError:
-            _s3().create_bucket(Bucket=_S3_BUCKET)
+            try:
+                _s3().create_bucket(Bucket=_S3_BUCKET)
+            except ClientError as err:
+                # Several processes start at once on a fresh install, only one wins the create.
+                if err.response.get("Error", {}).get("Code") not in ("BucketAlreadyOwnedByYou", "BucketAlreadyExists"):
+                    raise
         init_lifecycle_policy()
     else:
         STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
@@ -243,8 +248,6 @@ def init_storage() -> None:
 
 # The host the browser reaches, inside Docker the bucket may answer under another name.
 _S3_PUBLIC_ENDPOINT = os.environ.get("S3_PUBLIC_ENDPOINT", "") or _S3_ENDPOINT
-# Path on the page's own host that relays parts to the bucket, for buckets without CORS.
-S3_UPLOAD_PROXY = os.environ.get("S3_UPLOAD_PROXY", "").rstrip("/")
 
 # Origins the bucket already accepts browser uploads from, checked once per process.
 _UPLOAD_CORS_READY: set[str] = set()
@@ -260,7 +263,7 @@ def _s3_public():
         endpoint_url=_S3_PUBLIC_ENDPOINT,
         aws_access_key_id=os.environ.get("S3_ACCESS_KEY", ""),
         aws_secret_access_key=os.environ.get("S3_SECRET_KEY", ""),
-        # Path style keeps the bucket host fixed, so a relay can forward the signed path unchanged.
+        # Path style, MinIO answers only to that.
         config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
     )
 
@@ -307,10 +310,7 @@ def multipart_part_url(key: str, upload_id: str, part_number: int, expires_secon
     params = {"Bucket": _S3_BUCKET, "Key": key, "UploadId": upload_id, "PartNumber": part_number}
     if content_length is not None:
         params["ContentLength"] = content_length
-    url = _s3_public().generate_presigned_url("upload_part", Params=params, ExpiresIn=expires_seconds)
-    if S3_UPLOAD_PROXY and url.startswith(_S3_PUBLIC_ENDPOINT):
-        return S3_UPLOAD_PROXY + url[len(_S3_PUBLIC_ENDPOINT.rstrip("/")):]
-    return url
+    return _s3_public().generate_presigned_url("upload_part", Params=params, ExpiresIn=expires_seconds)
 
 
 def multipart_parts(key: str, upload_id: str) -> list[dict] | None:

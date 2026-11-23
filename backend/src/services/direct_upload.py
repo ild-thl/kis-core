@@ -17,7 +17,6 @@ from loguru import logger
 from src.core.redis_url import REDIS_URL
 from src.i18n import t
 from src.storage import (
-    S3_UPLOAD_PROXY,
     USE_S3,
     delete_file,
     ensure_upload_cors,
@@ -152,9 +151,7 @@ def start(tool: str, rule: UploadRule, filename: str, size: int, user_id: int, c
     if size > max_bytes:
         raise HTTPException(status_code=413, detail=t("file.tooLargeMb", locale, max=max_bytes // (1024 * 1024)))
 
-    # Through the relay the browser stays on its own host and needs no CORS rule.
-    if not S3_UPLOAD_PROXY:
-        ensure_upload_cors(same_site_origin(origin, host))
+    ensure_upload_cors(same_site_origin(origin, host))
 
     token = uuid.uuid4().hex
     key = staging_key(user_id, token, ext)

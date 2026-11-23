@@ -51,7 +51,6 @@ def bucket(monkeypatch):
     state = {"redis": {}, "parts": [], "deleted": [], "aborted": [], "completed": [], "cors": [],
              "head": MP3_HEAD, "started": []}
     monkeypatch.setattr(du, "USE_S3", True)
-    monkeypatch.setattr(du, "S3_UPLOAD_PROXY", "")
     monkeypatch.setattr(du, "_redis", lambda: _FakeRedis(state["redis"]))
     monkeypatch.setattr(du, "ensure_upload_cors", lambda origin: state["cors"].append(origin))
     monkeypatch.setattr(du, "multipart_start", lambda key, ct: state["started"].append(key) or "up-1")
@@ -143,12 +142,6 @@ def test_start_lehnt_leere_und_zu_grosse_dateien_ab(bucket):
     with pytest.raises(HTTPException) as big:
         _start(size=33 * 1024 * 1024, rule=small)
     assert big.value.status_code == 413
-
-
-def test_start_mit_relay_braucht_kein_cors(bucket, monkeypatch):
-    monkeypatch.setattr(du, "S3_UPLOAD_PROXY", "/s3-upload")
-    _start()
-    assert bucket["cors"] == []
 
 
 # --- status, urls, abort --------------------------------------------------------
