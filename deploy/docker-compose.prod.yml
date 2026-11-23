@@ -1,4 +1,4 @@
-# Hetzner server only: nginx with TLS in front of the stack, loaded by deploy/start-nginx.sh.
+# Bundled nginx with HTTPS, loaded by deploy/start-with-nginx.sh.
 # Paths are relative to the repo root, because docker-compose.yml is the first file.
 
 services:

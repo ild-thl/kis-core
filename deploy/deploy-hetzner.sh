@@ -49,7 +49,7 @@ main() {
     new=$(git rev-parse --short HEAD)
     log "main $old -> $new"
 
-    # The module workers carry a profile on the servers, Compose starts them only when it is named.
+    # Starts only the workers of these modules.
     local modules
     modules=$(grep -E '^MODULES[[:space:]]*=' .env 2>/dev/null | tail -1 | cut -d= -f2- | cut -d'#' -f1 | tr -d " \"'" || true)
     export COMPOSE_PROFILES="${modules:-aia,tools}"

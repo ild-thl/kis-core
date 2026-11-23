@@ -1,4 +1,4 @@
-# Servers start only the modules named in their .env and use an external S3 instead of MinIO.
+# Servers: only their modules, external S3 instead of MinIO.
 services:
   celery-worker-screencast:
     profiles: ["tools"]
