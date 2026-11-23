@@ -1,0 +1,37 @@
+name: Trello sync
+
+# Syncs the Trello board with the GitHub project at 06:00 and 18:00 (UTC+1) and when started by hand.
+on:
+  schedule:
+    - cron: "0 5,17 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Only show what would change
+        type: boolean
+        default: false
+
+concurrency:
+  group: trello-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # Only the owner's repository runs this, copies of the code skip it without an error.
+    if: github.repository == 'hamidmergan/kis-core'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - name: Sync
+        env:
+          TRELLO_KEY: ${{ secrets.TRELLO_KEY }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          TRELLO_BOARD_ID: ${{ vars.TRELLO_BOARD_ID }}
+          PROJECT_OWNER: ${{ vars.PROJECT_OWNER }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
+          DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
+        run: python3 .github/scripts/trello_sync.py $DRY_RUN
