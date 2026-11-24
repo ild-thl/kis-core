@@ -7,6 +7,8 @@ x-backend-env: &backend-env
   S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
   S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
   S3_BUCKET: ${S3_BUCKET:-kis}
+  # The server scripts set it, it hides /docs, marks the session cookie secure and enables the start checks.
+  PRODUCTION: ${PRODUCTION:-false}
 
 services:
   redis:
