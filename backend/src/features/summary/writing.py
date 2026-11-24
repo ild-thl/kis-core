@@ -229,7 +229,8 @@ def _names(roh, dateien: list[str] | None) -> dict[str, str]:
 
 
 def parse_outline(raw: str | None, stellen=None, dateien: list[str] | None = None,
-                  anker=None, extra: list[str] | None = None) -> Outline:
+                  anker=None, extra: list[str] | None = None,
+                  minimum: int = SUMMARY_MIN_SECTIONS) -> Outline:
     """Reads the planning answer, a broken one yields no sections rather than an error.
 
     Headings and the numbers under them come out of the same call. ``stellen`` turns the
@@ -258,7 +259,7 @@ def parse_outline(raw: str | None, stellen=None, dateien: list[str] | None = Non
             nummern = anker(nummern, eintrag.get("start"))
         abschnitte.append(Section(title=titel, scope=" ".join(str(umfang).split()),
                                   stellen=nummern))
-    if len(abschnitte) < SUMMARY_MIN_SECTIONS:
+    if len(abschnitte) < minimum:
         return Outline()
     titel = " ".join(str(roh.get("title") or "").split()).lstrip("#").strip()
     return Outline(title=titel[:120], intro=str(roh.get("intro") or "").strip(),
@@ -355,6 +356,9 @@ async def plan_outline(caller: Caller, *, language: str, template_body: str,
     erzwungen = {"response_format": outline_schema(extra_fields)} if enforce_schema else {}
     form = "" if enforce_schema else "\n" + outline_shape(extra_fields)
     plan = Outline()
+    # Short material carries fewer headings than the usual floor, one is enough there.
+    minimum = (SUMMARY_MIN_SECTIONS
+               if len(material) >= SUMMARY_MIN_SECTIONS * SUMMARY_CHARS_PER_SECTION else 1)
     for versuch in range(1, SUMMARY_OUTLINE_MAX_ATTEMPTS + 1):
         try:
             antwort = await caller.create(
@@ -371,7 +375,7 @@ async def plan_outline(caller: Caller, *, language: str, template_body: str,
                 max_tokens=SUMMARY_OUTLINE_MAX_TOKENS, **erzwungen,
             )
             plan = parse_outline(antwort.choices[0].message.content, stellen, sources, anker,
-                                 list(extra_fields or {}))
+                                 list(extra_fields or {}), minimum=minimum)
             # Without a single passage the writers would have nothing to write from.
             if stellen and not any(a.stellen for a in plan.sections):
                 plan = Outline()
