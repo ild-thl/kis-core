@@ -137,6 +137,7 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
                     <span className="text-sm font-medium">{t("tools")}</span>
                   </Link>
                 )}
+                {hasTools && <JobsPanel />}
                 {hasAia && (
                   <Link
                     href="/calendar"
@@ -151,7 +152,6 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
                     <span className="text-sm font-medium">{t("calendar")}</span>
                   </Link>
                 )}
-                {hasTools && <JobsPanel />}
                 <HeaderSettingsMenu
                   isAdmin={isAdmin}
                   canViewManual={canViewManual}

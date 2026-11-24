@@ -610,6 +610,10 @@ me-tpc:hover .mm-src-chip {
   .btn-icon:hover:not(:disabled, [aria-disabled="true"]) {
     color: var(--kb);
   }
+  /* In dark mode only the ring turns blue, the icon keeps its colour. */
+  :root[data-theme="dark"] .btn-icon:hover:not(:disabled, [aria-disabled="true"]) {
+    color: var(--muted);
+  }
 
   /* Solid primary CTA: inverts its fill and text on hover. */
   .btn-primary {

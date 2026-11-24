@@ -93,7 +93,7 @@ export default function ChatVerlauf({
       <div className="flex items-center justify-between pl-4 pr-2 flex-shrink-0" style={{ height: 48 }}>
         {/* The wordmark leads to the workspaces, like the one in the header of the other pages. */}
         <Link href="/workspace" aria-label={tHeader("homeAria")} title={tHeader("homeAria")} className="flex items-center logo-link" data-testid="campus-home">
-          <Wordmark size="sm" />
+          <Wordmark size="sm" themed />
         </Link>
         {toggle}
       </div>

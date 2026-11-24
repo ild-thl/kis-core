@@ -40,7 +40,8 @@ export default function StartOverview({
   const ordered = [...tools.filter((z) => z.key !== "campus"), ...tools.filter((z) => z.key === "campus")];
   const showTasks = home && tasks.visible;
   const headingClass = "text-sm font-semibold uppercase tracking-wider";
-  const gridClass = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
+  // Equal rows keep every tile as tall as the tallest one.
+  const gridClass = "grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
   return (
     <div className="page-shell pt-6 pb-20 lg:pt-15 lg:pb-30">

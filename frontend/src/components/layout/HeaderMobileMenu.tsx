@@ -139,20 +139,6 @@ export default function HeaderMobileMenu({ hasSession, isAdmin, canViewManual = 
               <span>{t("tools")}</span>
             </Link>
           )}
-          {hasSession && hasAia && (
-            <Link
-              href="/calendar"
-              onClick={closeIfHere("/calendar")}
-              aria-current={onCalendar ? "page" : undefined}
-              className={rowClass}
-              style={{ color: "var(--foreground)", ...(onCalendar ? activeRowStyle : {}) }}
-            >
-              <LinkBusy size="sm">
-                <CalendarBlank size={20} weight="bold" />
-              </LinkBusy>
-              <span>{t("calendar")}</span>
-            </Link>
-          )}
           {hasSession && hasTools && (
             <Link
               href="/my-jobs"
@@ -165,6 +151,20 @@ export default function HeaderMobileMenu({ hasSession, isAdmin, canViewManual = 
                 <Stack size={20} weight="bold" />
               </LinkBusy>
               <span>{t("jobs")}</span>
+            </Link>
+          )}
+          {hasSession && hasAia && (
+            <Link
+              href="/calendar"
+              onClick={closeIfHere("/calendar")}
+              aria-current={onCalendar ? "page" : undefined}
+              className={rowClass}
+              style={{ color: "var(--foreground)", ...(onCalendar ? activeRowStyle : {}) }}
+            >
+              <LinkBusy size="sm">
+                <CalendarBlank size={20} weight="bold" />
+              </LinkBusy>
+              <span>{t("calendar")}</span>
             </Link>
           )}
           <div
