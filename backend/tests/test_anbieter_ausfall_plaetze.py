@@ -14,9 +14,9 @@ def _ziel(pid, cap):
 def tuer(monkeypatch):
     unten: set[int] = set()
     monkeypatch.setattr(pt, "is_down", lambda pid, bucket: pid in unten)
-    hpc, mylab, mylab_gwdg, gwdg = _ziel(1, 10), _ziel(2, 4), _ziel(3, 2), _ziel(4, 2)
-    door = pt._Door(hpc, mylab, "llm", [mylab_gwdg, gwdg])
-    return door, unten, (hpc, mylab, mylab_gwdg, gwdg)
+    lokal, mylab, mylab_gwdg, gwdg = _ziel(1, 10), _ziel(2, 4), _ziel(3, 2), _ziel(4, 2)
+    door = pt._Door(lokal, mylab, "llm", [mylab_gwdg, gwdg])
+    return door, unten, (lokal, mylab, mylab_gwdg, gwdg)
 
 
 def _grenze(door, ziel):
@@ -29,16 +29,16 @@ def test_all_up_keeps_every_cap(tuer):
 
 
 def test_a_dead_first_choice_hands_its_seats_on(tuer):
-    door, unten, (_hpc, mylab, mylab_gwdg, gwdg) = tuer
+    door, unten, (_lokal, mylab, mylab_gwdg, gwdg) = tuer
     unten.add(1)
     # 18 seats in all, 8 left, so each would grow by 2.25 and is held at double.
     assert [_grenze(door, z) for z in (mylab, mylab_gwdg, gwdg)] == [8, 4, 4]
 
 
 def test_a_small_loss_grows_the_others_a_little(tuer):
-    door, unten, (hpc, mylab, _mg, gwdg) = tuer
+    door, unten, (lokal, mylab, _mg, gwdg) = tuer
     unten.add(3)
-    assert (_grenze(door, hpc), _grenze(door, mylab), _grenze(door, gwdg)) == (11, 4, 2)
+    assert (_grenze(door, lokal), _grenze(door, mylab), _grenze(door, gwdg)) == (11, 4, 2)
 
 
 def test_an_uncapped_provider_leaves_the_caps_alone(monkeypatch):

@@ -121,8 +121,8 @@ def create_env(monkeypatch):
 
 
 def _create(**extra):
-    body = CreateProviderRequest(name="HPC", protocol="openai_compat",
-                                 base_url="http://hpc", **extra)
+    body = CreateProviderRequest(name="Lokal", protocol="openai_compat",
+                                 base_url="http://lokal", **extra)
     return admin.create_provider(body, _admin=None, locale="de")
 
 
@@ -358,7 +358,7 @@ def _route_row(feature, provider_id, *, fallback=None, models=None):
 def test_export_carries_the_caps_and_the_fallback_by_name(monkeypatch):
     monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
     monkeypatch.setattr(admin.db, "list_providers", lambda: [
-        _provider(1, "myLab", concurrency={"llm": 10}), _provider(2, "HPC"),
+        _provider(1, "myLab", concurrency={"llm": 10}), _provider(2, "Lokal"),
     ])
     monkeypatch.setattr(admin.db, "list_routes", lambda: [
         _route_row("chat", 2, fallback=1, models={"1": "gemma-3", "2": "gemma-4-31b-it"}),
@@ -368,7 +368,7 @@ def test_export_carries_the_caps_and_the_fallback_by_name(monkeypatch):
     export = admin.build_export(exported_from=None)
     by_name = {p["name"]: p for p in export["providers"]}
     assert by_name["myLab"]["concurrency"] == {"llm": 10}
-    assert by_name["HPC"]["concurrency"] == {}
+    assert by_name["Lokal"]["concurrency"] == {}
     by_feature = {r["feature"]: r for r in export["feature_routes"]}
     assert by_feature["chat"]["fallback_provider_name"] == "myLab"
     assert by_feature["vision"]["fallback_provider_name"] is None
@@ -417,7 +417,7 @@ def _install(monkeypatch, fake):
 def test_export_then_import_keeps_caps_and_fallback(monkeypatch):
     monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
     quelle = _FakeDb([_provider(1, "myLab", concurrency={"llm": 10, "tts": 4}),
-                      _provider(2, "HPC")])
+                      _provider(2, "Lokal")])
     quelle.routes["chat"] = _route_row("chat", 2, fallback=1,
                                        models={"1": "gemma-3", "2": "gemma-4-31b-it"})
     _install(monkeypatch, quelle)
@@ -431,12 +431,12 @@ def test_export_then_import_keeps_caps_and_fallback(monkeypatch):
     ids = {p["name"]: p["id"] for p in ziel.list_providers()}
     by_name = {p["name"]: p for p in ziel.list_providers()}
     assert by_name["myLab"]["concurrency"] == {"llm": 10, "tts": 4}
-    assert by_name["HPC"]["concurrency"] == {}
+    assert by_name["Lokal"]["concurrency"] == {}
     chat = ziel.routes["chat"]
-    assert chat["provider_id"] == ids["HPC"]
+    assert chat["provider_id"] == ids["Lokal"]
     assert chat["fallback_provider_id"] == ids["myLab"]
     assert chat["provider_models"] == {str(ids["myLab"]): "gemma-3",
-                                       str(ids["HPC"]): "gemma-4-31b-it"}
+                                       str(ids["Lokal"]): "gemma-4-31b-it"}
 
 
 def test_import_updates_the_caps_of_an_existing_provider(monkeypatch):
@@ -466,7 +466,7 @@ def test_an_old_export_without_caps_keeps_the_existing_ones(monkeypatch):
 def test_export_then_import_keeps_the_tts_fallback(monkeypatch):
     monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
     quelle = _FakeDb([_provider(1, "myLab", caps=("tts",), voices=_STIMMEN),
-                      _provider(2, "HPC", caps=("tts",), voices=_STIMMEN)])
+                      _provider(2, "Lokal", caps=("tts",), voices=_STIMMEN)])
     quelle.routes["tts"] = _route_row("tts", 2, fallback=1,
                                       models={"1": "xtts-v2", "2": "qwen3-tts"})
     _install(monkeypatch, quelle)
@@ -478,7 +478,7 @@ def test_export_then_import_keeps_the_tts_fallback(monkeypatch):
 
     ids = {p["name"]: p["id"] for p in ziel.list_providers()}
     tts = ziel.routes["tts"]
-    assert tts["provider_id"] == ids["HPC"]
+    assert tts["provider_id"] == ids["Lokal"]
     assert tts["fallback_provider_id"] == ids["myLab"]
     stimmen = {p["name"]: p["voices"] for p in ziel.list_providers()}["myLab"]
     assert [v["voice_id"] for v in stimmen] == ["anna"]
@@ -488,7 +488,7 @@ def _roundtrip(monkeypatch, feature, provider_id, fallback, models):
     """Exports one route from a source and imports it into an empty target."""
     monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
     quelle = _FakeDb([_provider(1, "myLab", caps=("tts", "chat"), voices=_STIMMEN),
-                      _provider(2, "HPC", caps=("tts", "chat"), voices=_STIMMEN)])
+                      _provider(2, "Lokal", caps=("tts", "chat"), voices=_STIMMEN)])
     quelle.routes[feature] = _route_row(feature, provider_id, fallback=fallback, models=models)
     _install(monkeypatch, quelle)
     export = admin.build_export(exported_from=None)
@@ -550,11 +550,11 @@ def test_preview_shows_a_route_with_only_a_fallback_like_the_import(monkeypatch,
 
 
 def test_import_drops_an_unresolved_fallback(monkeypatch):
-    ziel = _FakeDb([_provider(1, "HPC")])
+    ziel = _FakeDb([_provider(1, "Lokal")])
     _install(monkeypatch, ziel)
     payload = ExportedConfig(**{
         "schema_version": 1, "exported_at": "x",
-        "feature_routes": [{"feature": "chat", "provider_name": "HPC",
+        "feature_routes": [{"feature": "chat", "provider_name": "Lokal",
                             "fallback_provider_name": "Ghost"}],
     }).model_dump()
     admin.perform_import(payload)

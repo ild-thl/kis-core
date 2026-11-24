@@ -10,7 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 STIMMEN = [
-    {"id": "hpc", "anbieter": "HPC", "eigen": True, "vergleich": ["en"],
+    {"id": "lokal", "anbieter": "Lokal", "eigen": True, "vergleich": ["en"],
      "sprachen": {"de": {"name": "Thorsten", "stimme": "thorsten"}, "en": {"name": "Michael", "stimme": "am_michael"}}},
     {"id": "gemini", "anbieter": "Gemini", "eigen": False,
      "sprachen": {"de": {"name": "Charon"}, "en": {"name": "Charon"}}},
@@ -36,8 +36,8 @@ def _sprache(wurzel, sprache: str, videos: list[str]):
 @pytest.fixture
 def demo_dir(tmp_path):
     (tmp_path / "stimmen.json").write_text(json.dumps(STIMMEN), encoding="utf-8")
-    _sprache(tmp_path, "de", ["hpc", "gemini"])
-    _sprache(tmp_path, "en", ["hpc"])
+    _sprache(tmp_path, "de", ["lokal", "gemini"])
+    _sprache(tmp_path, "en", ["lokal"])
     with patch("src.routes.screencast_demo.DEMO_DIR", tmp_path):
         yield tmp_path
 
@@ -76,8 +76,8 @@ def test_unbekannte_sprache_nimmt_die_standardsprache(client):
 
 def test_stimmen_in_ihrer_reihenfolge_mit_vorhandenen_videos(client):
     stimmen = client.get("/screencast-demo/stimmen").json()["stimmen"]
-    assert [s["id"] for s in stimmen] == ["hpc", "gemini"]
-    assert stimmen[0] == {"id": "hpc", "anbieter": "HPC", "eigen": True,
+    assert [s["id"] for s in stimmen] == ["lokal", "gemini"]
+    assert stimmen[0] == {"id": "lokal", "anbieter": "Lokal", "eigen": True,
                           "stimmen": {"de": "Thorsten", "en": "Michael"},
                           "kennungen": {"de": "thorsten", "en": "am_michael"}, "vergleich": ["en"],
                           "videos": ["de", "en"]}
@@ -87,13 +87,13 @@ def test_stimmen_in_ihrer_reihenfolge_mit_vorhandenen_videos(client):
 
 def test_vergleich_je_sprache_und_anbieter(client):
     assert client.get("/screencast-demo/vergleich/de/gemini").content == b"geminide"
-    assert client.get("/screencast-demo/vergleich/en/hpc").content == b"hpcen"
+    assert client.get("/screencast-demo/vergleich/en/lokal").content == b"lokalen"
 
 
 def test_fehlender_vergleich_gibt_404(client):
     assert client.get("/screencast-demo/vergleich/en/gemini").status_code == 404
     assert client.get("/screencast-demo/vergleich/de/fremd").status_code == 404
-    assert client.get("/screencast-demo/vergleich/..%2Fde/hpc").status_code == 404
+    assert client.get("/screencast-demo/vergleich/..%2Fde/lokal").status_code == 404
 
 
 def test_video_je_sprache(client):
@@ -152,7 +152,7 @@ def test_angaben_nennen_die_stimme_des_videos(client):
     de = client.get("/screencast-demo/angaben").json()
     en = client.get("/screencast-demo/angaben?sprache=en").json()
 
-    assert de["angaben"] == {"anbieter": "HPC", "sprache": "de", "stimme": "Thorsten"}
+    assert de["angaben"] == {"anbieter": "Lokal", "sprache": "de", "stimme": "Thorsten"}
     assert en["angaben"]["stimme"] == "Michael"
     assert de["datei"] == "Projektstart.pptx"
     assert de["erstellt"].endswith("Z")

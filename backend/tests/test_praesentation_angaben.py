@@ -16,9 +16,9 @@ def _params() -> PraesentationParams:
 
 
 def test_einstellungen_und_anbieter():
-    a = angaben(_params(), "HPC", "HPC Bild")
+    a = angaben(_params(), "Lokal", "Lokal Bild")
 
-    assert a == {"anbieter": "HPC", "bildanbieter": "HPC Bild", "vorlage": "THL-Vorlage", "sprache": "en",
+    assert a == {"anbieter": "Lokal", "bildanbieter": "Lokal Bild", "vorlage": "THL-Vorlage", "sprache": "en",
                  "anweisung": "Höchstens acht Folien.", "bildstil": "Tusche", "material": "Skript.pdf, Fallstudie.pdf"}
 
 
@@ -38,10 +38,10 @@ def test_alter_lauf_liest_seine_einstellungen(lokal):
 
 def test_gemerkte_anbieter_stehen_neben_den_einstellungen(lokal):
     store.save_params(UID, JOB, _params())
-    job_statistik.angaben_merken(UID, JOB, angaben(_params(), "HPC", ""))
+    job_statistik.angaben_merken(UID, JOB, angaben(_params(), "Lokal", ""))
 
     a = job_statistik.angaben_lesen({"user_id": UID, "job_uuid": JOB, "tool": "praesentation"})
 
-    assert a["anbieter"] == "HPC"
+    assert a["anbieter"] == "Lokal"
     assert "bildanbieter" not in a
     assert a["material"] == "Skript.pdf, Fallstudie.pdf"

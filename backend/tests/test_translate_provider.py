@@ -29,9 +29,9 @@ def test_get_translation_providers_merges_translation_and_chat(monkeypatch):
 def test_die_erste_wahl_aus_dem_admin_steht_vorn(monkeypatch):
     """Run 18: translator and screencast took the oldest provider instead of the admin's first choice."""
     from src.dependencies import get_translation_providers
-    gwdg, mylab, hpc = _make_provider(20, "GWDG"), _make_provider(21, "myLab"), _make_provider(92, "HPC")
+    gwdg, mylab, lokal = _make_provider(20, "GWDG"), _make_provider(21, "myLab"), _make_provider(92, "Lokal")
     monkeypatch.setattr("src.dependencies.db.list_providers_with_capability",
-                        lambda cap: [gwdg, mylab, hpc] if cap == "chat" else [])
+                        lambda cap: [gwdg, mylab, lokal] if cap == "chat" else [])
     monkeypatch.setattr("src.dependencies.db.get_route",
                         lambda f: {"provider_id": 92} if f == "doc_translate" else None)
     assert [p["id"] for p in get_translation_providers()] == [92, 20, 21]

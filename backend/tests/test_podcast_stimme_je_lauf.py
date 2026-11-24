@@ -14,7 +14,7 @@ UID = 7
 JOB = "f" * 32
 
 ANBIETER = {
-    3: {"id": 3, "name": "HPC", "voices": [{"voice_id": "anna", "name": "Anna"},
+    3: {"id": 3, "name": "Lokal", "voices": [{"voice_id": "anna", "name": "Anna"},
                                            {"voice_id": "ben", "name": "Ben"}]},
     4: {"id": 4, "name": "Lokal", "voices": [{"voice_id": "carl", "name": "Carl"}]},
     21: {"id": 21, "name": "THL myLab", "voices": [{"voice_id": "onyx", "name": "Onyx"},
@@ -215,7 +215,7 @@ def test_ohne_rueckfall_bleibt_das_stimmen_etikett_der_seite(lauf):
     _render.run_podcast_render(JOB, UID, "de", 1, 0)
 
     assert lauf["meta"]["voice_label"] == "Anna, Ben"
-    assert lauf["zahlen"]["vertonung"]["besetzung"] == "Lena (host, anna, HPC), Jonas (host, ben, HPC)"
+    assert lauf["zahlen"]["vertonung"]["besetzung"] == "Lena (host, anna, Lokal), Jonas (host, ben, Lokal)"
 
 
 def test_die_seite_zaehlt_den_ton_des_festgelegten_anbieters_als_vertont(lauf, monkeypatch):

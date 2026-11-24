@@ -31,19 +31,19 @@ def test_leere_angaben_fallen_weg(lokal):
 
 def test_zahlen_bleiben_erhalten(lokal):
     notiere(UID, JOB, "vertonung", {"folien": 3})
-    angaben_merken(UID, JOB, {"anbieter": "HPC"})
+    angaben_merken(UID, JOB, {"anbieter": "Lokal"})
 
     meta = load_result_meta(UID, JOB)
     assert meta["stats"]["vertonung"] == {"folien": 3}
-    assert meta["angaben"] == {"anbieter": "HPC"}
+    assert meta["angaben"] == {"anbieter": "Lokal"}
 
 
 def _tuer():
     from src.services.provider_transport import Target, _Door
 
-    hpc = Target(provider_id=1, name="HPC", root="http://hpc", api_key="k", model="m")
+    lokal = Target(provider_id=1, name="Lokal", root="http://lokal", api_key="k", model="m")
     mylab = Target(provider_id=2, name="THL myLab", root="http://mylab", api_key="k", model="m")
-    return _Door(hpc, mylab, "llm"), hpc, mylab
+    return _Door(lokal, mylab, "llm"), lokal, mylab
 
 
 def test_der_rueckfall_steht_als_anbieter_da():
@@ -61,13 +61,13 @@ def test_wechsel_mitten_im_auftrag_nennt_beide():
     from src.services import provider_transport
     from src.services.job_statistik import wer_antwortete
 
-    tuer, hpc, mylab = _tuer()
+    tuer, lokal, mylab = _tuer()
     provider_transport.record_answering()
-    tuer.served(hpc)
+    tuer.served(lokal)
     tuer.served(mylab)
-    tuer.served(hpc)
+    tuer.served(lokal)
 
-    assert wer_antwortete("chat") == "HPC, THL myLab"
+    assert wer_antwortete("chat") == "Lokal, THL myLab"
 
 
 def test_ohne_aufruf_durch_die_tuer_gilt_der_gewaehlte(monkeypatch):
@@ -101,11 +101,11 @@ def test_alte_sprachausgabe_liest_ihre_einstellungen(lokal, monkeypatch):
     from src.services import job_statistik
     from src.storage import save_job_file
 
-    monkeypatch.setattr(job_statistik, "anbieter_name", lambda pid: "HPC Audio DE")
+    monkeypatch.setattr(job_statistik, "anbieter_name", lambda pid: "Lokal Audio DE")
     monkeypatch.setattr(dependencies, "_voice_language_for", lambda pid, vid: "de")
     save_job_file(UID, JOB, "tts_params.json", json.dumps({"provider_id": 3, "voice_id": "k", "voice_label": "Kerstin"}).encode())
 
-    assert job_statistik.angaben_lesen(_job("tts")) == {"anbieter": "HPC Audio DE", "sprache": "de", "stimme": "Kerstin"}
+    assert job_statistik.angaben_lesen(_job("tts")) == {"anbieter": "Lokal Audio DE", "sprache": "de", "stimme": "Kerstin"}
 
 
 def test_gespeicherte_angaben_gehen_vor(lokal, monkeypatch):
@@ -115,7 +115,7 @@ def test_gespeicherte_angaben_gehen_vor(lokal, monkeypatch):
     from src.services import job_statistik
     from src.storage import save_job_file
 
-    monkeypatch.setattr(job_statistik, "anbieter_name", lambda pid: "HPC Audio DE")
+    monkeypatch.setattr(job_statistik, "anbieter_name", lambda pid: "Lokal Audio DE")
     monkeypatch.setattr(dependencies, "_voice_language_for", lambda pid, vid: "de")
     save_job_file(UID, JOB, "tts_params.json", json.dumps({"provider_id": 3, "voice_id": "k", "voice_label": "Kerstin"}).encode())
     angaben_merken(UID, JOB, {"anbieter": "THL myLab", "stimme": "Alloy", "sprache": "en"})
@@ -185,9 +185,9 @@ def test_bilder_bringen_anbieter_prompt_und_einstellungen_mit(lokal):
     from src.storage import save_result_meta
 
     save_result_meta(UID, JOB, {"beschreibung": "Ein Apfel", "modell_prompt": "Foto. Ein Apfel", "stil": "foto",
-                                "format": "16:9", "qualitaet": "hoch", "groesse": "1344x768", "anbieter": "HPC"})
+                                "format": "16:9", "qualitaet": "hoch", "groesse": "1344x768", "anbieter": "Lokal"})
 
-    assert angaben_lesen(_job("image_generate")) == {"anbieter": "HPC", "stil": "foto", "format": "16:9",
+    assert angaben_lesen(_job("image_generate")) == {"anbieter": "Lokal", "stil": "foto", "format": "16:9",
                                                      "qualitaet": "hoch", "groesse": "1344x768", "prompt": "Ein Apfel"}
 
 

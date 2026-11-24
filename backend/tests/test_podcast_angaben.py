@@ -10,7 +10,7 @@ from src.services import job_statistik
 
 UID = 7
 JOB = "c" * 32
-ANBIETER = {1: {"name": "HPC", "voices": [{"voice_id": "kerstin", "name": "Kerstin"}, {"voice_id": "thorsten", "name": "Thorsten"}]},
+ANBIETER = {1: {"name": "Lokal", "voices": [{"voice_id": "kerstin", "name": "Kerstin"}, {"voice_id": "thorsten", "name": "Thorsten"}]},
             2: {"name": "THL myLab", "voices": [{"voice_id": "nova", "name": "Nova"}]}}
 
 
@@ -30,7 +30,7 @@ def _params() -> PodcastParams:
 def test_besetzung_mit_rolle_und_stimmname():
     a = modul.angaben(_params(), None)
 
-    assert a["anbieter"] == "HPC"
+    assert a["anbieter"] == "Lokal"
     assert a["sprache"] == "de"
     assert a["material"] == "Skript.pdf, Fallstudie.pdf"
     assert a["besetzung"] == [{"name": "Lena", "rolle": "host", "stimme": "Kerstin"},
@@ -42,7 +42,7 @@ def test_der_rueckfall_nennt_wer_wirklich_sprach():
 
     a = modul.angaben(_params(), pin)
 
-    assert a["anbieter"] == "HPC, THL myLab"
+    assert a["anbieter"] == "Lokal, THL myLab"
     assert a["besetzung"][1] == {"name": "Jonas", "rolle": "expert", "stimme": "Nova"}
 
 
@@ -52,7 +52,7 @@ def test_alter_podcast_liest_seine_einstellungen(lokal):
     a = job_statistik.angaben_lesen({"user_id": UID, "job_uuid": JOB, "tool": "podcast"})
 
     assert a["besetzung"][0]["name"] == "Lena"
-    assert a["anbieter"] == "HPC"
+    assert a["anbieter"] == "Lokal"
 
 
 def test_gespeicherte_angaben_gehen_vor(lokal):
@@ -69,8 +69,8 @@ def test_anweisung_und_wer_das_skript_schrieb(lokal):
     params.instructions = "Nur Kapitel 2"
     store.save_params(UID, JOB, params)
     job_statistik.notiere(UID, JOB, "skript", {"anbieter": "THL myLab", "modell": "m"})
-    job_statistik.angaben_merken(UID, JOB, {"anbieter": "HPC"})
+    job_statistik.angaben_merken(UID, JOB, {"anbieter": "Lokal"})
 
     a = job_statistik.angaben_lesen({"user_id": UID, "job_uuid": JOB, "tool": "podcast"})
 
-    assert a == {"anbieter": "HPC", "anweisung": "Nur Kapitel 2", "textanbieter": "THL myLab"}
+    assert a == {"anbieter": "Lokal", "anweisung": "Nur Kapitel 2", "textanbieter": "THL myLab"}

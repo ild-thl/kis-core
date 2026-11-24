@@ -74,7 +74,7 @@ def _ziel(pid, root, model, caps=None, key="k"):
                      caps=caps or {})
 
 
-ERSTE = _ziel(1, "https://hpc.example", "gemma-hpc")
+ERSTE = _ziel(1, "https://lokal.example", "gemma-lokal")
 RUECK = _ziel(2, "https://mylab.example", "chat-fast")
 
 
@@ -100,7 +100,7 @@ def test_die_erste_wahl_antwortet_und_niemand_sonst_wird_gefragt(redis):
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler)).status_code == 200
-    assert gesehen == ["https://hpc.example/v1/chat/completions"]
+    assert gesehen == ["https://lokal.example/v1/chat/completions"]
 
 
 def test_nicht_erreichbar_geht_derselbe_aufruf_an_den_rueckfall(redis):
@@ -108,7 +108,7 @@ def test_nicht_erreichbar_geht_derselbe_aufruf_an_den_rueckfall(redis):
 
     def handler(req):
         gesehen.append(req)
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ConnectError("Connection refused", request=req)
         return httpx.Response(200, json={"ok": 1})
 
@@ -124,7 +124,7 @@ def test_nicht_erreichbar_geht_derselbe_aufruf_an_den_rueckfall(redis):
 
 def test_ablehnung_wegen_grenze_sperrt_die_erste_wahl_bis_zum_ende_der_sperre(redis):
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             return httpx.Response(429, headers={"ratelimit-reset": "50"}, json={"error": "limit"})
         return httpx.Response(200, json={"ok": 1})
 
@@ -135,7 +135,7 @@ def test_ablehnung_wegen_grenze_sperrt_die_erste_wahl_bis_zum_ende_der_sperre(re
 
 def test_serverfehler_geht_an_den_rueckfall(redis):
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             return httpx.Response(502, text="bad gateway")
         return httpx.Response(200, json={"ok": 1})
 
@@ -150,7 +150,7 @@ def test_ein_echter_fehler_der_anfrage_wechselt_nicht(redis):
         return httpx.Response(400, json={"error": "zu lang"})
 
     assert _chat(_client(handler)).status_code == 400
-    assert gesehen == ["hpc.example"]
+    assert gesehen == ["lokal.example"]
 
 
 def test_ohne_rueckfall_bleibt_alles_wie_heute(redis):
@@ -183,7 +183,7 @@ def test_nach_der_sperre_kommt_die_erste_wahl_wieder_dran(redis, uhr):
         return httpx.Response(200, json={"ok": 1})
 
     _chat(_client(handler))
-    assert gesehen == ["hpc.example"]
+    assert gesehen == ["lokal.example"]
 
 
 def test_sind_beide_gesperrt_wird_trotzdem_zuerst_die_erste_wahl_gefragt(redis):
@@ -196,7 +196,7 @@ def test_sind_beide_gesperrt_wird_trotzdem_zuerst_die_erste_wahl_gefragt(redis):
         return httpx.Response(200, json={"ok": 1})
 
     _chat(_client(handler))
-    assert gesehen == ["hpc.example"]
+    assert gesehen == ["lokal.example"]
 
 
 def test_ein_gesperrter_rueckfall_bleibt_als_letzter_versuch_stehen(redis):
@@ -206,12 +206,12 @@ def test_ein_gesperrter_rueckfall_bleibt_als_letzter_versuch_stehen(redis):
 
     def handler(req):
         gesehen.append(req.url.host)
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ConnectError("Connection refused", request=req)
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler)).json() == {"ok": 1}
-    assert gesehen == ["hpc.example", "mylab.example"]
+    assert gesehen == ["lokal.example", "mylab.example"]
 
 
 def test_ist_auch_der_rueckfall_tot_fragt_die_tuer_den_naechsten_aus_der_liste(redis):
@@ -225,7 +225,7 @@ def test_ist_auch_der_rueckfall_tot_fragt_die_tuer_den_naechsten_aus_der_liste(r
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler, extras=[DRITTE])).json() == {"ok": 1}
-    assert [r.url.host for r in gesehen] == ["hpc.example", "mylab.example", "gwdg.example"]
+    assert [r.url.host for r in gesehen] == ["lokal.example", "mylab.example", "gwdg.example"]
     assert gesehen[-1].headers["authorization"] == "Bearer k3"
     assert json.loads(gesehen[-1].content)["model"] == "gemma-gwdg"
     assert redis.exists("kis:provider-down:1:llm") and redis.exists("kis:provider-down:2:llm")
@@ -251,12 +251,12 @@ def test_eine_zu_langsame_antwort_sperrt_einen_anbieter_der_noch_antwortet_nicht
 
     def handler(req):
         gesehen.append(req.url.host)
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ReadTimeout("zu langsam", request=req)
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler)).json() == {"ok": 1}
-    assert gesehen == ["hpc.example", "mylab.example"]
+    assert gesehen == ["lokal.example", "mylab.example"]
     assert not redis.exists("kis:provider-down:1:llm")
 
 
@@ -265,7 +265,7 @@ def test_eine_abgerissene_verbindung_sperrt_einen_anbieter_der_noch_antwortet_ni
     monkeypatch.setattr(pt, "_answers", lambda target: True)
 
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.RemoteProtocolError("Server disconnected without sending a response.", request=req)
         return httpx.Response(200, json={"ok": 1})
 
@@ -278,7 +278,7 @@ def test_eine_abgelehnte_verbindung_sperrt_ohne_probe(redis, monkeypatch):
     monkeypatch.setattr(pt, "_answers", lambda target: gefragt.append(target) or True)
 
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ConnectError("Connection refused", request=req)
         return httpx.Response(200, json={"ok": 1})
 
@@ -290,7 +290,7 @@ def test_eine_zu_langsame_antwort_sperrt_einen_stummen_anbieter(redis, monkeypat
     monkeypatch.setattr(pt, "_answers", lambda target: False)
 
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ReadTimeout("zu langsam", request=req)
         return httpx.Response(200, json={"ok": 1})
 
@@ -302,7 +302,7 @@ def test_auch_asynchron_sperrt_eine_langsame_antwort_nur_einen_stummen_anbieter(
     monkeypatch.setattr(pt, "_answers", lambda target: True)
 
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ReadTimeout("zu langsam", request=req)
         return httpx.Response(200, json={"ok": 1})
 
@@ -329,18 +329,18 @@ def test_spracherkennung_bekommt_beim_rueckfall_das_modell_des_rueckfalls(redis)
 
     def handler(req):
         gesehen.append(req)
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ConnectError("refused", request=req)
         return httpx.Response(200, json={"text": "hallo"})
 
-    client = _client(handler, primary=_ziel(1, "https://hpc.example", "whisper-hpc"),
+    client = _client(handler, primary=_ziel(1, "https://lokal.example", "whisper-lokal"),
                      fallback=_ziel(2, "https://mylab.example", "whisper-3-large"), bucket="stt")
-    client.post("https://hpc.example/v1/audio/transcriptions",
-                data={"model": "whisper-hpc", "language": "de"},
+    client.post("https://lokal.example/v1/audio/transcriptions",
+                data={"model": "whisper-lokal", "language": "de"},
                 files={"file": ("a.mp3", b"\x00\x01audio", "audio/mpeg")})
     koerper = gesehen[-1].content
     assert b'name="model"\r\n\r\nwhisper-3-large\r\n' in koerper
-    assert b"whisper-hpc" not in koerper
+    assert b"whisper-lokal" not in koerper
     assert b"\x00\x01audio" in koerper
 
 
@@ -351,7 +351,7 @@ def test_fremde_adressen_laufen_ohne_platz_und_ohne_rueckfall_durch(redis):
         gesehen.append(str(req.url))
         return httpx.Response(200, content=b"png")
 
-    voll = _ziel(1, "https://hpc.example", "flux", caps={"image": 1})
+    voll = _ziel(1, "https://lokal.example", "flux", caps={"image": 1})
     client = _client(handler, primary=voll, bucket="image")
     redis.zadd("kis:provider-slots:1:image", {"besetzt": 1000.0})
     assert client.get("https://cdn.example/bild.png").content == b"png"
@@ -385,15 +385,15 @@ def test_volle_bildplaetze_gehen_nicht_an_den_rueckfall(redis, monkeypatch):
         gesehen.append(req.url.host)
         return httpx.Response(200, json={"ok": 1})
 
-    eng = _ziel(1, "https://hpc.example", "flux", caps={"image": 1})
+    eng = _ziel(1, "https://lokal.example", "flux", caps={"image": 1})
     with pytest.raises(provider_slots.ProviderFull):
         _client(handler, primary=eng, fallback=_ziel(2, "https://mylab.example", "flux"), bucket="image").post(
-            "https://hpc.example/v1/images/generations", json={"model": "flux", "prompt": "x"})
+            "https://lokal.example/v1/images/generations", json={"model": "flux", "prompt": "x"})
     assert gesehen == []
 
 
 def _eng(pid=1):
-    return _ziel(pid, "https://hpc.example", "gemma-hpc", caps={"llm": 1})
+    return _ziel(pid, "https://lokal.example", "gemma-lokal", caps={"llm": 1})
 
 
 def test_ist_die_erste_wahl_voll_geht_ein_llm_aufruf_sofort_an_den_rueckfall(redis, monkeypatch):
@@ -474,8 +474,8 @@ def test_auch_asynchron_geht_ein_voller_llm_aufruf_an_den_rueckfall(redis, monke
         tuer = pt.AsyncProviderTransport(_eng(), _ziel(2, "https://mylab.example", "chat-fast", caps={"llm": 10}),
                                          "llm", inner=httpx.MockTransport(handler))
         async with httpx.AsyncClient(transport=tuer) as client:
-            return await client.post("https://hpc.example/v1/chat/completions",
-                                     json={"model": "gemma-hpc", "messages": [{"role": "user", "content": "x"}]})
+            return await client.post("https://lokal.example/v1/chat/completions",
+                                     json={"model": "gemma-lokal", "messages": [{"role": "user", "content": "x"}]})
 
     assert asyncio.run(los()).json() == {"ok": 1}
     assert gesehen == ["mylab.example"]
@@ -484,7 +484,7 @@ def test_auch_asynchron_geht_ein_voller_llm_aufruf_an_den_rueckfall(redis, monke
 def test_der_chat_von_francis_nimmt_keinen_platz(redis, monkeypatch):
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
     redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
-    eng = _ziel(1, "https://hpc.example", "gemma-hpc", caps={"llm": 1})
+    eng = _ziel(1, "https://lokal.example", "gemma-lokal", caps={"llm": 1})
     client = _client(lambda req: httpx.Response(200, json={"ok": 1}), primary=eng)
     with pt.seat_exempt():
         assert _chat(client).status_code == 200
@@ -510,14 +510,14 @@ def test_viel_material_bekommt_nur_ein_fuenftel_der_plaetze(redis, monkeypatch):
 
 def test_auch_der_asynchrone_weg_faellt_zurueck(redis):
     async def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ConnectError("refused", request=req)
         return httpx.Response(200, json={"ok": 1})
 
     async def lauf():
         transport = pt.AsyncProviderTransport(ERSTE, RUECK, "llm", inner=httpx.MockTransport(handler))
         async with httpx.AsyncClient(transport=transport) as client:
-            antwort = await client.post("https://hpc.example/v1/chat/completions",
+            antwort = await client.post("https://lokal.example/v1/chat/completions",
                                         json={"model": ERSTE.model, "messages": []})
             return antwort.json()
 
@@ -525,7 +525,7 @@ def test_auch_der_asynchrone_weg_faellt_zurueck(redis):
 
 
 def test_die_verbindung_zur_ersten_wahl_gibt_nach_zehn_sekunden_auf(redis):
-    """A queued HPC job must not hold a call up for two minutes."""
+    """A provider that has not started yet must not hold a call up for two minutes."""
     gesehen = []
 
     def handler(req):
@@ -533,7 +533,7 @@ def test_die_verbindung_zur_ersten_wahl_gibt_nach_zehn_sekunden_auf(redis):
         return httpx.Response(200, json={"ok": 1})
 
     client = _client(handler)
-    client.post("https://hpc.example/v1/chat/completions", json={"model": "x"}, timeout=120)
+    client.post("https://lokal.example/v1/chat/completions", json={"model": "x"}, timeout=120)
     assert gesehen == [10.0]
 
 
@@ -544,9 +544,9 @@ def test_die_verbindung_zur_ersten_wahl_gibt_nach_zehn_sekunden_auf(redis):
 def anbieter(monkeypatch):
     stand = {
         "route": {"provider_id": 1, "fallback_provider_id": 2,
-                  "provider_models": {"1": "gemma-hpc", "2": "chat-fast"}},
+                  "provider_models": {"1": "gemma-lokal", "2": "chat-fast"}},
         "providers": {
-            1: {"id": 1, "name": "HPC", "base_url": "https://hpc.example/v1", "enabled": True,
+            1: {"id": 1, "name": "Lokal", "base_url": "https://lokal.example/v1", "enabled": True,
                 "protocol": "openai_compat", "api_key": None},
             2: {"id": 2, "name": "myLab", "base_url": "https://mylab.example", "enabled": True,
                 "protocol": "openai_compat", "api_key": "geheim", "concurrency": {"llm": 10}},
@@ -612,7 +612,7 @@ def test_mit_rueckfall_stehen_die_weiteren_anbieter_hinter_ihm(anbieter):
 
     anbieter["providers"][3] = dict(GWDG)
     anbieter["route"]["provider_models"]["3"] = "gemma-gwdg"
-    tuer = pt.transport_for(FeatureBinding(feature="chat", provider=anbieter["providers"][1], model="gemma-hpc"))._door
+    tuer = pt.transport_for(FeatureBinding(feature="chat", provider=anbieter["providers"][1], model="gemma-lokal"))._door
     assert [t.provider_id for t in tuer.backups] == [2, 3]
 
 
@@ -624,7 +624,7 @@ def test_ohne_rueckfall_fragt_die_tuer_die_anbieter_mit_modell_aus_der_liste(anb
     anbieter["route"]["provider_models"]["3"] = "gemma-gwdg"
     anbieter["route"]["fallback_provider_id"] = None
     anbieter["providers"][2]["capabilities"] = ["chat"]
-    tuer = pt.transport_for(FeatureBinding(feature="chat", provider=anbieter["providers"][1], model="gemma-hpc"))._door
+    tuer = pt.transport_for(FeatureBinding(feature="chat", provider=anbieter["providers"][1], model="gemma-lokal"))._door
     assert [t.provider_id for t in tuer.backups] == [2, 3]
 
 
@@ -666,7 +666,7 @@ def test_das_sdk_merkt_vom_rueckfall_nichts(redis):
     from openai import DefaultHttpxClient, OpenAI
 
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx2.ConnectError("refused", request=req)
         daten = json.loads(req.content)
         return httpx2.Response(200, json={
@@ -676,9 +676,9 @@ def test_das_sdk_merkt_vom_rueckfall_nichts(redis):
         })
 
     tuer = pt.SdkTransport(ERSTE, RUECK, "llm", inner=httpx2.MockTransport(handler))
-    client = OpenAI(api_key="k1", base_url="https://hpc.example/v1", max_retries=0,
+    client = OpenAI(api_key="k1", base_url="https://lokal.example/v1", max_retries=0,
                     http_client=DefaultHttpxClient(transport=tuer))
-    antwort = client.chat.completions.create(model="gemma-hpc", messages=[{"role": "user", "content": "?"}])
+    antwort = client.chat.completions.create(model="gemma-lokal", messages=[{"role": "user", "content": "?"}])
     assert antwort.choices[0].message.content == "Paris"
     assert antwort.model == "chat-fast"
 
@@ -691,16 +691,16 @@ def test_der_gestreamte_chat_faellt_ueber_das_sdk_zurueck(redis):
               '"choices":[{"index":0,"delta":{"content":"Paris"},"finish_reason":null}]}\n\ndata: [DONE]\n\n')
 
     async def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx2.ConnectError("refused", request=req)
         return httpx2.Response(200, headers={"content-type": "text/event-stream"},
                                stream=httpx2.ByteStream(stueck.encode()))
 
     async def lauf():
         tuer = pt.AsyncSdkTransport(ERSTE, RUECK, "llm", inner=httpx2.MockTransport(handler))
-        client = AsyncOpenAI(api_key="k1", base_url="https://hpc.example/v1", max_retries=0,
+        client = AsyncOpenAI(api_key="k1", base_url="https://lokal.example/v1", max_retries=0,
                              http_client=DefaultAsyncHttpxClient(transport=tuer))
-        strom = await client.chat.completions.create(model="gemma-hpc", stream=True,
+        strom = await client.chat.completions.create(model="gemma-lokal", stream=True,
                                                      messages=[{"role": "user", "content": "?"}])
         return "".join([c.choices[0].delta.content async for c in strom if c.choices])
 
@@ -715,18 +715,18 @@ def test_die_spracherkennung_faellt_ueber_das_sdk_mit_dem_eigenen_modell_zurueck
 
     def handler(req):
         gesehen.append(req.read())
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx2.ConnectError("refused", request=req)
         return httpx2.Response(200, json={"text": "hallo"})
 
-    tuer = pt.SdkTransport(_ziel(1, "https://hpc.example", "whisper-hpc"),
+    tuer = pt.SdkTransport(_ziel(1, "https://lokal.example", "whisper-lokal"),
                            _ziel(2, "https://mylab.example", "whisper-3-large"), "stt",
                            inner=httpx2.MockTransport(handler))
-    client = OpenAI(api_key="k1", base_url="https://hpc.example/v1", max_retries=0,
+    client = OpenAI(api_key="k1", base_url="https://lokal.example/v1", max_retries=0,
                     http_client=DefaultHttpxClient(transport=tuer))
-    text = client.audio.transcriptions.create(model="whisper-hpc", file=("a.mp3", b"\x00audio", "audio/mpeg"))
+    text = client.audio.transcriptions.create(model="whisper-lokal", file=("a.mp3", b"\x00audio", "audio/mpeg"))
     assert text.text == "hallo"
-    assert b"whisper-3-large" in gesehen[-1] and b"whisper-hpc" not in gesehen[-1]
+    assert b"whisper-3-large" in gesehen[-1] and b"whisper-lokal" not in gesehen[-1]
 
 
 def test_volle_plaetze_meldet_das_sdk_nach_einmal_warten(redis, monkeypatch):
@@ -746,12 +746,12 @@ def test_volle_plaetze_meldet_das_sdk_nach_einmal_warten(redis, monkeypatch):
     monkeypatch.setattr(provider_slots, "claim_ranked", claim)
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
     redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
-    eng = _ziel(1, "https://hpc.example", "gemma-hpc", caps={"llm": 1})
+    eng = _ziel(1, "https://lokal.example", "gemma-lokal", caps={"llm": 1})
     tuer = pt.SdkTransport(eng, None, "llm", inner=httpx2.MockTransport(lambda req: httpx2.Response(200)))
-    client = OpenAI(api_key="k1", base_url="https://hpc.example/v1", max_retries=2,
+    client = OpenAI(api_key="k1", base_url="https://lokal.example/v1", max_retries=2,
                     http_client=DefaultHttpxClient(transport=tuer))
     with pytest.raises(provider_slots.ProviderFull) as fehler:
-        client.chat.completions.create(model="gemma-hpc", messages=[{"role": "user", "content": "?"}])
+        client.chat.completions.create(model="gemma-lokal", messages=[{"role": "user", "content": "?"}])
     assert len(wartezeiten) == 1
     assert is_upstream_busy(fehler.value)
 
@@ -879,7 +879,7 @@ def test_grosse_anfragen_gehen_in_kleinen_stuecken_hinaus(redis):
         return httpx.Response(200, json={"text": "ok"})
 
     client = _client(handler, fallback=None, bucket="stt")
-    client.post("https://hpc.example/v1/audio/transcriptions", content=b"x" * 1_000_000,
+    client.post("https://lokal.example/v1/audio/transcriptions", content=b"x" * 1_000_000,
                 headers={"content-type": "application/octet-stream"})
     assert sum(stuecke) == 1_000_000
     assert max(stuecke) <= 64 * 1024
@@ -889,7 +889,7 @@ def test_auch_der_rueckfall_geht_in_kleinen_stuecken_hinaus(redis):
     stuecke = []
 
     def handler(req):
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ConnectError("refused", request=req)
         stuecke.extend(len(s) for s in req.stream)
         return httpx.Response(200, json={"ok": 1})
@@ -909,7 +909,7 @@ def _protokoll():
 
 
 def _erste_wahl_tot(req):
-    if req.url.host == "hpc.example":
+    if req.url.host == "lokal.example":
         raise httpx.ConnectError("refused", request=req)
     return httpx.Response(200, json={"ok": 1})
 
@@ -935,7 +935,7 @@ def test_auch_der_asynchrone_weg_nennt_den_rueckfall(redis):
     async def lauf():
         transport = pt.AsyncProviderTransport(ERSTE, RUECK, "llm", inner=httpx.MockTransport(handler))
         async with httpx.AsyncClient(transport=transport) as client:
-            await client.post("https://hpc.example/v1/chat/completions", json={"model": ERSTE.model, "messages": []})
+            await client.post("https://lokal.example/v1/chat/completions", json={"model": ERSTE.model, "messages": []})
 
     zeilen, sink = _protokoll()
     try:
@@ -982,7 +982,7 @@ def test_ein_abgebrochener_asynchroner_aufruf_gibt_den_platz_zurueck(redis, monk
     async def los():
         tuer = pt.AsyncProviderTransport(_eng(), None, "llm", inner=httpx.MockTransport(handler))
         async with httpx.AsyncClient(transport=tuer) as client:
-            await client.post("https://hpc.example/v1/chat/completions", json={"model": "gemma-hpc", "messages": []})
+            await client.post("https://lokal.example/v1/chat/completions", json={"model": "gemma-lokal", "messages": []})
 
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(los())
@@ -995,7 +995,7 @@ def test_eine_weiterleitung_beim_rueckfall_behaelt_dessen_modell(redis):
 
     def handler(req):
         gesehen.append(req)
-        if req.url.host == "hpc.example":
+        if req.url.host == "lokal.example":
             raise httpx.ConnectError("Connection refused", request=req)
         if req.url.path == "/v1/chat/completions":
             return httpx.Response(307, headers={"location": "http://mylab.example/v2/chat"})

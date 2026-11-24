@@ -128,7 +128,7 @@ async def test_list_reachable_filters_unreachable(monkeypatch):
 
 
 async def test_ist_die_erste_wahl_weg_steht_der_rueckfall_aus_dem_admin_vorn(monkeypatch):
-    """29.09.2026: the large FLUX was waiting on the HPC, yet GWDG was preselected as the oldest provider instead of the small one."""
+    """The large image model was still waiting, yet the oldest provider was preselected instead of the small one."""
     providers = [_provider(20, base_url="http://gwdg"), _provider(21, base_url="http://mylab"),
                  _provider(93, base_url="http://down"), _provider(95, base_url="http://klein")]
     route = {**_route(93, "m", {"20": "m", "21": "m", "93": "m", "95": "m"}), "fallback_provider_id": 95}

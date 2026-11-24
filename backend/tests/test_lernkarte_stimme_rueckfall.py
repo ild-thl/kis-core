@@ -9,8 +9,8 @@ from src.services import tts_voice_preview
 MYLAB = {"id": 21, "name": "THL myLab", "enabled": True, "protocol": "openai_compat", "capabilities": ["tts"],
          "base_url": "https://mylab/v1",
          "voices": [{"voice_id": "alloy", "name": "Alloy", "language": "de"}]}
-HPC = {"id": 30, "name": "HPC", "enabled": True, "protocol": "openai_compat", "capabilities": ["tts"],
-       "base_url": "http://hpc:8000/v1",
+Lokal = {"id": 30, "name": "Lokal", "enabled": True, "protocol": "openai_compat", "capabilities": ["tts"],
+       "base_url": "http://lokal:8000/v1",
        "voices": [{"voice_id": "anna", "name": "Anna", "language": "de"}]}
 _MODELLE = {21: "xtts-v2", 30: "qwen3-tts"}
 
@@ -34,7 +34,7 @@ class _Client:
 def welt(monkeypatch):
     """Settings, providers, pool and clients without a database or network."""
     stand = {"einstellungen": {"aia_flashcard_voice_provider_id": "21", "aia_flashcard_voice_id": "alloy"},
-             "anbieter": {21: dict(MYLAB), 30: dict(HPC)},
+             "anbieter": {21: dict(MYLAB), 30: dict(Lokal)},
              "route": {"provider_id": 21, "fallback_provider_id": 30,
                        "provider_models": {"21": "xtts-v2", "30": "qwen3-tts"}},
              "unerreichbar": set(), "vorrat": {}, "clients": {}, "wahlen": []}
