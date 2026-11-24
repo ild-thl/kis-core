@@ -4,12 +4,12 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-ADMIN = {"user_id": 1, "email": "admin@th-luebeck.de", "role": "admin"}
+ADMIN = {"user_id": 1, "email": "admin@example.org", "role": "admin"}
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@th-luebeck.de")
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.org")
 
     from src.app import app
     from src.dependencies import get_current_user, get_settings

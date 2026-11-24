@@ -39,7 +39,7 @@ def db(monkeypatch):
 
 
 def _konto(**felder):
-    basis = {"id": 1, "username": "a", "email": "alt@th-luebeck.de",
+    basis = {"id": 1, "username": "a", "email": "alt@example.org",
              "password_hash": "$2b$12$alterhash", "display_name": "Hans"}
     basis.update(felder)
     return basis
@@ -51,27 +51,27 @@ def test_nothing_happens_without_a_mail_address(db):
 
 
 def test_nothing_happens_without_a_password(db):
-    assert ensure_env_admin("chefin@th-luebeck.de", "", "chefin") is None
+    assert ensure_env_admin("chefin@example.org", "", "chefin") is None
     assert "create_user" not in db["aufrufe"]
 
 
 def test_a_missing_account_is_created_with_all_three_values(db):
-    assert ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chefin") == 99
+    assert ensure_env_admin("chefin@example.org", "geheim123", "chefin") == 99
 
     kwargs = db["aufrufe"]["create_user"][0][1]
     assert kwargs["username"] == "chefin"
-    assert kwargs["email"] == "chefin@th-luebeck.de"
+    assert kwargs["email"] == "chefin@example.org"
     assert kwargs["role"] == "admin"
     assert kwargs["password_hash"].startswith("$2")
 
 
 def test_without_a_user_name_the_local_part_is_used(db):
-    ensure_env_admin("chefin@th-luebeck.de", "geheim123", "")
+    ensure_env_admin("chefin@example.org", "geheim123", "")
     assert db["aufrufe"]["create_user"][0][1]["username"] == "chefin"
 
 
 def test_the_new_account_is_remembered_for_the_next_start(db):
-    ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chefin")
+    ensure_env_admin("chefin@example.org", "geheim123", "chefin")
     assert db["aufrufe"]["set_setting"][0][0] == ("env_admin_user_id", "99")
 
 
@@ -79,11 +79,11 @@ def test_a_remembered_account_gets_all_three_values_overwritten(db):
     db["setting"] = "1"
     db["by_id"] = _konto()
 
-    assert ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chefin") == 1
+    assert ensure_env_admin("chefin@example.org", "geheim123", "chefin") == 1
 
     assert "create_user" not in db["aufrufe"]
     args = db["aufrufe"]["_rename_and_remail"][0][0]
-    assert args == (1, "chefin", "chefin@th-luebeck.de")
+    assert args == (1, "chefin", "chefin@example.org")
     assert db["aufrufe"]["set_user_password"][0][0][0] == 1
     assert db["aufrufe"]["set_user_password"][0][0][1].startswith("$2")
 
@@ -91,52 +91,52 @@ def test_a_remembered_account_gets_all_three_values_overwritten(db):
 def test_the_mail_address_lands_on_the_list_as_well(db):
     db["setting"] = "1"
     db["by_id"] = _konto()
-    ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chefin")
-    assert db["aufrufe"]["add_to_whitelist"][0][0] == ("chefin@th-luebeck.de",)
+    ensure_env_admin("chefin@example.org", "geheim123", "chefin")
+    assert db["aufrufe"]["add_to_whitelist"][0][0] == ("chefin@example.org",)
 
 
 def test_without_a_note_the_mail_address_finds_the_account(db):
     # First start after the change, nothing is noted yet.
     db["by_email"] = _konto(id=5)
-    assert ensure_env_admin("alt@th-luebeck.de", "geheim123", "chefin") == 5
-    assert db["aufrufe"]["_rename_and_remail"][0][0] == (5, "chefin", "alt@th-luebeck.de")
+    assert ensure_env_admin("alt@example.org", "geheim123", "chefin") == 5
+    assert db["aufrufe"]["_rename_and_remail"][0][0] == (5, "chefin", "alt@example.org")
 
 
 def test_without_a_note_the_user_name_also_finds_the_account(db):
     db["by_username"] = _konto(id=7)
-    assert ensure_env_admin("ganz-neu@th-luebeck.de", "geheim123", "a") == 7
+    assert ensure_env_admin("ganz-neu@example.org", "geheim123", "a") == 7
 
 
 def test_a_noted_account_that_is_gone_falls_back_to_the_mail(db):
     db["setting"] = "42"
     db["by_id"] = None
     db["by_email"] = _konto(id=5)
-    assert ensure_env_admin("alt@th-luebeck.de", "geheim123", "chefin") == 5
+    assert ensure_env_admin("alt@example.org", "geheim123", "chefin") == 5
 
 
 def test_a_user_name_with_an_at_sign_is_refused(db):
     # The login field tells a mail from a name by the @, such a name would break it.
     db["setting"] = "1"
     db["by_id"] = _konto()
-    ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chef@th-luebeck.de")
+    ensure_env_admin("chefin@example.org", "geheim123", "chef@example.org")
 
     # The name stays as it was, the rest still goes through.
-    assert db["aufrufe"]["_rename_and_remail"][0][0] == (1, "a", "chefin@th-luebeck.de")
+    assert db["aufrufe"]["_rename_and_remail"][0][0] == (1, "a", "chefin@example.org")
 
 
 def test_a_user_name_taken_by_somebody_else_is_refused(db):
     db["setting"] = "1"
     db["by_id"] = _konto()
     db["by_username"] = _konto(id=2, username="chefin")
-    ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chefin")
+    ensure_env_admin("chefin@example.org", "geheim123", "chefin")
 
-    assert db["aufrufe"]["_rename_and_remail"][0][0] == (1, "a", "chefin@th-luebeck.de")
+    assert db["aufrufe"]["_rename_and_remail"][0][0] == (1, "a", "chefin@example.org")
 
 
 def test_a_password_beyond_the_limit_does_not_stop_the_start(db):
     db["setting"] = "1"
     db["by_id"] = _konto()
-    assert ensure_env_admin("chefin@th-luebeck.de", "x" * 100, "chefin") == 1
+    assert ensure_env_admin("chefin@example.org", "x" * 100, "chefin") == 1
     assert "set_user_password" not in db["aufrufe"]
 
 

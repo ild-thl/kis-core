@@ -22,7 +22,7 @@ def client():
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "admin@th-luebeck.de", "role": "admin",
+        "user_id": 1, "email": "admin@example.org", "role": "admin",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -39,7 +39,7 @@ def client_ohne_recht():
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 3, "email": "student@th-luebeck.de", "role": "user",
+        "user_id": 3, "email": "student@example.org", "role": "user",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -61,7 +61,7 @@ def client_mit_event_recht(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 4, "email": "event@th-luebeck.de", "role": "custom", "custom_role_id": 1,
+        "user_id": 4, "email": "event@example.org", "role": "custom", "custom_role_id": 1,
     }
     yield TestClient(app)
     app.dependency_overrides.clear()

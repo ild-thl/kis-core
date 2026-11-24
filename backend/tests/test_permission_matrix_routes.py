@@ -45,7 +45,7 @@ def as_sprachexperte(monkeypatch):
         "get_custom_role",
         lambda role_id: {"id": role_id, "name": "Sprachexperte", "permissions": list(SPRACHEXPERTE)},
     )
-    return {"role": "custom", "custom_role_id": 1, "email": "sprach@th-luebeck.de"}
+    return {"role": "custom", "custom_role_id": 1, "email": "sprach@example.org"}
 
 
 async def test_sprachexperte_may_save_the_prompt(store, as_sprachexperte):
@@ -144,10 +144,10 @@ def _as_role(monkeypatch, keys):
         database, "get_custom_role",
         lambda role_id: {"id": role_id, "name": "Rolle", "permissions": list(keys)},
     )
-    return {"role": "custom", "custom_role_id": 9, "email": "wer@th-luebeck.de"}
+    return {"role": "custom", "custom_role_id": 9, "email": "wer@example.org"}
 
 
-ADMIN = {"role": "admin", "email": "a@th-luebeck.de"}
+ADMIN = {"role": "admin", "email": "a@example.org"}
 
 
 async def test_matrix_lists_groups_system_roles_and_own_roles(monkeypatch):

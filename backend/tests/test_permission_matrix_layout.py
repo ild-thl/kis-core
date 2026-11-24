@@ -14,7 +14,7 @@ from src.permissions_registry import (
 )
 from src.routes.admin import roles as roles_route
 
-ADMIN = {"role": "admin", "email": "a@th-luebeck.de"}
+ADMIN = {"role": "admin", "email": "a@example.org"}
 
 
 def test_every_permission_sits_in_exactly_one_group():

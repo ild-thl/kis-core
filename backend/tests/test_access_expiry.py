@@ -76,7 +76,7 @@ def test_a_running_test_access_carries_its_deadline_into_the_session(client):
 
 def test_a_normal_account_carries_no_deadline(client):
     konto = {"id": 5, "username": "chefin", "display_name": "Chefin",
-             "email": "chefin@th-luebeck.de", "active": 1,
+             "email": "chefin@example.org", "active": 1,
              "role": "admin", "custom_role_id": None, "access_expires_at": None}
     antwort, anlegen = _anmelden(client, konto)
 

@@ -44,9 +44,9 @@ def test_without_a_mail_address_nothing_lands_on_the_list():
 def test_a_given_mail_address_lands_on_the_list():
     with patch("src.features.accounts.provisioning.database.create_user", return_value=42), \
          patch("src.features.accounts.provisioning.database.add_to_whitelist") as liste:
-        _anlegen(email="max@th-luebeck.de")
+        _anlegen(email="max@example.org")
 
-    liste.assert_called_once_with("max@th-luebeck.de")
+    liste.assert_called_once_with("max@example.org")
 
 
 def test_it_falls_back_to_the_user_name_when_no_name_was_given():

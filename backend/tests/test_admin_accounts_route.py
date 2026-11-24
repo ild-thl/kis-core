@@ -6,12 +6,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 ADMIN = {"user_id": 1, "username": "chefin", "display_name": "Chefin",
-         "email": "admin@th-luebeck.de", "role": "admin", "custom_role_id": None}
+         "email": "admin@example.org", "role": "admin", "custom_role_id": None}
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@th-luebeck.de")
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.org")
     from src.app import app
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -48,16 +48,16 @@ def test_a_given_mail_address_is_passed_on(client):
     with patch("src.routes.admin.accounts.database.get_user_by_username", return_value=None), \
          patch("src.routes.admin.accounts.database.get_user_by_email", return_value=None), \
          patch("src.routes.admin.accounts.provision_account") as anlegen:
-        r = client.post("/admin/accounts", json=_payload(email="max@th-luebeck.de"))
+        r = client.post("/admin/accounts", json=_payload(email="max@example.org"))
 
     assert r.status_code == 200
-    assert anlegen.call_args.kwargs["email"] == "max@th-luebeck.de"
+    assert anlegen.call_args.kwargs["email"] == "max@example.org"
 
 
 def test_an_at_sign_in_the_user_name_is_refused(client):
     # The login field tells a mail from a name by the @, such a name would break it.
     with patch("src.routes.admin.accounts.provision_account") as anlegen:
-        r = client.post("/admin/accounts", json=_payload(uid="max@th-luebeck.de"))
+        r = client.post("/admin/accounts", json=_payload(uid="max@example.org"))
 
     assert r.status_code == 400
     anlegen.assert_not_called()
@@ -84,7 +84,7 @@ def test_a_mail_address_that_is_taken_reports_a_conflict(client):
     with patch("src.routes.admin.accounts.database.get_user_by_username", return_value=None), \
          patch("src.routes.admin.accounts.database.get_user_by_email", return_value={"id": 4}), \
          patch("src.routes.admin.accounts.provision_account") as anlegen:
-        r = client.post("/admin/accounts", json=_payload(email="max@th-luebeck.de"))
+        r = client.post("/admin/accounts", json=_payload(email="max@example.org"))
 
     assert r.status_code == 409
     anlegen.assert_not_called()

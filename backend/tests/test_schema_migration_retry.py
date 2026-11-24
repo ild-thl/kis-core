@@ -71,5 +71,5 @@ def test_the_admin_email_reaches_the_migration(monkeypatch):
     gesehen = {}
     monkeypatch.setattr(schema, "_init_db",
                         lambda admin_email=None: gesehen.update(mail=admin_email))
-    schema.init_db(admin_email="admin@th-luebeck.de")
-    assert gesehen["mail"] == "admin@th-luebeck.de"
+    schema.init_db(admin_email="admin@example.org")
+    assert gesehen["mail"] == "admin@example.org"

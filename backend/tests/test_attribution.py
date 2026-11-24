@@ -1088,7 +1088,7 @@ def test_subunits_single_sentence_prose_has_no_extra_sentence_units():
 
 from src.features.ai_assistant.routes._evidence import _chips_for_line, _line_candidates
 
-_SLIDE = ("Lenka Kleinau Kontakt: Fachforum E-Mail: lenka.kleinau@th-luebeck.de "
+_SLIDE = ("Lenka Kleinau Kontakt: Fachforum E-Mail: lenka.kleinau@example.org "
           "Wöchentliche Sprechstunde (Mittwoch 17:30-18:30 Uhr) MENTORIN UND TUTORIN")
 _LINE = ("Zusätzlich finden ab dem 22.04.2026 wöchentliche offene Sprechstunden statt "
          "(mittwochs von 17:30 bis 18:30 Uhr)")

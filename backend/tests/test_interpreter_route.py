@@ -26,7 +26,7 @@ def _client(monkeypatch, tools):
 
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 1, "email": "a@th-luebeck.de", "role": "staff"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 1, "email": "a@example.org", "role": "staff"}
     app.dependency_overrides[get_user_permissions] = lambda: Permissions(keys=frozenset(tools))
     monkeypatch.setattr("src.dependencies_rbac.is_released_now", lambda key: True)
     monkeypatch.setattr(route, "enforce_tool_burst", lambda *a, **k: None)

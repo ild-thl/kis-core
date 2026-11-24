@@ -21,7 +21,7 @@ def client(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "user@th-luebeck.de", "role": "user",
+        "user_id": 1, "email": "user@example.org", "role": "user",
         "username": "max.mustermann", "display_name": "Max Mustermann",
     }
     yield TestClient(app)
@@ -39,7 +39,7 @@ def admin_client(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "admin@th-luebeck.de", "role": "admin",
+        "user_id": 1, "email": "admin@example.org", "role": "admin",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()

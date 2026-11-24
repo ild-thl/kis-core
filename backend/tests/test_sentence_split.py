@@ -97,8 +97,8 @@ def test_split_after_lone_short_lowercase_word():
 
 
 def test_no_split_inside_email():
-    assert _split_sentences("Schreib an lenka.kleinau@th-luebeck.de. Sie antwortet schnell.") == [
-        "Schreib an lenka.kleinau@th-luebeck.de.",
+    assert _split_sentences("Schreib an lenka.kleinau@example.org. Sie antwortet schnell.") == [
+        "Schreib an lenka.kleinau@example.org.",
         "Sie antwortet schnell.",
     ]
 

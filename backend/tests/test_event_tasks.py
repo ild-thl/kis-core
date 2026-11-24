@@ -243,7 +243,7 @@ def admin_client(monkeypatch):
     monkeypatch.setattr(tasks, "workspaces_for_code", lambda code: [{"uuid": "ws-uuid", "title": f"von {code}"}])
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 1, "email": "admin@th-luebeck.de", "role": "admin"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 1, "email": "admin@example.org", "role": "admin"}
     yield TestClient(app), gespeichert
     app.dependency_overrides.clear()
     get_settings.cache_clear()

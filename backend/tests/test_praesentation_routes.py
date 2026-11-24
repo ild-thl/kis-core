@@ -105,7 +105,7 @@ def env(monkeypatch):
 
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "a@th-luebeck.de", "role": "staff"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "a@example.org", "role": "staff"}
     app.dependency_overrides[get_user_permissions] = lambda: Permissions(keys=frozenset({"tools.praesentation"}))
     yield TestClient(app), jobs, gestartet, ablage, vorlagen
     app.dependency_overrides.clear()

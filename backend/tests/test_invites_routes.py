@@ -16,7 +16,7 @@ def client(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "admin@th-luebeck.de", "role": "admin",
+        "user_id": 1, "email": "admin@example.org", "role": "admin",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -49,11 +49,11 @@ def test_a_given_mail_address_is_kept(client):
         r = client.post(
             "/admin/invites",
             json={"username": "Max.Mustermann", "kis_role": "staff",
-                  "email": "max@th-luebeck.de"},
+                  "email": "max@example.org"},
         )
 
     assert r.status_code == 200
-    assert anlegen.call_args.kwargs["email"] == "max@th-luebeck.de"
+    assert anlegen.call_args.kwargs["email"] == "max@example.org"
 
 
 def test_a_mail_address_without_an_at_sign_is_refused(client):
@@ -74,7 +74,7 @@ def test_a_mail_address_that_is_already_taken_is_refused(client):
          patch("src.routes.admin.invites.repo.create_invite") as anlegen:
         r = client.post(
             "/admin/invites",
-            json={"username": "Max", "kis_role": "staff", "email": "max@th-luebeck.de"},
+            json={"username": "Max", "kis_role": "staff", "email": "max@example.org"},
         )
 
     assert r.status_code == 409
