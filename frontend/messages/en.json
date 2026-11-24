@@ -3515,25 +3515,17 @@
       "assistent": "Learning assistant",
       "gemeinsam": "Shared"
     },
-    "operatorCard": {
-      "title": "Operator",
-      "description": "Details of the institution that runs this installation. They appear in the imprint and privacy policy, in the footer, on the posters and wherever a contact address is shown.",
+    "legalCard": {
+      "title": "Imprint and privacy policy",
+      "description": "Details of this installation. They appear on the imprint and privacy pages, the contact email also at sign-in, on the approval page and on the start page.",
       "missing": "The imprint or privacy policy is missing. The pages then show only a notice.",
       "email": "Contact email",
-      "emailHint": "Shown at sign-in, on the approval page and on the start page.",
+      "emailHint": "If it stays empty, the contact links disappear.",
       "imprint": "Imprint",
       "privacy": "Privacy policy",
       "german": "German",
       "english": "English",
-      "markdownHint": "Markdown: ## heading, ### bold line, - list, [text](https://…). If English stays empty, the German text appears.",
-      "logos": "Logos",
-      "logosHint": "Shown in the footer and on the posters. PNG, JPEG, WebP or SVG, at most 2 MB.",
-      "alt": "Name (alt text)",
-      "href": "Link",
-      "size": "Size in footer",
-      "remove": "Remove logo",
-      "addLogo": "Add logo",
-      "logoTooLarge": "A logo may be at most {max} MB."
+      "markdownHint": "Markdown: ## heading, ### bold line, - list, [text](https://…). If English stays empty, the German text appears."
     }
   },
   "permissions": {

@@ -19,6 +19,14 @@ MESSAGES: dict[str, dict[str, str]] = {
         "de": "Hinweistext ist zu lang (max {max} Zeichen)",
         "en": "Notice text is too long (max {max} characters)",
     },
+    "admin.settings.contactEmailInvalid": {
+        "de": "Die E-Mail-Adresse ist ungültig.",
+        "en": "The email address is not valid.",
+    },
+    "admin.settings.legalTextTooLong": {
+        "de": "Text ist zu lang (max {max} Zeichen)",
+        "en": "Text is too long (max {max} characters)",
+    },
     "admin.settings.welcomeModalTooLong": {
         "de": "Text ist zu lang (max {max} Zeichen)",
         "en": "Text is too long (max {max} characters)",

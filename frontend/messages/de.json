@@ -3515,25 +3515,17 @@
       "assistent": "Lernassistent",
       "gemeinsam": "Gemeinsam"
     },
-    "operatorCard": {
-      "title": "Betreiber",
-      "description": "Angaben der Einrichtung, die diese Installation betreibt. Sie erscheinen in Impressum und Datenschutz, im Footer, auf den Plakaten und überall, wo eine Kontaktadresse steht.",
+    "legalCard": {
+      "title": "Impressum und Datenschutz",
+      "description": "Angaben dieser Installation. Sie erscheinen auf den Seiten Impressum und Datenschutz, die Kontakt-E-Mail auch bei Anmeldung, Freischaltung und auf der Startseite.",
       "missing": "Impressum oder Datenschutzerklärung fehlen. Die Seiten zeigen dann nur einen Hinweis.",
       "email": "Kontakt-E-Mail",
-      "emailHint": "Erscheint bei der Anmeldung, auf der Seite zur Freischaltung und auf der Startseite.",
+      "emailHint": "Bleibt sie leer, verschwinden die Kontakt-Links.",
       "imprint": "Impressum",
       "privacy": "Datenschutzerklärung",
       "german": "Deutsch",
       "english": "Englisch",
-      "markdownHint": "Markdown: ## Überschrift, ### fette Zeile, - Liste, [Text](https://…). Bleibt Englisch leer, erscheint der deutsche Text.",
-      "logos": "Logos",
-      "logosHint": "Erscheinen im Footer und auf den Plakaten. PNG, JPEG, WebP oder SVG, höchstens 2 MB.",
-      "alt": "Name (Alternativtext)",
-      "href": "Link",
-      "size": "Größe im Footer",
-      "remove": "Logo entfernen",
-      "addLogo": "Logo hinzufügen",
-      "logoTooLarge": "Ein Logo darf höchstens {max} MB groß sein."
+      "markdownHint": "Markdown: ## Überschrift, ### fette Zeile, - Liste, [Text](https://…). Bleibt Englisch leer, erscheint der deutsche Text."
     }
   },
   "permissions": {

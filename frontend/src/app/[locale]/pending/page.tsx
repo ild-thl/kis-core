@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 import Header from "@/components/layout/Header";
 import Mascot from "@/components/ui/Mascot";
 import { useMascotPref } from "@/hooks/useMascotPref";
+import { useLegal } from "@/lib/legal";
 
 export default function TestphasePage() {
   const t = useTranslations("pending");
+  const contactEmail = useLegal()?.contactEmail ?? "";
   const { variant: mascotVariant } = useMascotPref();
 
   return (
@@ -32,12 +34,14 @@ export default function TestphasePage() {
               {t("body2")}
             </p>
 
-            <a
-              href="mailto:hamid.mergan@th-luebeck.de"
-              className="inline-block px-4 py-2 btn-primary text-sm font-medium rounded-md  transition-colors mb-6"
-            >
-              hamid.mergan@th-luebeck.de
-            </a>
+            {contactEmail && (
+              <a
+                href={`mailto:${contactEmail}`}
+                className="inline-block px-4 py-2 btn-primary text-sm font-medium rounded-md  transition-colors mb-6"
+              >
+                {contactEmail}
+              </a>
+            )}
 
             <div>
               <Link

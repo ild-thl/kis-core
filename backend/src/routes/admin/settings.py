@@ -1,12 +1,14 @@
 """Reads and writes the system-wide settings, providers live in the AI tab."""
 
 import json
+import logging
+import re
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from src import database as db
 from src.dependencies_rbac import permissions_of, require_any_settings
-from src.routes.health import DEFAULT_WELCOME_MODAL_TEXT
+from src.routes.health import DEFAULT_WELCOME_MODAL_TEXT, LEGAL_KEYS
 from src.i18n import (
     DEFAULT_LEARNING_TOOLS_LANGUAGE,
     TRANSCRIPT_LANGUAGES,
@@ -66,6 +68,9 @@ router = APIRouter(tags=["admin: settings"])
 MAX_DELETE_AFTER_DAYS = 3650
 # Both notices of the start page share this length.
 MAX_NOTICE_CHARS = 1000
+MAX_LEGAL_CHARS = 50_000
+_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+logger = logging.getLogger(__name__)
 # Below this a context budget holds no usable excerpt.
 MIN_CONTEXT_CHARS = 1000
 
@@ -108,6 +113,7 @@ def get_settings(_admin=Depends(require_any_settings)):
         # First-login welcome dialog, on by default so onboarding is never blank.
         "welcome_modal_enabled": _enabled("welcome_modal_enabled"),
         "welcome_modal_text": db.get_setting("welcome_modal_text", DEFAULT_WELCOME_MODAL_TEXT),
+        **{key: db.get_setting(key, "") for key in LEGAL_KEYS},
         # OCR on image-heavy pages during indexing (system-wide, default on)
         "ocr_enabled": _enabled("ocr_enabled"),
         # Workspace limits (admin-tunable)
@@ -288,6 +294,19 @@ def _save_general(body: UpdateSettingsRequest, locale: str) -> None:
     _save_text("welcome_modal_text", body.welcome_modal_text, MAX_NOTICE_CHARS,
                "admin.settings.welcomeModalTooLong", locale)
     _save_flag("ocr_enabled", body.ocr_enabled)
+    _save_legal(body, locale)
+
+
+def _save_legal(body: UpdateSettingsRequest, locale: str) -> None:
+    """Contact address and the legal texts, the address must look like one or stay empty."""
+    email = body.legal_contact_email
+    if email is not None:
+        email = email.strip()
+        if email and (len(email) > 254 or not _EMAIL.match(email)):
+            raise HTTPException(status_code=400, detail=t("admin.settings.contactEmailInvalid", locale))
+        db.set_setting("legal_contact_email", email)
+    for key in LEGAL_KEYS[1:]:
+        _save_text(key, getattr(body, key), MAX_LEGAL_CHARS, "admin.settings.legalTextTooLong", locale)
 
 
 def _save_language_diagnosis(body: UpdateSettingsRequest, locale: str) -> None:
@@ -399,4 +418,8 @@ def update_settings(
     _save_language_diagnosis(body, locale)
     _save_assistant_limits(body, locale)
     _save_tool_limits(body, locale)
+    # Legal texts keep a trace of who changed them and when.
+    legal = [key for key in LEGAL_KEYS if getattr(body, key) is not None]
+    if legal:
+        logger.info("legal settings changed by %s: %s", admin.get("username"), ", ".join(legal))
     return {"ok": True}

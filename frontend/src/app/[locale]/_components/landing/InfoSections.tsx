@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowCircleRight, Bank, Books, ChalkboardTeacher, Envelope, Flask, Globe, GraduationCap, type Icon } from "@phosphor-icons/react";
-import { CONTACT_EMAIL } from "@/lib/event/contact";
+import { useLegal } from "@/lib/legal";
 import Band from "./Band";
 
 /** Shared section heading, large on wide screens. */
@@ -77,20 +77,23 @@ export function PurposeSection() {
 /** Contact block at the end of the page, one address and a short invitation. */
 export function ContactSection() {
   const t = useTranslations("eventInfo.contact");
+  const contactEmail = useLegal()?.contactEmail ?? "";
   return (
     <Band testId="info-contact">
       <div className="grid grid-cols-1 @min-[64rem]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] gap-6 @min-[64rem]:gap-16 items-start">
         <SectionHeading>{t("heading")}</SectionHeading>
         <div className="flex flex-col items-start gap-6">
           <p className="text-lg @min-[40rem]:text-xl leading-snug text-foreground-soft max-w-prose">{t("body")}</p>
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="inline-flex items-center gap-3 px-5 py-3 text-base btn-primary rounded-md transition-colors"
-            data-testid="info-contact-mail"
-          >
-            <Envelope size={22} weight="bold" aria-hidden="true" />
-            {CONTACT_EMAIL}
-          </a>
+          {contactEmail && (
+            <a
+              href={`mailto:${contactEmail}`}
+              className="inline-flex items-center gap-3 px-5 py-3 text-base btn-primary rounded-md transition-colors"
+              data-testid="info-contact-mail"
+            >
+              <Envelope size={22} weight="bold" aria-hidden="true" />
+              {contactEmail}
+            </a>
+          )}
         </div>
       </div>
     </Band>
