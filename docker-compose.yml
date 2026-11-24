@@ -431,22 +431,8 @@ services:
       - kis-minio-data:/data
     restart: unless-stopped
 
-  # Profile "hpc": SSH tunnel to the running HPC jobs, providers reach it as http://hpc-tunnel:<port>.
-  hpc-tunnel:
-    profiles: ["hpc"]
-    build: ./deploy/hpc-tunnel
-    container_name: kis-hpc-tunnel
-    environment:
-      HPC_LOGIN: ${HPC_LOGIN:-}
-    volumes:
-      # Private key registered at Academic Cloud for the HPC account, mode 600.
-      - ${HPC_SSH_KEY:-${HOME}/.ssh/kis-hpc}:/run/hpc/key:ro
-      - kis-hpc-tunnel:/state
-    restart: unless-stopped
-
 volumes:
   kis-postgres-data:
   kis-celerybeat:
   kis-storage:
   kis-minio-data:
-  kis-hpc-tunnel:

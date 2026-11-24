@@ -106,7 +106,6 @@ function ProviderStatusBody() {
                 </section>
               ))}
             </div>
-            <p className="text-xs text-muted-soft text-right mt-6">{t("hpcHint")}</p>
           </>
         )}
       </div>

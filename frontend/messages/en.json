@@ -4768,7 +4768,6 @@
       "statusActive": "answers",
       "statusError": "does not answer",
       "statusUnprobed": "not checked yet",
-      "hpcHint": "HPC is usually the fastest.",
       "group": {
         "chat": "Chat",
         "tts": "Text to audio",

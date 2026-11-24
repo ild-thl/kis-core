@@ -5,7 +5,7 @@ async def test_translate_config_hides_unreachable(monkeypatch):
     from src.routes import translate
     from src.services import feature_provider_choices
 
-    anbieter = [{"id": 92, "name": "HPC"}, {"id": 21, "name": "THL myLab"}]
+    anbieter = [{"id": 92, "name": "Lokal"}, {"id": 21, "name": "THL myLab"}]
     monkeypatch.setattr("src.dependencies.get_translation_providers", lambda: anbieter)
 
     async def fake_reachable(provider):
@@ -24,7 +24,7 @@ async def test_das_dropdown_bekommt_nur_erreichbare_anbieter(monkeypatch):
     from src.routes import translate
     from src.services import feature_provider_choices, provider_check
 
-    anbieter = [{"id": 92, "name": "HPC"}, {"id": 21, "name": "THL myLab"}]
+    anbieter = [{"id": 92, "name": "Lokal"}, {"id": 21, "name": "THL myLab"}]
     monkeypatch.setattr("src.dependencies.get_translation_providers", lambda: anbieter)
 
     async def fake_reachable(provider):

@@ -4768,7 +4768,6 @@
       "statusActive": "antwortet",
       "statusError": "antwortet nicht",
       "statusUnprobed": "noch nicht geprüft",
-      "hpcHint": "HPC ist meist am schnellsten.",
       "group": {
         "chat": "Chat",
         "tts": "Text in Audio",

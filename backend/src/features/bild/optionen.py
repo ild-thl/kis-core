@@ -22,7 +22,7 @@ _PIXEL: dict[str, tuple[str, str, str]] = {
 }
 _FLAECHE: dict[str, float] = {"klein": 0.59e6, "mittel": 1.05e6, "gross": 2.07e6}
 
-# Steps for FLUX.2 dev at myLab and GWDG, the HPC server maps them onto the few steps its distilled klein needs.
+# Steps for a full image model, a provider with a distilled one maps them onto its own few steps.
 _SCHRITTE: dict[str, int] = {"entwurf": 12, "standard": 28, "hoch": 50}
 # myLab crashes on an edit without these, so editing keeps its own scale.
 _SCHRITTE_BEARBEITEN: dict[str, int] = {"entwurf": 15, "standard": 25, "hoch": 40}

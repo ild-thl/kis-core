@@ -28,13 +28,6 @@ fi
 modules=$(env_get MODULES | tr -d ' ')
 export COMPOSE_PROFILES="${modules:-aia,tools}"
 
-# The HPC tunnel starts only when its SSH key is present.
-hpc_key=${HPC_SSH_KEY:-$(env_get HPC_SSH_KEY)}
-hpc_key=${hpc_key:-$HOME/.ssh/kis-hpc}
-if [ -f "${hpc_key/#\~/$HOME}" ]; then
-    COMPOSE_PROFILES="$COMPOSE_PROFILES,hpc"
-fi
-
 export PRODUCTION=true
 
 compose() {

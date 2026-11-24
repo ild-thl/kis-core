@@ -24,7 +24,7 @@ def _folie(sid: str, bilder: int) -> dict:
 def zusammenfassung(tmp_path):
     (tmp_path / "demo.json").write_text(json.dumps({
         "workspace": "Projektmanagement", "dateien": ["A.pdf", "B.pdf"], "anweisung": "Kurz halten",
-        "anbieter": "HPC", "erstellt": "2026-10-01T01:38:17Z",
+        "anbieter": "Lokal", "erstellt": "2026-10-01T01:38:17Z",
     }), encoding="utf-8")
     (tmp_path / "kurzbriefing").mkdir()
     (tmp_path / "kurzbriefing" / "Kurzbriefing.md").write_text("# T\n\n## Eins\n\nx\n\n### Zwei\n\ny\n", encoding="utf-8")
@@ -42,7 +42,7 @@ def praesentation(tmp_path):
         "outline": {"title": "Der Projektstart!", "subtitle": "", "rows": []},
         "slides": [_folie("s1", 1), _folie("s2", 1)],
         "workspace": "Projektmanagement", "dateien": ["Skript.pdf"],
-        "angaben": {"anbieter": "HPC", "bildanbieter": "HPC Bild"}, "erstellt": "2026-10-01T09:57:28Z",
+        "angaben": {"anbieter": "Lokal", "bildanbieter": "Lokal Bild"}, "erstellt": "2026-10-01T09:57:28Z",
     }), encoding="utf-8")
     (tmp_path / "preview").mkdir()
     (tmp_path / "images").mkdir()
@@ -61,7 +61,7 @@ def podcast(tmp_path_factory):
         "params": {"persons": [{"name": "Lena"}, {"name": "Jonas"}]},
         "lines": [{"id": "b0", "speaker": 0, "text": "Hallo"}, {"id": "b1", "speaker": 1, "text": "Servus"}],
         "seconds": 12.5, "workspace": "Projektmanagement", "dateien": ["Skript.pdf"],
-        "angaben": {"anbieter": "HPC", "besetzung": [{"name": "Lena", "rolle": "host", "stimme": "Kerstin"}]},
+        "angaben": {"anbieter": "Lokal", "besetzung": [{"name": "Lena", "rolle": "host", "stimme": "Kerstin"}]},
         "erstellt": "2026-10-01T12:39:06Z",
     }), encoding="utf-8")
     (ordner / "audio").mkdir()
@@ -100,7 +100,7 @@ def test_zusammenfassung_nennt_material_und_vorbereitete_vorlagen(client):
     assert r.status_code == 200
     assert r.json() == {
         "workspace": "Projektmanagement", "files": ["A.pdf", "B.pdf"], "instructions": "Kurz halten",
-        "provider": "HPC", "created": "2026-10-01T01:38:17Z",
+        "provider": "Lokal", "created": "2026-10-01T01:38:17Z",
         "templates": ["kurzbriefing"], "sections": {"kurzbriefing": 2},
     }
 
@@ -130,7 +130,7 @@ def test_praesentation_ansicht_wie_ein_fertiger_lauf(client):
     assert v["missing_images"] == ["s2"]
     assert v["has_deck"] is True
     assert v["files"] == ["Skript.pdf"]
-    assert v["angaben"] == {"anbieter": "HPC", "bildanbieter": "HPC Bild", "vorlage": "thl", "sprache": "de"}
+    assert v["angaben"] == {"anbieter": "Lokal", "bildanbieter": "Lokal Bild", "vorlage": "thl", "sprache": "de"}
     assert v["erstellt"] == "2026-10-01T09:57:28Z"
     assert client.get("/praesentation-demo/available").json() == {"available": True}
 
