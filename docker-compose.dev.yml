@@ -80,12 +80,12 @@ services:
       NEXTAUTH_SECRET: langfuse-local-secret-change-in-prod
       SALT: langfuse-local-salt-change-in-prod
       LANGFUSE_INIT_ORG_ID: kis
-      LANGFUSE_INIT_ORG_NAME: KIS-THL
+      LANGFUSE_INIT_ORG_NAME: KIS
       LANGFUSE_INIT_PROJECT_ID: aia
       LANGFUSE_INIT_PROJECT_NAME: KI-Tutor
       LANGFUSE_INIT_PROJECT_PUBLIC_KEY: lf-pk-local
       LANGFUSE_INIT_PROJECT_SECRET_KEY: lf-sk-local
-      LANGFUSE_INIT_USER_EMAIL: admin@th-luebeck.de
+      LANGFUSE_INIT_USER_EMAIL: admin@example.org
       LANGFUSE_INIT_USER_NAME: admin
       LANGFUSE_INIT_USER_PASSWORD: admin123
     restart: unless-stopped

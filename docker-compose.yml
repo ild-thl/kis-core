@@ -35,7 +35,7 @@ services:
     #
     # One EIGHTH of the RAM as shared_buffers, not the quarter from the Postgres
     # docs. Reason: the quarter rule is for a pure database server. Here backend,
-    # frontend, three Celery containers, nginx and MinIO run on the same
+    # frontend, three Celery containers, the reverse proxy and MinIO run on the same
     # machine as well.
     #
     # Measured on 2026-07-29 (hnsw search, 823 MB index, 138,511 chunks):
@@ -119,7 +119,7 @@ services:
       - ./backend/pytest.ini:/app/pytest.ini:ro
       - kis-storage:/app/storage
     ports:
-      # Bind to localhost only, not to the public interface. nginx and the frontend
+      # Bind to localhost only, not to the public interface. The reverse proxy and the frontend
       # container reach the backend internally over the Docker network (backend:8000);
       # only local host tools need the published port.
       - "127.0.0.1:8000:8000"

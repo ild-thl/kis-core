@@ -1,14 +1,14 @@
 #!/bin/bash
-# Deploys the latest main on the Hetzner box and keeps the site up while the images build.
-# Started by the "Deploy Hetzner" workflow through a forced SSH command, the argument "force" skips the job check.
+# Deploys the latest main on the server and keeps the site up while the images build.
+# Started by the "Deploy" workflow through a forced SSH command, the argument "force" skips the job check.
 
 # The whole script sits in one function so bash has read it completely before git pull replaces the file.
 main() {
     set -euo pipefail
-    cd "$(dirname "$0")/.."
+    # shellcheck source=deploy/common.sh
+    source "$(dirname "$0")/common.sh"
 
     local mode="${SSH_ORIGINAL_COMMAND:-${1:-normal}}"
-    local files="-f docker-compose.yml -f deploy/docker-compose.server.yml -f deploy/docker-compose.prod.yml"
     log() { echo "[deploy] $*"; }
     free_gb() { df --output=avail -BG / | tail -1 | tr -dc '0-9'; }
 
@@ -26,8 +26,8 @@ main() {
     # Recreating the workers would kill running jobs.
     if [ "$mode" != "force" ]; then
         local db_user db_name active
-        db_user=$(grep -E '^POSTGRES_USER=' .env | tail -1 | cut -d= -f2- | tr -d " \"'" || true)
-        db_name=$(grep -E '^POSTGRES_DB=' .env | tail -1 | cut -d= -f2- | tr -d " \"'" || true)
+        db_user=$(env_get POSTGRES_USER)
+        db_name=$(env_get POSTGRES_DB)
         active=$(docker exec kis-postgres psql -U "${db_user:-kis}" -d "${db_name:-kis}" -tAc \
             "SELECT (SELECT count(*) FROM jobs WHERE status IN ('pending','queued','running'))
                   + (SELECT count(*) FROM aia_jobs WHERE status IN ('queued','running'))")
@@ -39,7 +39,7 @@ main() {
     fi
 
     if [ "$(git branch --show-current)" != "main" ]; then
-        log "The box is not on main, aborting."
+        log "The server is not on main, aborting."
         exit 1
     fi
     local old new
@@ -49,24 +49,18 @@ main() {
     new=$(git rev-parse --short HEAD)
     log "main $old -> $new"
 
-    # Starts only the workers of these modules.
-    local modules
-    modules=$(grep -E '^MODULES[[:space:]]*=' .env 2>/dev/null | tail -1 | cut -d= -f2- | cut -d'#' -f1 | tr -d " \"'" || true)
-    export COMPOSE_PROFILES="${modules:-aia,tools}"
-    export PRODUCTION=true
-
-    # The box has little memory, so the idle workers make room for the build and come back with the recreate.
-    local workers
-    workers=$(docker compose $files config --services | grep -E '^celery-' | tr '\n' ' ')
-    log "Stopping the workers during the build: $workers"
-    docker compose $files stop $workers
+    # Small servers have little memory, so the idle workers make room for the build and come back with the recreate.
+    local workers=()
+    read -ra workers <<< "$(compose config --services | grep -E '^celery-' | tr '\n' ' ')"
+    log "Stopping the workers during the build: ${workers[*]}"
+    compose stop "${workers[@]}"
 
     log "Building images while the site keeps running."
     local oom_before oom_after
     oom_before=$(dmesg 2>/dev/null | grep -c 'Out of memory' || true)
-    if ! docker compose $files build; then
+    if ! compose build; then
         log "Build failed, starting the workers again with the old version."
-        docker compose $files start $workers
+        compose start "${workers[@]}"
         exit 1
     fi
     oom_after=$(dmesg 2>/dev/null | grep -c 'Out of memory' || true)
@@ -75,31 +69,44 @@ main() {
     else
         log "No process was killed for lack of memory during the build."
     fi
-    docker compose $files up -d --remove-orphans
+    compose up -d --remove-orphans
 
-    # Mounted source code and the single-file nginx config only reach a fresh container.
-    local apps
-    apps=$(docker compose $files config --services | grep -E '^(backend|frontend|nginx|celery-.*)$' | tr '\n' ' ')
-    log "Recreating: $apps"
-    docker compose $files up -d --force-recreate --no-deps $apps
+    # Mounted source code only reaches a fresh container.
+    local apps=()
+    read -ra apps <<< "$(compose config --services | grep -E '^(backend|frontend|celery-.*)$' | tr '\n' ' ')"
+    log "Recreating: ${apps[*]}"
+    compose up -d --force-recreate --no-deps "${apps[@]}"
+    proxy_reload
 
     docker image prune -f >/dev/null
     docker builder prune -f --keep-storage 8GB >/dev/null
     log "Free disk after cleanup: $(free_gb) GB"
 
-    local domain code=000
-    domain=$(grep -m1 -oE 'server_name [^ ;]+' deploy/nginx/default.conf | awk '{print $2}')
+    # With the bundled proxy the check goes through Caddy and its certificate, otherwise straight to the frontend.
+    local url="http://127.0.0.1:3000/" host="" code=000
+    if [ "$PROXY" = "true" ]; then
+        host=$(env_get DOMAIN)
+        host=${host%%,*}
+        host=${host//[[:space:]]/}
+        url="https://$host/"
+    fi
     for _ in $(seq 1 36); do
-        code=$(curl -sk -o /dev/null -w '%{http_code}' --resolve "$domain:443:127.0.0.1" "https://$domain/" || true)
+        if [ -n "$host" ]; then
+            code=$(curl -sk -o /dev/null -w '%{http_code}' --resolve "$host:443:127.0.0.1" "$url" || true)
+        else
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url" || true)
+        fi
         if [ "$code" = "200" ]; then
-            log "https://$domain answers 200, deploy of $new done."
+            log "$url answers 200, deploy of $new done."
             exit 0
         fi
         sleep 5
     done
-    log "https://$domain did not answer 200 within 3 min (last: $code)."
+    log "$url did not answer 200 within 3 min (last: $code)."
     exit 1
 }
 
 main "$@"
+# Bash never reads past this line, even after git pull has changed the file.
+# shellcheck disable=SC2317
 exit

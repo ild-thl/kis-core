@@ -1,0 +1,8 @@
+# Every request goes through Next.js, which keeps the Host header and adds X-Forwarded-*.
+{$DOMAIN} {
+	# Large files go to the bucket in parts, so only small requests pass here.
+	request_body {
+		max_size 32MiB
+	}
+	reverse_proxy frontend:3000
+}
