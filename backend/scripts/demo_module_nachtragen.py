@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src import database  # noqa: E402
 
 _PAARE = """
-    SELECT m.id AS workspace_id, m.title, u.id AS user_id, u.ldap_username,
+    SELECT m.id AS workspace_id, m.title, u.id AS user_id, u.username,
            (e.id IS NOT NULL) AS drin,
            (ds.user_id IS NOT NULL) AS gemerkt
       FROM aia_workspaces m

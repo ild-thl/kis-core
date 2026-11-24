@@ -66,8 +66,8 @@ def session_payload(target: dict, actor: dict, log_id: int, parent_token: str) -
     expires = target.get("access_expires_at")
     return {
         "user_id": target["id"],
-        "username": target["ldap_username"],
-        "display_name": target.get("display_name") or target["ldap_username"],
+        "username": target["username"],
+        "display_name": target.get("display_name") or target["username"],
         "email": target.get("email") or "",
         "role": target.get("role") or "user",
         "custom_role_id": target.get("custom_role_id"),

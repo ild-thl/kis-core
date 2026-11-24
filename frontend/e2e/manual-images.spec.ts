@@ -18,7 +18,7 @@ const OWNED_TITLE = process.env.E2E_OWNED_TITLE ?? "Wiss. Seminar";
 /**
  * The stored session has all rights and answered both start page invitations long ago, so that
  * shot logs in as a student who has not. If the cards are gone, this SQL brings them back:
- * UPDATE users SET tour_seen_at = NULL, language_training_asked_at = NULL WHERE ldap_username = 'b'
+ * UPDATE users SET tour_seen_at = NULL, language_training_asked_at = NULL WHERE username = 'b'
  */
 const STUDENT = {
   user: process.env.E2E_STUDENT_USER ?? "b",

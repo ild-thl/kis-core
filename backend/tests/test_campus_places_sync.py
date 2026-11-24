@@ -1,7 +1,10 @@
 """The place list becomes one page each with a link to the map."""
 import json
 
+import pytest
+
 from src.features.campus.services import places_sync
+from src.features.campus.services.fetch import FetchResult
 
 ORT = {
     "id": "Mensa_B_59", "code": "B.59", "kind": "building",
@@ -34,3 +37,21 @@ def test_sync_ersetzt_orte_und_seiten(monkeypatch):
     assert n == 1 and ersetzt[0][0]["id"] == "Mensa_B_59"
     assert angelegt == [("place", "https://map.test/?show=B.59", "Mensa B.59")]
     assert indexiert == ["Mensa B.59"] and geloescht == [7]
+
+
+def test_url_mit_index_html():
+    url = "https://s3.test/bucket/campus-map/index.html"
+    assert places_sync.place_url(url, ORT) == "https://s3.test/bucket/campus-map/index.html?show=B.59"
+    assert places_sync.places_url(url) == "https://s3.test/bucket/campus-map/places.json"
+    assert places_sync.places_url("https://map.test/campus-map") == "https://map.test/campus-map/places.json"
+
+
+def test_fetch_places(monkeypatch):
+    assert places_sync.fetch_places(None, "") == b"[]"
+    monkeypatch.setattr(places_sync.fetch_mod, "fetch_conditional", lambda c, u: FetchResult("gone"))
+    assert places_sync.fetch_places(None, "https://map.test/") == b"[]"
+    monkeypatch.setattr(places_sync.fetch_mod, "fetch_conditional", lambda c, u: FetchResult("ok", body=b'{"places": []}'))
+    assert places_sync.fetch_places(None, "https://map.test/") == b'{"places": []}'
+    monkeypatch.setattr(places_sync.fetch_mod, "fetch_conditional", lambda c, u: FetchResult("error", error="http 500"))
+    with pytest.raises(ValueError):
+        places_sync.fetch_places(None, "https://map.test/")

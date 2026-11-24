@@ -65,7 +65,7 @@ def get_me(
         raise HTTPException(status_code=404, detail=t("user.notFound", locale))
     return {
         "id": row["id"],
-        "username": row["ldap_username"],
+        "username": row["username"],
         "display_name": row["display_name"],
         "email": row["email"],
         "role": row["role"],

@@ -45,7 +45,7 @@ def start_impersonation(
         actor_user_id=actor.get("user_id"),
         actor_username=actor.get("username") or "",
         target_user_id=target["id"],
-        target_username=target["ldap_username"],
+        target_username=target["username"],
     )
     store = get_session_store()
     token = store.create(
@@ -54,12 +54,12 @@ def start_impersonation(
     set_session_cookie(response, token)
     logger.info(
         "Impersonation started: {} -> {} (log {})",
-        actor.get("username"), target["ldap_username"], log_id,
+        actor.get("username"), target["username"], log_id,
     )
     return {
         "status": "ok",
         "user_id": target["id"],
-        "display_name": target.get("display_name") or target["ldap_username"],
+        "display_name": target.get("display_name") or target["username"],
     }
 
 

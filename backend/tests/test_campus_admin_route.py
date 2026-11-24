@@ -20,14 +20,12 @@ def umgebung(monkeypatch):
 
 
 def test_einstellungen_nur_mit_oeffentlicher_adresse(umgebung):
-    body = admin_campus.SettingsBody(sitemap_url="https://x.test/sitemap.xml", map_url="https://map.test/", retention_days=30)
+    body = admin_campus.SettingsBody(sitemap_url="https://x.test/sitemap.xml", retention_days=30)
     admin_campus.update_campus(body, admin=ADMIN, locale="de")
-    assert umgebung == {"sitemap_url": "https://x.test/sitemap.xml", "map_url": "https://map.test/", "retention_days": 30}
+    assert umgebung == {"sitemap_url": "https://x.test/sitemap.xml", "retention_days": 30}
     with pytest.raises(HTTPException) as info:
         admin_campus.update_campus(admin_campus.SettingsBody(sitemap_url="http://localhost/sitemap.xml"), admin=ADMIN, locale="de")
     assert info.value.status_code == 400
-    with pytest.raises(HTTPException):
-        admin_campus.update_campus(admin_campus.SettingsBody(map_url="javascript:alert(1)"), admin=ADMIN, locale="de")
 
 
 async def test_dokument_falscher_typ_und_doppelt(monkeypatch):

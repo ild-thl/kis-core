@@ -7,12 +7,12 @@ from fastapi.testclient import TestClient
 
 
 ADMIN = {"user_id": 1, "username": "chefin", "display_name": "Chefin",
-         "email": "admin@th-luebeck.de", "role": "admin", "custom_role_id": None}
+         "email": "admin@example.org", "role": "admin", "custom_role_id": None}
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@th-luebeck.de")
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.org")
     from src.app import app
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -29,10 +29,10 @@ def test_adding_an_address_activates_the_matching_account(client):
     with patch("src.routes.admin.users.db.add_to_whitelist") as liste, \
          patch("src.routes.admin.users.db.get_user_by_email", return_value={"id": 4}), \
          patch("src.routes.admin.users.db.activate_user") as aktiv:
-        antwort = client.post("/admin/whitelist", json={"email": "max@th-luebeck.de"})
+        antwort = client.post("/admin/whitelist", json={"email": "max@example.org"})
 
     assert antwort.status_code == 200
-    liste.assert_called_once_with("max@th-luebeck.de")
+    liste.assert_called_once_with("max@example.org")
     aktiv.assert_called_once_with(4)
 
 
@@ -40,10 +40,10 @@ def test_an_address_without_an_account_only_lands_on_the_list(client):
     with patch("src.routes.admin.users.db.add_to_whitelist") as liste, \
          patch("src.routes.admin.users.db.get_user_by_email", return_value=None), \
          patch("src.routes.admin.users.db.activate_user") as aktiv:
-        antwort = client.post("/admin/whitelist", json={"email": "neu@th-luebeck.de"})
+        antwort = client.post("/admin/whitelist", json={"email": "neu@example.org"})
 
     assert antwort.status_code == 200
-    liste.assert_called_once_with("neu@th-luebeck.de")
+    liste.assert_called_once_with("neu@example.org")
     aktiv.assert_not_called()
 
 
@@ -55,7 +55,7 @@ def test_an_address_without_an_at_sign_is_refused(client):
 def test_removing_an_address_deactivates_the_account(client):
     with patch("src.routes.admin.users.db.remove_from_whitelist") as liste, \
          patch("src.routes.admin.users.db.deactivate_user_by_email") as sperren:
-        antwort = client.delete("/admin/whitelist/max@th-luebeck.de")
+        antwort = client.delete("/admin/whitelist/max@example.org")
 
     assert antwort.status_code == 200
     liste.assert_called_once()
@@ -63,5 +63,5 @@ def test_removing_an_address_deactivates_the_account(client):
 
 
 def test_the_admin_from_the_env_cannot_be_removed(client):
-    antwort = client.delete("/admin/whitelist/admin@th-luebeck.de")
+    antwort = client.delete("/admin/whitelist/admin@example.org")
     assert antwort.status_code == 403

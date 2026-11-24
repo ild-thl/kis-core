@@ -167,7 +167,7 @@ def konto_am_code():
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (ldap_username, display_name, email, active, role, access_code_id) "
+                "INSERT INTO users (username, display_name, email, active, role, access_code_id) "
                 "VALUES (%s, 'Test Aufgaben', %s, 1, 'staff', %s) RETURNING id",
                 (f"test.aufgaben.{kennung}", f"test.aufgaben.{kennung}@demo.kis.local", code_id),
             )
@@ -243,7 +243,7 @@ def admin_client(monkeypatch):
     monkeypatch.setattr(tasks, "workspaces_for_code", lambda code: [{"uuid": "ws-uuid", "title": f"von {code}"}])
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 1, "email": "admin@th-luebeck.de", "role": "admin"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 1, "email": "admin@example.org", "role": "admin"}
     yield TestClient(app), gespeichert
     app.dependency_overrides.clear()
     get_settings.cache_clear()

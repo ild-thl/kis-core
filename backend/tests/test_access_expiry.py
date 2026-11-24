@@ -14,8 +14,6 @@ MORGEN = datetime.now() + timedelta(days=1)
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
 
     from src.dependencies import get_settings
     from src.security.auth import verify_auth
@@ -42,7 +40,7 @@ def _anmelden(client, konto):
 
 
 def test_an_expired_test_access_cannot_log_in(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann",
+    konto = {"id": 42, "username": "max.mustermann",
              "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
@@ -54,7 +52,7 @@ def test_an_expired_test_access_cannot_log_in(client):
 
 
 def test_a_blocked_login_takes_the_dead_cookie_with_it(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann",
+    konto = {"id": 42, "username": "max.mustermann",
              "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
@@ -66,7 +64,7 @@ def test_a_blocked_login_takes_the_dead_cookie_with_it(client):
 
 
 def test_a_running_test_access_carries_its_deadline_into_the_session(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann",
+    konto = {"id": 42, "username": "max.mustermann",
              "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": MORGEN}
@@ -77,8 +75,8 @@ def test_a_running_test_access_carries_its_deadline_into_the_session(client):
 
 
 def test_a_normal_account_carries_no_deadline(client):
-    konto = {"id": 5, "ldap_username": "chefin", "display_name": "Chefin",
-             "email": "chefin@th-luebeck.de", "active": 1,
+    konto = {"id": 5, "username": "chefin", "display_name": "Chefin",
+             "email": "chefin@example.org", "active": 1,
              "role": "admin", "custom_role_id": None, "access_expires_at": None}
     antwort, anlegen = _anmelden(client, konto)
 
@@ -152,7 +150,7 @@ async def test_the_gate_lets_a_session_through_when_the_deadline_is_unparseable(
 
 
 def test_login_lets_an_account_through_when_the_deadline_is_unparseable(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann", "display_name": "Max Mustermann",
+    konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
              "email": "max.mustermann@demo.kis.local", "active": 1,
              "role": "staff", "custom_role_id": None, "access_expires_at": "kaputt"}
     antwort, anlegen = _anmelden(client, konto)

@@ -15,8 +15,9 @@ import { checkAuthStatus } from "@/lib/auth";
 type Category = "bug" | "idea" | "other";
 
 const MAX_MESSAGE_CHARS = 2000;
-const MAX_FILES = 10;
-const MAX_FILE_MB = 15;
+// Five files of 5 MiB stay under the 32 MB proxy limit, the backend checks the same.
+const MAX_FILES = 5;
+const MAX_FILE_MB = 5;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 const ACCEPT = ".png,.jpg,.jpeg,.pdf,image/png,image/jpeg,application/pdf";
 
@@ -175,7 +176,7 @@ export default function FeedbackPage() {
                 className="hidden"
               />
             </label>
-            <p className="text-xs text-muted-soft">{t("attachHint", { max: MAX_FILES })}</p>
+            <p className="text-xs text-muted-soft">{t("attachHint", { max: MAX_FILES, mb: MAX_FILE_MB })}</p>
             {files.length > 0 && (
               <ul className="space-y-1.5">
                 {files.map((datei, i) => (

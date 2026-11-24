@@ -1,9 +1,9 @@
 name: Trello sync
 
-# Syncs the Trello board with the GitHub project at 06:00 and 18:00 (UTC+1) and when started by hand.
+# Syncs the Trello board with the GitHub project around 06:23 and 18:23 (UTC+1), off the full hour where GitHub drops scheduled runs under load.
 on:
   schedule:
-    - cron: "0 5,17 * * *"
+    - cron: "23 5,17 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

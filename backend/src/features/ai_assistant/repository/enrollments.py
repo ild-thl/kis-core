@@ -71,14 +71,14 @@ def get_workspace_participants(workspace_id: int) -> list[dict]:
             cur.execute(
                 """SELECT e.user_id,
                           u.display_name,
-                          u.ldap_username,
+                          u.username,
                           BOOL_OR(e.role = 'tutor') AS is_tutor,
                           MIN(e.created_at)         AS joined_at,
                           MAX(e.enrolled_until)     AS enrolled_until
                    FROM aia_enrollments e
                    JOIN users u ON u.id = e.user_id
                    WHERE e.workspace_id = %s
-                   GROUP BY e.user_id, u.display_name, u.ldap_username
+                   GROUP BY e.user_id, u.display_name, u.username
                    ORDER BY BOOL_OR(e.role = 'tutor') DESC, u.display_name ASC""",
                 (workspace_id,),
             )

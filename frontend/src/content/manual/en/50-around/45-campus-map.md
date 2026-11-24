@@ -15,11 +15,12 @@ page and can also be opened in its own tab.
 
 ## Embedding the campus map
 
-The campus map can be embedded on other pages too, as a stand-alone iframe.
+The campus map can be embedded on other pages too, as a stand-alone iframe. The map address is set
+in the admin under System → Campus map.
 
 ```html
 <iframe
-    src="https://kis.th-luebeck.de/campus-map/?lang=en"
+    src="https://s3.mylab.th-luebeck.de/mb00083805-campus-map/campus-map/index.html?lang=en"
     title="Campus map TH Lübeck"
     width="100%"
     height="700"

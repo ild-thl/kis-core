@@ -43,8 +43,6 @@ class SettingsBody(BaseModel):
     start_urls: Optional[str] = None
     url_include: Optional[str] = None
     url_exclude: Optional[str] = None
-    map_url: Optional[str] = None
-    map_enabled: Optional[bool] = None
     retention_days: Optional[int] = None
 
 
@@ -125,9 +123,6 @@ def update_campus(body: SettingsBody, admin: dict = Depends(_require), locale: s
     values = body.model_dump(exclude_unset=True)
     urls = sitemap_mod.parse_patterns(values.get("sitemap_url") or "") + sitemap_mod.parse_patterns(values.get("start_urls") or "")
     if any(not fetch_mod.is_web_url(u) for u in urls):
-        raise HTTPException(status_code=400, detail=t("campus.urlInvalid", locale))
-    map_url = (values.get("map_url") or "").strip()
-    if map_url and not map_url.startswith(("http://", "https://")):
         raise HTTPException(status_code=400, detail=t("campus.urlInvalid", locale))
     campus_settings.write(values)
     return _overview()

@@ -80,7 +80,7 @@ export const EMPTY_PERMS: UserPermissions = {
   allow_workspace_create: false,
   tools: [],
   keys: [],
-  allow_ldap_user_create: false,
+  allow_account_create: false,
 };
 
 /** Whether the permissions contain one of the named keys. */

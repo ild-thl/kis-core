@@ -1,6 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
 
-/** Seeded dev workspace (owner = LDAP user `a`) with 3 PDFs + 3 lecture videos. */
+/** Seeded dev workspace (owner = account `a`) with 3 PDFs + 3 lecture videos. */
 export const WS =
   process.env.E2E_WORKSPACE ??
   "/en/workspace/1ea7b2fa-b237-4bbd-801b-c9793d388984";

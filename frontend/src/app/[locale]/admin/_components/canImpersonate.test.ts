@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest";
 import { canImpersonate, gesperrteRollenIds } from "./canImpersonate";
 import { PERM } from "@/lib/permissions";
 
-const ICH = { userId: 1, adminEmail: "admin@th-luebeck.de", gesperrteRollen: [5] };
+const ICH = { userId: 1, adminEmail: "admin@example.org", gesperrteRollen: [5] };
 
 describe("canImpersonate", () => {
   it("bietet ein normales Konto an", () => {
-    expect(canImpersonate({ id: 7, email: "studi@th-luebeck.de", role: "user", active: 1 }, ICH)).toBe(true);
+    expect(canImpersonate({ id: 7, email: "studi@example.org", role: "user", active: 1 }, ICH)).toBe(true);
   });
 
   it("bietet Lehrende an", () => {
@@ -24,7 +24,7 @@ describe("canImpersonate", () => {
   });
 
   it("erkennt das Konto aus der Konfiguration an der Mailadresse", () => {
-    expect(canImpersonate({ id: 9, email: "Admin@TH-Luebeck.de", role: "user", active: 1 }, ICH)).toBe(false);
+    expect(canImpersonate({ id: 9, email: "Admin@Example.org", role: "user", active: 1 }, ICH)).toBe(false);
   });
 
   it("bietet ein gesperrtes Konto nicht an", () => {

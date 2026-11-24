@@ -25,7 +25,7 @@ async function rolleUebernehmen(
   rolle: string,
 ) {
   const liste = await (await admin.get("/api/admin/users?limit=100")).json();
-  const konto = liste.users.find((u: { ldap_username: string }) => u.ldap_username === username);
+  const konto = liste.users.find((u: { username: string }) => u.username === username);
   const vorher = { role: konto.role, custom_role_id: konto.custom_role_id ?? null };
   await admin.post(`/api/admin/users/${konto.id}/role`, {
     data: { role: rolle, custom_role_id: null },

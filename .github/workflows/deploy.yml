@@ -1,0 +1,36 @@
+name: Deploy
+
+# Deploys main to the server in DEPLOY_TARGET, only when started by hand from the Actions tab, never on push or merge.
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Deploy even if jobs are still running
+        type: boolean
+        default: false
+
+# Two deploys never run at the same time, a second one waits.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Without a target or for anyone not listed in DEPLOY_ACTORS the job is skipped without an error.
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_TARGET != '' && contains(format(',{0},', vars.DEPLOY_ACTORS), format(',{0},', github.triggering_actor))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Run the deploy script on the server
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+          TARGET: ${{ vars.DEPLOY_TARGET }}
+          MODE: ${{ inputs.force && 'force' || 'normal' }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # The key may only start the deploy script on the server, the word after the target is its argument.
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ServerAliveInterval=30 "$TARGET" "$MODE"

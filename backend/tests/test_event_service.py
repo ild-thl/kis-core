@@ -305,7 +305,7 @@ def test_broken_addresses_are_rejected(email):
 
 
 def test_normalising_lowers_and_trims():
-    assert normalize_email("  Max@TH-Luebeck.DE ") == "max@th-luebeck.de"
+    assert normalize_email("  Max@Example.ORG ") == "max@example.org"
 
 
 # --- texts of the card ------------------------------------------------------------

@@ -34,8 +34,8 @@ def login(body: LoginRequest, response: Response, locale: str = Depends(get_loca
         logger.warning("Failed login attempt for '{}' (invalid credentials)", body.username)
         raise HTTPException(status_code=401, detail=t("auth.invalidCredentials", locale))
 
-    ldap_username = db_user["ldap_username"]
-    display_name = db_user["display_name"] or ldap_username
+    username = db_user["username"]
+    display_name = db_user["display_name"] or username
     email = db_user["email"] or None
     user_id = db_user["id"]
     effective_role = db_user["role"] or "user"
@@ -47,12 +47,12 @@ def login(body: LoginRequest, response: Response, locale: str = Depends(get_loca
     is_admin_email = bool(email and settings.admin_email and email.lower() == settings.admin_email.lower())
     is_db_admin = effective_role == "admin"
     if maintenance_on and not (is_admin_email or is_db_admin):
-        logger.warning("Login blocked for '{}' (maintenance active, non-admin)", ldap_username)
+        logger.warning("Login blocked for '{}' (maintenance active, non-admin)", username)
         raise HTTPException(status_code=503, detail=t("maintenance.message", locale))
 
     # Step 2: The column decides, the whitelist only writes into it.
     if not active:
-        logger.warning("Login blocked for '{}' (not activated)", ldap_username)
+        logger.warning("Login blocked for '{}' (not activated)", username)
         raise HTTPException(status_code=403, detail="account_not_activated")
 
     # Step 3: A test access whose deadline has passed gets no session.
@@ -61,11 +61,11 @@ def login(body: LoginRequest, response: Response, locale: str = Depends(get_loca
         try:
             abgelaufen = ablauf <= datetime.now()
         except (TypeError, ValueError) as e:
-            logger.error("Unparseable access_expires_at '{}' for '{}': {}", ablauf, ldap_username, e)
+            logger.error("Unparseable access_expires_at '{}' for '{}': {}", ablauf, username, e)
             ablauf = None
         else:
             if abgelaufen:
-                logger.info("Login blocked for '{}' (test access expired)", ldap_username)
+                logger.info("Login blocked for '{}' (test access expired)", username)
                 raise access_expired_error()
 
     # Step 4: The demo module, once per account, whichever way it was created.
@@ -75,7 +75,7 @@ def login(body: LoginRequest, response: Response, locale: str = Depends(get_loca
     store = get_session_store()
     token = store.create(data={
         "user_id": user_id,
-        "username": ldap_username,
+        "username": username,
         "display_name": display_name,
         "email": email or "",
         "role": effective_role,
@@ -83,7 +83,7 @@ def login(body: LoginRequest, response: Response, locale: str = Depends(get_loca
         "access_expires_at": ablauf.isoformat() if ablauf else None,
     })
     set_session_cookie(response, token)
-    return {"status": "ok", "username": ldap_username, "display_name": display_name, "role": effective_role}
+    return {"status": "ok", "username": username, "display_name": display_name, "role": effective_role}
 
 
 @router.post("/logout")
@@ -120,7 +120,7 @@ def _permissions_payload(perms) -> dict:
         "allow_admin_panel": perms.allow_admin_panel,
         "allow_aia": perms.allow_aia,
         "allow_workspace_create": perms.allow_workspace_create,
-        "allow_ldap_user_create": perms.allow_ldap_user_create,
+        "allow_account_create": perms.allow_account_create,
         "tools": list(perms.tools),
         "keys": sorted(perms.keys),
     }

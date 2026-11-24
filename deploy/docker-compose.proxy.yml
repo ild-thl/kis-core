@@ -1,0 +1,28 @@
+# Bundled Caddy with automatic HTTPS, loaded by deploy/common.sh when PROXY=true is in the .env.
+# Paths are relative to the repo root, because docker-compose.yml is the first file.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: kis-caddy
+    oom_score_adj: -500
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN missing}
+    volumes:
+      - ./deploy/caddy:/etc/caddy:ro
+      - kis-caddy-data:/data
+      - kis-caddy-config:/config
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "7"
+
+volumes:
+  kis-caddy-data:
+  kis-caddy-config:

@@ -141,10 +141,14 @@ def load(token: str, user_id: int, locale: str) -> dict:
 
 def start(tool: str, rule: UploadRule, filename: str, size: int, user_id: int, context: dict,
           origin: str, host: str, locale: str) -> dict:
-    """Opens a direct upload, or answers direct False when the classic route fits better."""
-    ext = extension_of(filename)
-    if not USE_S3 or ext not in rule.extensions:
+    """Opens a direct upload, or answers direct False when there is no bucket."""
+    if not USE_S3:
         return {"direct": False}
+    ext = extension_of(filename)
+    # The classic route takes no other ending either, refused here it never crosses the proxy whole.
+    if ext not in rule.extensions:
+        raise HTTPException(status_code=400, detail=t("ai.source.allowedExtensions", locale,
+                                                      extensions=", ".join(sorted(rule.extensions))))
     if size == 0:
         raise HTTPException(status_code=400, detail=t("file.empty", locale))
     max_bytes = rule.max_bytes()

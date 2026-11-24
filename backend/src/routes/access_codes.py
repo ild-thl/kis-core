@@ -149,7 +149,7 @@ def renew(payload: RenewPayload, response: Response, locale: str = Depends(get_l
     repo.set_user_access(konto["id"], expires_at=frist, code_id=eintrag["id"])
     _enroll_into_code_workspaces(eintrag["id"], konto["id"])
 
-    name = konto["ldap_username"]
+    name = konto["username"]
     _set_session(response, {
         "user_id": konto["id"],
         "username": name,

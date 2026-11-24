@@ -24,7 +24,7 @@ def _now_iso() -> str:
     soft_time_limit=CAMPUS_CRAWL_TIME_LIMIT_SECONDS, time_limit=CAMPUS_CRAWL_TIME_LIMIT_SECONDS + 300,
 )
 def run_crawl() -> dict:
-    """Syncs the bundled place list and crawls the web pages when a sitemap or start address is configured."""
+    """Syncs the place list of the configured map and crawls the web pages when a sitemap or start address is configured."""
     cfg = campus_settings.read()
     status = {"started_at": _now_iso(), "running": True}
     campus_settings.set_crawl_status(status)
@@ -33,7 +33,7 @@ def run_crawl() -> dict:
         client = fetch_mod.make_client()
         # A broken place list must not cost the night its page crawl.
         try:
-            status["places"] = places_sync.sync(places_sync.BUNDLED_PLACES.read_bytes(), cfg.map_url, embed)
+            status["places"] = places_sync.sync(places_sync.fetch_places(client, cfg.map_url), cfg.map_url, embed)
         except Exception as e:  # noqa: BLE001
             logger.exception("Campus: Ortsliste nicht eingelesen")
             status["places_error"] = f"{type(e).__name__}: {e}"[:300]

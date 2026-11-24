@@ -274,10 +274,6 @@
   },
   "imprint": {
     "title": "Imprint",
-    "lawHeading": "Information pursuant to § 5 DDG:",
-    "contactHeading": "Contact:",
-    "phoneLabel": "Phone:",
-    "emailLabel": "E-mail:",
     "projectHeading": "Project:",
     "projectBody": "Developed at the Institute for Interactive Systems (ISy),\nTechnische Hochschule Lübeck."
   },
@@ -298,7 +294,7 @@
     "messageRequired": "Please enter some text",
     "attachLabel": "Attachments (optional)",
     "attachButton": "Attach a file",
-    "attachHint": "Up to {max} files, PNG, JPG or PDF, up to 15 MB each.",
+    "attachHint": "Up to {max} files, PNG, JPG or PDF, up to {mb} MB each.",
     "tooManyFiles": "At most {max} files",
     "fileTooLarge": "{name} is larger than {max} MB",
     "removeFile": "Remove file",
@@ -2062,7 +2058,12 @@
       },
       "system": {
         "label": "System",
-        "sub": "What applies to the whole platform: maintenance, labels and notice."
+        "sub": "What holds for the whole platform: operation, legal and campus map.",
+        "tabs": {
+          "betrieb": "Operation",
+          "rechtliches": "Legal",
+          "karte": "Campus map"
+        }
       },
       "mascot": {
         "label": "Mascots",
@@ -2106,9 +2107,6 @@
         "includeHint": "One pattern per line, for example /studies/. Empty means every page of the sitemap.",
         "exclude": "Addresses without",
         "excludeHint": "One pattern per line, for example /news/. Pages with this pattern are skipped.",
-        "mapUrl": "Campus map address",
-        "mapHint": "The page of the campus map. Place cards in the chat open it at the right spot.",
-        "mapEnabled": "Show campus map",
         "retention": "Keep chats",
         "retentionHint": "Days without activity after which a chat is deleted. 0 keeps all.",
         "days": "days",
@@ -2258,10 +2256,10 @@
       "empty": "Nobody has logged in as somebody else yet.",
       "loadError": "The record could not be loaded."
     },
-    "createLdapUser": {
+    "createAccount": {
       "buttonLabel": "+ Add user",
-      "title": "Create LDAP user",
-      "fieldUid": "Username (uid)",
+      "title": "Add user",
+      "fieldUid": "Username",
       "fieldUidHint": "Lowercase, digits, _ . -, 2-32 characters",
       "fieldGivenName": "First name",
       "fieldSurname": "Last name",
@@ -3518,6 +3516,25 @@
       "werkzeuge": "Services",
       "assistent": "Learning assistant",
       "gemeinsam": "Shared"
+    },
+    "legalCard": {
+      "title": "Imprint and privacy policy",
+      "description": "Details of this installation. They appear on the imprint and privacy pages, the contact email also at sign-in, on the approval page and on the start page.",
+      "missing": "The imprint or privacy policy is missing. The pages then show only a notice.",
+      "email": "Contact email",
+      "emailHint": "If it stays empty, the contact links disappear.",
+      "imprint": "Imprint",
+      "privacy": "Privacy policy",
+      "german": "German",
+      "english": "English",
+      "markdownHint": "Markdown: ## heading, ### bold line, - list, [text](https://…). If English stays empty, the German text appears."
+    },
+    "campusMapCard": {
+      "title": "Campus map",
+      "active": "On - footer tile and place cards in the info assistant.",
+      "disabled": "Off - no map, no tile, no places.",
+      "hint": "Address of the map page, the map lives outside KIS. Places (places.json) and preview (preview.jpg) sit next to it. Empty means no map.",
+      "toggleAria": "Toggle campus map"
     }
   },
   "permissions": {
@@ -3528,42 +3545,11 @@
     }
   },
   "privacy": {
-    "title": "Privacy policy",
-    "controller": {
-      "heading": "1. Data controller",
-      "body": "Hamid Mergan\nMönkhofer Weg 239\n23562 Lübeck, Germany\nEmail: hamid.mergan@th-luebeck.de\nPhone: +49 451 160818 81"
-    },
-    "data": {
-      "heading": "2. What data is processed",
-      "intro": "Only what is needed to run the platform is processed:",
-      "item1": "Account data such as name, username and email address. The password is stored only as a hash.",
-      "item2": "Content you upload or enter, and the results created from it",
-      "item3": "Usage data such as services used and presence times",
-      "item4": "Server logs with IP address, time and page requested",
-      "item5": "For a raffle, the email address if you enter it there voluntarily",
-      "outro": "People with the relevant permission can view this data for technical support."
-    },
-    "cookies": {
-      "heading": "3. Cookies",
-      "body": "The platform uses only technically necessary cookies and browser storage, for sign-in and for settings. There is no tracking or analytics."
-    },
-    "recipients": {
-      "heading": "4. Recipients",
-      "body": "For AI features and translations, content is sent to services of TH Lübeck (THL myLab) and GWDG. The platform runs at kis-isy.th-luebeck.de on servers of TH Lübeck. The test platform at kis-thl.de is operated by Hetzner Online GmbH in Germany.\nEmbedded YouTube videos load only after confirmation. Only then is data sent to YouTube (Google LLC, USA).\nTeachers can connect their own accounts with external providers. Content then goes to that provider, possibly outside the EU."
-    },
-    "retention": {
-      "heading": "5. Retention",
-      "body": "Data is kept until the account or the content is deleted, at the latest until the end of the pilot project. Time-limited accounts are deleted after they expire, server logs after a few weeks. On request, we delete earlier."
-    },
-    "legalBasis": {
-      "heading": "6. Legal basis",
-      "body": "Art. 6(1)(b) GDPR (provision of the platform), for server logs Art. 6(1)(f) GDPR (legitimate interest in secure operation). Embedded YouTube videos load only with your consent (Art. 6(1)(a) GDPR). The transfer to the USA is based on the adequacy decision of the EU Commission (Art. 45 GDPR, EU-US Data Privacy Framework). Taking part in a raffle rests on your consent (Art. 6(1)(a) GDPR)."
-    },
-    "rights": {
-      "heading": "7. Your rights",
-      "body": "You have the right of access, rectification, erasure, restriction of processing, data portability and objection (Art. 15 to 21 GDPR). You can withdraw your consent at any time with effect for the future, for YouTube by deleting the site data in your browser. To exercise them, please contact:",
-      "complaint": "You can also lodge a complaint with the Unabhängiges Landeszentrum für Datenschutz Schleswig-Holstein (ULD)."
-    }
+    "title": "Privacy policy"
+  },
+  "legal": {
+    "imprintMissing": "The imprint has not been provided yet.",
+    "privacyMissing": "The privacy policy has not been provided yet."
   },
   "jobsStatus": {
     "translation": {

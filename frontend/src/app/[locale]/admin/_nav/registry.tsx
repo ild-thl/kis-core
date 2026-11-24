@@ -54,7 +54,9 @@ import EventBlockPage from "../_pages/event/block";
 import EventStatsPage from "../_pages/event/stats";
 import EventTasksPage from "../_pages/event/tasks";
 import EventRafflePage from "../_pages/event/raffle";
-import SystemPage from "../_pages/system";
+import SystemOperationPage from "../_pages/system/operation";
+import SystemLegalPage from "../_pages/system/legal";
+import SystemMapPage from "../_pages/system/map";
 import CampusAdminPage from "../_pages/campus";
 import HildePage from "../_pages/mascot/hilde";
 import FrancisPage from "../_pages/mascot/francis";
@@ -240,7 +242,7 @@ export const SECTIONS: AdminSection[] = [
       { slug: "landing", labelKey: "landing", Component: EventLandingPage },
     ],
   },
-  // System also carries the two platform-wide cards.
+  // What holds for the whole installation, split by subject.
   {
     slug: "system",
     key: "system",
@@ -248,7 +250,11 @@ export const SECTIONS: AdminSection[] = [
     world: "both",
     rank: "admin",
     perm: PERM.system,
-    Component: SystemPage,
+    tabs: [
+      { slug: "operation", labelKey: "betrieb", Component: SystemOperationPage },
+      { slug: "legal", labelKey: "rechtliches", Component: SystemLegalPage },
+      { slug: "map", labelKey: "karte", Component: SystemMapPage },
+    ],
   },
   {
     slug: "mascots",

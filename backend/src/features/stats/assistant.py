@@ -113,7 +113,7 @@ def _workspaces(cur) -> list[dict]:
     """The modules with their numbers, in one query instead of one per module."""
     cur.execute(
         """SELECT m.uuid, m.title, m.is_active, m.created_at,
-                  COALESCE(u.display_name, u.ldap_username, 'Unbekannt') AS owner,
+                  COALESCE(u.display_name, u.username, 'Unbekannt') AS owner,
                   (SELECT COUNT(*) FROM aia_sources s WHERE s.workspace_id = m.id) AS quellen,
                   -- Der Eigentuemer steht in keiner Einschreibung. Ohne das
                   -- "+ 1" stuende in der Zeile eine andere Zahl als im Fenster,

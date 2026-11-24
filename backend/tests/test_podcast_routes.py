@@ -10,10 +10,6 @@ from src.permissions import Permissions
 
 def _out_of_local_mode(monkeypatch):
     monkeypatch.setenv("AUTH_DISABLED", "false")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
 
 
 class FakeAblage:
@@ -97,7 +93,7 @@ def env(monkeypatch):
 
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "a@th-luebeck.de", "role": "staff"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "a@example.org", "role": "staff"}
     app.dependency_overrides[get_user_permissions] = lambda: Permissions(keys=frozenset({"tools.podcast"}))
     yield TestClient(app), jobs, gestartet, ablage
     app.dependency_overrides.clear()

@@ -8,10 +8,7 @@ from fastapi.testclient import TestClient
 
 # Out of local mode, otherwise the app's own session middleware hits the real database.
 def _out_of_local_mode(monkeypatch):
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
+    monkeypatch.setenv("AUTH_DISABLED", "false")
 
 
 @pytest.fixture
@@ -24,7 +21,7 @@ def client(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "user@th-luebeck.de", "role": "user",
+        "user_id": 1, "email": "user@example.org", "role": "user",
         "username": "max.mustermann", "display_name": "Max Mustermann",
     }
     yield TestClient(app)
@@ -42,7 +39,7 @@ def admin_client(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "admin@th-luebeck.de", "role": "admin",
+        "user_id": 1, "email": "admin@example.org", "role": "admin",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -196,14 +193,26 @@ def test_content_not_matching_the_extension_is_refused(client):
     anlegen.assert_not_called()
 
 
-def test_more_than_ten_files_is_refused(client):
-    dateien = [("files", (f"s{i}.png", _PNG_BYTES, "image/png")) for i in range(11)]
+def test_more_than_five_files_is_refused(client):
+    dateien = [("files", (f"s{i}.png", _PNG_BYTES, "image/png")) for i in range(6)]
     with patch("src.routes.feedback.repo.create_feedback") as anlegen:
         r = client.post(
             "/feedback", data={"category": "bug", "message": "Test"}, files=dateien,
         )
 
     assert r.status_code == 400
+    anlegen.assert_not_called()
+
+
+def test_a_file_over_five_mib_is_refused(client):
+    gross = _PNG_BYTES + b"\0" * (5 * 1024 * 1024)
+    with patch("src.routes.feedback.repo.create_feedback") as anlegen:
+        r = client.post(
+            "/feedback", data={"category": "bug", "message": "Test"},
+            files=[("files", ("gross.png", gross, "image/png"))],
+        )
+
+    assert r.status_code == 413
     anlegen.assert_not_called()
 
 

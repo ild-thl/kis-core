@@ -11,12 +11,12 @@ from src.permissions import Permissions
 from src.permissions_registry import PERM_SET_USERS_ALL
 
 BCRYPT = "$2b$12$abcdefghijklmnopqrstuv"
-ADMIN = {"user_id": 1, "email": "admin@th-luebeck.de", "role": "admin"}
+ADMIN = {"user_id": 1, "email": "admin@example.org", "role": "admin"}
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@th-luebeck.de")
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.org")
     from src.app import app
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -30,7 +30,7 @@ def client(monkeypatch):
 
 
 def _konto(**ueberschrieben):
-    konto = {"id": 7, "ldap_username": "max", "email": "max@x.de", "role": "user", "active": 1, "password_hash": BCRYPT}
+    konto = {"id": 7, "username": "max", "email": "max@x.de", "role": "user", "active": 1, "password_hash": BCRYPT}
     konto.update(ueberschrieben)
     return konto
 
@@ -46,7 +46,7 @@ def test_eligibility_rules():
     assert not can_get_reset_link(_konto(password_hash=None))
     assert not can_get_reset_link(_konto(password_hash="{SSHA}xyz"))
     assert not can_get_reset_link(_konto(role="admin"))
-    assert not can_get_reset_link(_konto(email="Admin@th-luebeck.de"), "admin@th-luebeck.de")
+    assert not can_get_reset_link(_konto(email="Admin@example.org"), "admin@example.org")
 
 
 def test_status_of():

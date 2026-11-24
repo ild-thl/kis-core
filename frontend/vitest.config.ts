@@ -6,6 +6,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   // Mirrors the "@/*" path in tsconfig.json. Without it a tested module cannot
   // reach a shared helper under src/lib the way the app does.
+  // Same JSX runtime as Next, so a component renders in a test without importing React.
+  esbuild: { jsx: "automatic" },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

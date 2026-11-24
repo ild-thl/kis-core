@@ -9,7 +9,7 @@ def test_slugify_lowers_case_and_replaces_umlauts():
     assert slugify_uid("Jörg.Müller") == "joerg.mueller"
 
 
-def test_slugify_drops_characters_ldap_does_not_accept():
+def test_slugify_drops_characters_a_login_name_does_not_accept():
     assert slugify_uid("anna+test") == "annatest"
 
 
@@ -40,15 +40,15 @@ def test_a_normal_user_name_is_a_login_name():
 
 def test_an_at_sign_is_never_a_login_name():
     # The login field tells a mail from a name by the @, so a name must not carry one.
-    assert ist_anmeldename("max@th-luebeck.de") is False
+    assert ist_anmeldename("max@example.org") is False
 
 
 def test_the_slug_never_produces_something_with_an_at_sign():
-    assert "@" not in (slugify_uid("max@th-luebeck.de") or "")
+    assert "@" not in (slugify_uid("max@example.org") or "")
 
 
 def test_a_slug_is_always_a_login_name():
-    for eingabe in ("Max Mustermann", "Hans Müller", "a.b-c_d", "max@th-luebeck.de"):
+    for eingabe in ("Max Mustermann", "Hans Müller", "a.b-c_d", "max@example.org"):
         erg = slugify_uid(eingabe)
         if erg is not None:
             assert ist_anmeldename(erg) is True

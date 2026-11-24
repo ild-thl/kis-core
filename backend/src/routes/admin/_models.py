@@ -23,6 +23,15 @@ class _UpdateSettingsBase(BaseModel):
     # Welcome dialog on an account's very first login, a switch plus free text.
     welcome_modal_enabled: bool | None = None
     welcome_modal_text: str | None = None
+    # Contact address, imprint and privacy policy of this installation, the texts in Markdown.
+    legal_contact_email: str | None = None
+    legal_imprint_de: str | None = None
+    legal_imprint_en: str | None = None
+    legal_privacy_de: str | None = None
+    legal_privacy_en: str | None = None
+    # Campus map hosted outside KIS, its address drives the footer tile, place cards and places.
+    campus_map_url: str | None = None
+    campus_map_enabled: bool | None = None
     # Text recognition when ingesting image-heavy pages, on by default.
     ocr_enabled: bool | None = None
     # Per-workspace source upload cap (admin-tunable, default 30).

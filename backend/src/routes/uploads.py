@@ -61,7 +61,7 @@ async def start_upload(
     perms: Permissions = Depends(get_user_permissions),
     locale: str = Depends(get_locale),
 ):
-    """Opens a direct upload, or answers direct False when the classic route fits better."""
+    """Opens a direct upload, or answers direct False when there is no bucket."""
     rule = rule_for(body.tool, locale)
     await _maybe_await(rule.authorize(current_user, perms, body.context, locale))
     user_id = current_user["user_id"]

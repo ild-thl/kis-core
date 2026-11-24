@@ -8,10 +8,6 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -20,7 +16,7 @@ def client(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "admin@th-luebeck.de", "role": "admin",
+        "user_id": 1, "email": "admin@example.org", "role": "admin",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -53,11 +49,11 @@ def test_a_given_mail_address_is_kept(client):
         r = client.post(
             "/admin/invites",
             json={"username": "Max.Mustermann", "kis_role": "staff",
-                  "email": "max@th-luebeck.de"},
+                  "email": "max@example.org"},
         )
 
     assert r.status_code == 200
-    assert anlegen.call_args.kwargs["email"] == "max@th-luebeck.de"
+    assert anlegen.call_args.kwargs["email"] == "max@example.org"
 
 
 def test_a_mail_address_without_an_at_sign_is_refused(client):
@@ -78,7 +74,7 @@ def test_a_mail_address_that_is_already_taken_is_refused(client):
          patch("src.routes.admin.invites.repo.create_invite") as anlegen:
         r = client.post(
             "/admin/invites",
-            json={"username": "Max", "kis_role": "staff", "email": "max@th-luebeck.de"},
+            json={"username": "Max", "kis_role": "staff", "email": "max@example.org"},
         )
 
     assert r.status_code == 409
@@ -248,7 +244,7 @@ def test_redeeming_creates_an_active_account_and_signs_in(client):
 
     assert r.status_code == 200
     kwargs = anlegen.call_args.kwargs
-    assert kwargs["ldap_username"] == "max.mustermann"
+    assert kwargs["username"] == "max.mustermann"
     assert verify_password("ein-langes-passwort", kwargs["password_hash"]) is True
     whitelist.assert_called_once_with("max.mustermann@kis.local")
     assert kwargs["active"] == 1
@@ -329,10 +325,6 @@ def test_without_a_name_the_username_is_shown(client):
 
 @pytest.fixture
 def client_ohne_sitzung(monkeypatch):
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.dependencies import get_settings
     from src.app import app

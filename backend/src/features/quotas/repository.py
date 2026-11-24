@@ -75,7 +75,7 @@ def quota_get_all_users_usage() -> list[dict]:
     with get_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(
-                """SELECT u.id AS user_id, u.ldap_username, u.display_name,
+                """SELECT u.id AS user_id, u.username, u.display_name,
                           q.quota_type, COALESCE(q.used, 0) AS used, q.reset_at,
                           o.limit_value AS override
                    FROM users u

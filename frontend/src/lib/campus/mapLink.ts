@@ -17,3 +17,17 @@ export function mapLink(mapUrl: string, locale: string, show?: string, partner?:
   if (noIntro) url.searchParams.set("intro", "0");
   return url.toString();
 }
+
+/** A file the map keeps next to its page, such as its preview image. */
+export function mapFile(mapUrl: string, name: string): string {
+  try {
+    const url = new URL(mapUrl);
+    url.search = "";
+    url.hash = "";
+    const last = url.pathname.split("/").pop() ?? "";
+    if (last && !last.includes(".")) url.pathname += "/";
+    return new URL(name, url).toString();
+  } catch {
+    return "";
+  }
+}

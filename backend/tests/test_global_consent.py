@@ -107,7 +107,7 @@ def test_me_reports_whether_consent_was_given():
     from src.security.auth import verify_auth
 
     row = {
-        "id": 7, "ldap_username": "pat", "display_name": "Pat", "email": "", "role": "user",
+        "id": 7, "username": "pat", "display_name": "Pat", "email": "", "role": "user",
         "locale": "de", "tour_seen_at": None, "global_consent_at": datetime(2026, 10, 9),
     }
     app.dependency_overrides[verify_auth] = lambda: None

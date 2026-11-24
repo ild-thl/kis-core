@@ -194,7 +194,7 @@ def list_users_for_code(code_id: int) -> list[dict]:
     with get_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(
-                """SELECT id, ldap_username, created_at, access_expires_at, active
+                """SELECT id, username, created_at, access_expires_at, active
                    FROM users WHERE access_code_id = %s ORDER BY created_at DESC""",
                 (code_id,),
             )
@@ -270,7 +270,7 @@ def workspaces_by_code() -> dict[int, list[dict]]:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(
                 """SELECT cw.code_id, w.id, w.title, w.user_id AS owner_id,
-                          COALESCE(NULLIF(u.display_name, ''), u.ldap_username) AS owner_name
+                          COALESCE(NULLIF(u.display_name, ''), u.username) AS owner_name
                    FROM access_code_workspaces cw
                    JOIN aia_workspaces w ON w.id = cw.workspace_id
                    LEFT JOIN users u ON u.id = w.user_id
@@ -306,7 +306,7 @@ def search_workspace_owners(
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(
                 """WITH treffer AS (
-                       SELECT u.id, LOWER(COALESCE(NULLIF(u.display_name, ''), u.ldap_username)) AS sortname
+                       SELECT u.id, LOWER(COALESCE(NULLIF(u.display_name, ''), u.username)) AS sortname
                        FROM users u
                        WHERE NOT u.is_demo
                          AND EXISTS (SELECT 1 FROM aia_workspaces w WHERE w.user_id = u.id)
@@ -316,15 +316,15 @@ def search_workspace_owners(
                          AND (u.id = ANY(%(ids)s)
                               OR (%(q)s <> '' AND (
                                   COALESCE(u.display_name, '') ILIKE %(muster)s
-                                  OR u.ldap_username ILIKE %(muster)s
+                                  OR u.username ILIKE %(muster)s
                                   OR EXISTS (SELECT 1 FROM aia_workspaces w
                                              WHERE w.user_id = u.id AND w.title ILIKE %(muster)s))))
                        ORDER BY sortname
                        LIMIT %(limit)s
                    )
                    SELECT u.id AS user_id, u.role,
-                          COALESCE(NULLIF(u.display_name, ''), u.ldap_username) AS name,
-                          u.ldap_username AS username,
+                          COALESCE(NULLIF(u.display_name, ''), u.username) AS name,
+                          u.username AS username,
                           w.id AS workspace_id, w.title
                    FROM treffer t
                    JOIN users u ON u.id = t.id

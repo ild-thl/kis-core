@@ -10,7 +10,7 @@ from src.routes import me as routes
 NUTZER = {"user_id": 5}
 
 KONTO = {
-    "id": 5, "ldap_username": "cc", "display_name": "Carla", "email": "cc@th-luebeck.de",
+    "id": 5, "username": "cc", "display_name": "Carla", "email": "cc@example.org",
     "role": "staff", "locale": "de",
 }
 

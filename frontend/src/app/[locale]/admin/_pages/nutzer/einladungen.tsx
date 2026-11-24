@@ -1,6 +1,6 @@
 "use client";
 
-/** Invitations, behind the same server switch as the LDAP users. */
+/** Invitations, behind the same server switch as creating accounts. */
 
 import { useTranslations } from "next-intl";
 import InvitesTab from "../../_components/InvitesTab";
@@ -11,7 +11,7 @@ export default function InvitesPage() {
   const { loaded, permissions } = usePermissions();
 
   if (!loaded) return null;
-  if (!permissions.allow_ldap_user_create) {
+  if (!permissions.allow_account_create) {
     return <p className="text-sm text-muted-soft">{t("disabled")}</p>;
   }
   return <InvitesTab />;

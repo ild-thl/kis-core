@@ -23,7 +23,8 @@ const nextConfig: NextConfig = {
     return config;
   },
   experimental: {
-    middlewareClientMaxBodySize: "500mb",
+    // Matches the 32 MB proxy limit, larger files go to the bucket in parts.
+    middlewareClientMaxBodySize: "32mb",
     proxyTimeout: 600000, // 10 min for local Ollama generation
     optimizePackageImports: ["@phosphor-icons/react"],
   },
@@ -394,15 +395,6 @@ const nextConfig: NextConfig = {
       {
         source: "/openapi.json",
         destination: `${backendUrl}/openapi.json`,
-      },
-      // Campus map: static folder under public/, Next does not resolve "/campus-map/" to index.html itself.
-      {
-        source: "/campus-map",
-        destination: "/campus-map/index.html",
-      },
-      {
-        source: "/campus-map/",
-        destination: "/campus-map/index.html",
       },
     ];
   },

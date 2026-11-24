@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import MapModal from "@/components/campus/MapModal";
 import { campusApi } from "@/lib/campus/api";
+import { mapFile } from "@/lib/campus/mapLink";
 
 // The THL lettering is much heavier than the rest, a narrower cap evens out how much of its tile it fills.
 const PARTNERS = [
@@ -22,6 +23,7 @@ const LOGO = "max-h-full max-w-full w-auto h-auto object-contain";
 export default function Footer({ loggedIn }: { loggedIn?: boolean }) {
   const t = useTranslations("footer");
   const [mapUrl, setMapUrl] = useState("");
+  const [previewOk, setPreviewOk] = useState(true);
   const [mapOpen, setMapOpen] = useState(false);
 
   // The map link is an admin setting, without it the map section stays away.
@@ -73,14 +75,18 @@ export default function Footer({ loggedIn }: { loggedIn?: boolean }) {
                 <span className="absolute left-4 top-2 text-xs font-medium" style={{ color: "rgba(0,0,0,0.45)" }}>
                   {t("campusMap")}
                 </span>
-                <Image
-                  src="/campus-map-preview.jpg"
-                  alt=""
-                  width={1280}
-                  height={720}
-                  sizes="(min-width: 640px) 284px, 228px"
-                  className={`${LOGO} rounded-md`}
-                />
+                {/* The map brings its own preview, a map without one leaves the tile with its label only. */}
+                {previewOk && (
+                  <Image
+                    src={mapFile(mapUrl, "preview.jpg")}
+                    alt=""
+                    width={1280}
+                    height={720}
+                    unoptimized
+                    onError={() => setPreviewOk(false)}
+                    className={`${LOGO} rounded-md`}
+                  />
+                )}
               </span>
             </button>
             <MapModal open={mapOpen} onClose={() => setMapOpen(false)} mapUrl={mapUrl} />

@@ -31,10 +31,7 @@ def _code(**abweichungen):
 
 
 def _umgebung(monkeypatch):
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
+    monkeypatch.setenv("AUTH_DISABLED", "false")
 
 
 @pytest.fixture
@@ -236,7 +233,7 @@ def test_a_failing_creation_gives_the_seat_back(client):
     with patch("src.routes.access_codes.repo.get_code_by_code", return_value=_code()), \
          patch("src.routes.access_codes.database.get_user_by_username", return_value=None), \
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
-         patch("src.routes.access_codes.provision_account", side_effect=RuntimeError("ldap")), \
+         patch("src.routes.access_codes.provision_account", side_effect=RuntimeError("boom")), \
          patch("src.routes.access_codes.repo.release_use") as zurueck:
         r = client.post("/access-codes/redeem", json=GUELTIG)
 
@@ -319,7 +316,7 @@ VERLAENGERN = {"username": "max.mustermann", "password": "geheim123", "code": "K
 
 
 def test_renewing_moves_the_deadline_and_logs_in(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann", "display_name": "Max Mustermann",
+    konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
              "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
@@ -335,7 +332,7 @@ def test_renewing_moves_the_deadline_and_logs_in(client):
 
 
 def test_renewing_with_an_unlimited_code_sets_no_deadline(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann", "display_name": "Max Mustermann",
+    konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
              "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
@@ -351,7 +348,7 @@ def test_renewing_with_an_unlimited_code_sets_no_deadline(client):
 
 
 def test_renewing_works_even_when_every_seat_is_taken(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann", "display_name": "Max Mustermann",
+    konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
              "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
@@ -363,7 +360,7 @@ def test_renewing_works_even_when_every_seat_is_taken(client):
 
 
 def test_renewing_a_switched_off_code_is_refused(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann", "display_name": "M", "email": None,
+    konto = {"id": 42, "username": "max.mustermann", "display_name": "M", "email": None,
              "role": "staff", "custom_role_id": None, "active": 1, "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
          patch("src.routes.access_codes.repo.get_code_by_code", return_value=_code(active=False)), \
@@ -375,7 +372,7 @@ def test_renewing_a_switched_off_code_is_refused(client):
 
 
 def test_a_normal_account_cannot_give_itself_a_deadline(client):
-    konto = {"id": 5, "ldap_username": "hamid", "display_name": "H", "email": None,
+    konto = {"id": 5, "username": "hamid", "display_name": "H", "email": None,
              "role": "admin", "custom_role_id": None, "active": 1, "access_expires_at": None}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
          patch("src.routes.access_codes.repo.set_user_access") as frist:
@@ -386,7 +383,7 @@ def test_a_normal_account_cannot_give_itself_a_deadline(client):
 
 
 def test_a_deactivated_account_cannot_renew_itself_back_in(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann", "display_name": "M", "email": None,
+    konto = {"id": 42, "username": "max.mustermann", "display_name": "M", "email": None,
              "role": "staff", "custom_role_id": None, "active": 0, "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
          patch("src.routes.access_codes.repo.set_user_access") as frist:
@@ -476,7 +473,7 @@ def test_a_failed_enrollment_never_blocks_redeeming(client):
 
 
 def test_renewing_enrolls_into_the_workspaces_of_the_code_used(client):
-    konto = {"id": 42, "ldap_username": "max.mustermann", "display_name": "Max Mustermann",
+    konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
              "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \

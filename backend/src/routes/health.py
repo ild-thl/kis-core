@@ -13,6 +13,10 @@ DEFAULT_WELCOME_MODAL_TEXT = (
 )
 
 
+# Contact, imprint and privacy policy of this installation, entered in Admin -> System and empty on a fresh one.
+LEGAL_KEYS = ("legal_contact_email", "legal_imprint_de", "legal_imprint_en", "legal_privacy_de", "legal_privacy_en")
+
+
 @router.get("/health")
 def health():
     return {"status": "ok"}
@@ -35,4 +39,6 @@ def ui_labels():
         # First-login welcome dialog, read publicly so it can show right after sign-in.
         "welcome_modal_enabled": db.get_setting("welcome_modal_enabled", "true").lower() == "true",
         "welcome_modal_text": db.get_setting("welcome_modal_text", DEFAULT_WELCOME_MODAL_TEXT),
+        # Imprint and privacy pages and the contact links are open to every visitor.
+        **{key: db.get_setting(key, "") for key in LEGAL_KEYS},
     }

@@ -35,7 +35,7 @@ export default function UsersTab({ onOpenQuota }: { onOpenQuota: (userId: number
   const [resetFuer, setResetFuer] = useState<AdminUser | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [demoFrage, setDemoFrage] = useState<{ user: AdminUser; wert: boolean } | null>(null);
-  const [allowLdapCreate, setAllowLdapCreate] = useState(false);
+  const [allowAccountCreate, setAllowAccountCreate] = useState(false);
   const [darfUebernehmen, setDarfUebernehmen] = useState(false);
   const [gesperrteRollen, setGesperrteRollen] = useState<number[]>([]);
   const [uebernahmeFehler, setUebernahmeFehler] = useState("");
@@ -88,7 +88,7 @@ export default function UsersTab({ onOpenQuota }: { onOpenQuota: (userId: number
       .then((s) => {
         if (s?.email) setAdminEmail(String(s.email).toLowerCase());
         setMeineId(Number(s?.user_id ?? 0));
-        setAllowLdapCreate(Boolean(s?.permissions?.allow_ldap_user_create));
+        setAllowAccountCreate(Boolean(s?.permissions?.allow_account_create));
         setDarfUebernehmen(Boolean(s?.permissions?.keys?.includes(PERM.usersImpersonate)));
       });
   }, [t]);
@@ -187,13 +187,13 @@ export default function UsersTab({ onOpenQuota }: { onOpenQuota: (userId: number
           className="w-40"
         />
         <span className="text-xs text-muted-soft whitespace-nowrap">{t("users.totalUsers", { n: total })}</span>
-        {allowLdapCreate && (
+        {allowAccountCreate && (
           <button
             type="button"
             onClick={() => setShowCreateDialog(true)}
             className="px-3 py-2 text-sm btn-primary rounded-md transition-colors whitespace-nowrap"
           >
-            {t("createLdapUser.buttonLabel")}
+            {t("createAccount.buttonLabel")}
           </button>
         )}
       </div>
@@ -232,7 +232,7 @@ export default function UsersTab({ onOpenQuota }: { onOpenQuota: (userId: number
                 <tr key={u.id}>
                   <td className="px-4 py-3">
                     <p className="font-medium text-foreground">{u.display_name}</p>
-                    <p className="text-xs text-muted-soft">{u.ldap_username}</p>
+                    <p className="text-xs text-muted-soft">{u.username}</p>
                   </td>
                   <td className="px-4 py-3 text-foreground-soft">
                     {u.email ?? <span className="text-border">-</span>}
@@ -359,7 +359,7 @@ export default function UsersTab({ onOpenQuota }: { onOpenQuota: (userId: number
       {resetFuer && (
         <ResetLinkDialog
           userId={resetFuer.id}
-          userName={resetFuer.display_name || resetFuer.ldap_username}
+          userName={resetFuer.display_name || resetFuer.username}
           onClose={() => setResetFuer(null)}
         />
       )}
@@ -367,7 +367,7 @@ export default function UsersTab({ onOpenQuota }: { onOpenQuota: (userId: number
       {zuLoeschen && (
         <DeleteUserConfirmDialog
           userId={zuLoeschen.id}
-          userName={zuLoeschen.display_name || zuLoeschen.ldap_username}
+          userName={zuLoeschen.display_name || zuLoeschen.username}
           onCancel={() => setZuLoeschen(null)}
           onDeleted={() => {
             setZuLoeschen(null);

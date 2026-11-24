@@ -30,7 +30,7 @@ class Permissions:
     """What someone may do, as a set of keys."""
 
     keys: frozenset[str] = field(default_factory=frozenset)
-    allow_ldap_user_create: bool = False
+    allow_account_create: bool = False
 
     def has(self, *keys: str) -> bool:
         """True as soon as one of the named keys is present."""
@@ -88,7 +88,7 @@ def resolve_user_permissions(
     """Computes the effective permissions, creating accounts comes with user administration."""
     base = _resolve_base_permissions(role, custom_role_id, is_env_admin)
     if PERM_SET_USERS_ALL in base.keys:
-        return Permissions(keys=base.keys, allow_ldap_user_create=True)
+        return Permissions(keys=base.keys, allow_account_create=True)
     return base
 
 
@@ -97,7 +97,7 @@ def _resolve_base_permissions(
     custom_role_id: int | None,
     is_env_admin: bool,
 ) -> Permissions:
-    """The base permissions before the LDAP switch, the environment admin always wins."""
+    """The base permissions before the account creation switch, the environment admin always wins."""
     if is_env_admin:
         return permissions_for_system_role("admin")
     if role in SYSTEM_ROLES:

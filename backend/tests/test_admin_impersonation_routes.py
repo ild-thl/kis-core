@@ -12,7 +12,7 @@ from src.permissions_registry import (
 )
 
 ADMIN = {"user_id": 1, "username": "chef", "display_name": "Chefin",
-         "email": "admin@th-luebeck.de", "role": "admin", "custom_role_id": None}
+         "email": "admin@example.org", "role": "admin", "custom_role_id": None}
 
 
 class FakeStore:
@@ -40,8 +40,8 @@ class FakeStore:
 
 def _user(**felder) -> dict:
     basis = {
-        "id": 7, "ldap_username": "anna", "display_name": "Anna Beispiel",
-        "email": "anna@th-luebeck.de", "role": "user", "custom_role_id": None,
+        "id": 7, "username": "anna", "display_name": "Anna Beispiel",
+        "email": "anna@example.org", "role": "user", "custom_role_id": None,
         "active": 1, "access_expires_at": None,
     }
     basis.update(felder)
@@ -51,8 +51,7 @@ def _user(**felder) -> dict:
 @pytest.fixture
 def umgebung(monkeypatch):
     """App with a fake session store, a fake record and a settable target."""
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
-    monkeypatch.setenv("ADMIN_EMAIL", "chef@th-luebeck.de")
+    monkeypatch.setenv("ADMIN_EMAIL", "chef@example.org")
 
     from src import database
     from src.app import app
@@ -111,7 +110,7 @@ GELIEHEN = {
 
 def test_ohne_recht_kein_zutritt(umgebung):
     _als(umgebung, {"user_id": 2, "username": "lisa", "role": "staff",
-                    "email": "lisa@th-luebeck.de", "custom_role_id": None})
+                    "email": "lisa@example.org", "custom_role_id": None})
     antwort = _post(umgebung, "/admin/users/7/impersonate")
     assert antwort.status_code == 403
 
@@ -123,7 +122,7 @@ def test_unbekanntes_konto_ist_404(umgebung):
 
 
 def test_sich_selbst_geht_nicht(umgebung):
-    umgebung["ziel"]["row"] = _user(id=1, ldap_username="chef")
+    umgebung["ziel"]["row"] = _user(id=1, username="chef")
     antwort = _post(umgebung, "/admin/users/1/impersonate")
     assert antwort.status_code == 403
 
@@ -241,7 +240,7 @@ def test_stop_braucht_kein_recht(umgebung):
 
 def test_protokoll_braucht_das_recht(umgebung):
     _als(umgebung, {"user_id": 2, "username": "lisa", "role": "user",
-                    "email": "lisa@th-luebeck.de", "custom_role_id": None})
+                    "email": "lisa@example.org", "custom_role_id": None})
     assert umgebung["client"].get("/admin/impersonation/log", cookies={"session": "eigene"}).status_code == 403
 
 

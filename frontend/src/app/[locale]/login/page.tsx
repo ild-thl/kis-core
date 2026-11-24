@@ -11,6 +11,7 @@ import { login, checkAuthStatus } from "@/lib/auth";
 import { AccessCodeDone, AccessCodeForm, useAccessCode } from "../redeem/_accessCode";
 import { isReturnPath } from "@/components/auth/_routeGuard";
 import { AUTH_FIELD } from "@/components/auth/authField";
+import { useLegal } from "@/lib/legal";
 
 /** Where the login leads: back to a shared page the person came from, else the workspaces. */
 function afterLogin(): string {
@@ -20,6 +21,7 @@ function afterLogin(): string {
 
 export default function LoginPage() {
   const t = useTranslations("login");
+  const contactEmail = useLegal()?.contactEmail ?? "";
   const tc = useTranslations("accessCode");
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -133,9 +135,11 @@ export default function LoginPage() {
         >
           <p className="text-sm font-semibold">{t("expiredTitle")}</p>
           <p className="mt-1 text-sm leading-relaxed text-foreground-soft">{t("expiredText")}</p>
-          <a href="mailto:hamid.mergan@th-luebeck.de" className="mt-2 inline-block text-sm text-kb-dark hover:underline">
-            hamid.mergan@th-luebeck.de
-          </a>
+          {contactEmail && (
+            <a href={`mailto:${contactEmail}`} className="mt-2 inline-block text-sm text-kb-dark hover:underline">
+              {contactEmail}
+            </a>
+          )}
         </div>
       )}
 
@@ -209,11 +213,11 @@ export default function LoginPage() {
 
       {fertig && <AccessCodeDone fertig={fertig} />}
 
-      {tab === "login" && !fertig && (
+      {tab === "login" && !fertig && contactEmail && (
         <p className="mt-6 text-sm text-foreground-soft">
           {t("forgot")}{" "}
-          <a href="mailto:hamid.mergan@th-luebeck.de" className="text-kb-dark hover:underline">
-            hamid.mergan@th-luebeck.de
+          <a href={`mailto:${contactEmail}`} className="text-kb-dark hover:underline">
+            {contactEmail}
           </a>
         </p>
       )}

@@ -5,21 +5,21 @@ import { extractJoinCode } from "./joinInput";
 
 describe("extractJoinCode", () => {
   it("liest den Code aus einem ganzen Link", () => {
-    expect(extractJoinCode("https://kis.th-luebeck.de/?code=7f3a91c2")).toBe("7f3a91c2");
+    expect(extractJoinCode("https://kis.example.org/?code=7f3a91c2")).toBe("7f3a91c2");
   });
 
   it("liest den Code auch mit Sprachpfad und weiteren Parametern", () => {
-    expect(extractJoinCode("https://kis.th-luebeck.de/de/?code=7f3a91c2&utm=mail")).toBe(
+    expect(extractJoinCode("https://kis.example.org/de/?code=7f3a91c2&utm=mail")).toBe(
       "7f3a91c2",
     );
   });
 
   it("liest den Code aus dem Link zur Modulliste", () => {
-    expect(extractJoinCode("https://kis.th-luebeck.de/workspace?code=7f3a91c2")).toBe("7f3a91c2");
+    expect(extractJoinCode("https://kis.example.org/workspace?code=7f3a91c2")).toBe("7f3a91c2");
   });
 
   it("kommt ohne Schema aus", () => {
-    expect(extractJoinCode("kis.th-luebeck.de/?code=7f3a91c2")).toBe("7f3a91c2");
+    expect(extractJoinCode("kis.example.org/?code=7f3a91c2")).toBe("7f3a91c2");
   });
 
   it("nimmt den nackten Code", () => {
@@ -39,7 +39,7 @@ describe("extractJoinCode", () => {
   });
 
   it("gibt null bei einer Adresse ohne Code", () => {
-    expect(extractJoinCode("https://kis.th-luebeck.de/workspace/abc")).toBeNull();
+    expect(extractJoinCode("https://kis.example.org/workspace/abc")).toBeNull();
   });
 
   it("gibt null bei leerer Eingabe", () => {

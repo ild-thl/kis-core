@@ -33,7 +33,7 @@ def get_config() -> dict:
         "outro_text": get_setting("evaluation_outro_text") if gespeichert else voreinstellung["outro_text"],
         "outro_link_label": get_setting("evaluation_outro_link_label"),
         "outro_link_url": get_setting("evaluation_outro_link_url"),
-        "contact_email": get_setting("evaluation_contact_email") if gespeichert else voreinstellung["contact_email"],
+        "contact_email": get_setting("evaluation_contact_email") if gespeichert else (voreinstellung["contact_email"] or get_setting("legal_contact_email")),
         "questions": json.loads(fragen_roh) if gespeichert else voreinstellung["questions"],
     }
 

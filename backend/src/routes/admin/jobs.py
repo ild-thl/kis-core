@@ -56,7 +56,7 @@ def list_all_jobs(
             "created_at": j["created_at"],
             "completed_at": j["completed_at"],
             "duration_seconds": _compute_duration(j),
-            "user_display_name": j.get("user_display_name") or j.get("ldap_username") or "Unbekannt",
+            "user_display_name": j.get("user_display_name") or j.get("username") or "Unbekannt",
         }
         for j in jobs
     ]

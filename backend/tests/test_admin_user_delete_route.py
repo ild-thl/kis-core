@@ -4,12 +4,12 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-ADMIN = {"user_id": 1, "email": "admin@th-luebeck.de", "role": "admin"}
+ADMIN = {"user_id": 1, "email": "admin@example.org", "role": "admin"}
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@th-luebeck.de")
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.org")
 
     from src.app import app
     from src.dependencies import get_current_user, get_settings
@@ -23,7 +23,7 @@ def client(monkeypatch):
     get_settings.cache_clear()
 
 
-def _nutzer(user_id=7, email="studi@th-luebeck.de"):
+def _nutzer(user_id=7, email="studi@example.org"):
     return {"id": user_id, "email": email, "display_name": "Studi"}
 
 
@@ -47,7 +47,7 @@ def test_das_eigene_konto_bleibt_stehen(client):
 def test_das_env_konto_bleibt_stehen(client):
     """It is recreated at startup and is the way back into the system."""
     with patch("src.routes.admin.users.db.get_user_by_id",
-               return_value=_nutzer(9, "admin@th-luebeck.de")), \
+               return_value=_nutzer(9, "admin@example.org")), \
          patch("src.routes.admin.users.delete_user_completely") as loeschen:
         r = client.delete("/admin/users/9")
     assert r.status_code == 403
@@ -56,7 +56,7 @@ def test_das_env_konto_bleibt_stehen(client):
 
 def test_grossschreibung_hebelt_den_schutz_des_env_kontos_nicht_aus(client):
     with patch("src.routes.admin.users.db.get_user_by_id",
-               return_value=_nutzer(9, "Admin@TH-Luebeck.de")), \
+               return_value=_nutzer(9, "Admin@Example.org")), \
          patch("src.routes.admin.users.delete_user_completely") as loeschen:
         r = client.delete("/admin/users/9")
     assert r.status_code == 403

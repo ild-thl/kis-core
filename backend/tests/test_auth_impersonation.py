@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 GELIEHEN = {
     "user_id": 7, "username": "anna", "display_name": "Anna Beispiel",
-    "email": "anna@th-luebeck.de", "role": "user", "custom_role_id": None,
+    "email": "anna@example.org", "role": "user", "custom_role_id": None,
     "access_expires_at": None,
     "impersonator": {"user_id": 1, "username": "chef", "display_name": "Chefin", "log_id": 42},
     "impersonator_token": "eigene",
@@ -28,8 +28,7 @@ class FakeStore:
 
 @pytest.fixture
 def umgebung(monkeypatch):
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
-    monkeypatch.setenv("ADMIN_EMAIL", "chef@th-luebeck.de")
+    monkeypatch.setenv("ADMIN_EMAIL", "chef@example.org")
 
     from src import database
     from src.app import app

@@ -14,8 +14,6 @@ MORGEN = datetime.now() + timedelta(days=30)
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -24,7 +22,7 @@ def client(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "admin@th-luebeck.de", "role": "admin",
+        "user_id": 1, "email": "admin@example.org", "role": "admin",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -34,8 +32,6 @@ def client(monkeypatch):
 @pytest.fixture
 def limited_client(monkeypatch):
     """An admin whose custom role holds only user administration, nothing else."""
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src import database
     from src.dependencies import get_current_user, get_settings
@@ -49,7 +45,7 @@ def limited_client(monkeypatch):
     )
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 2, "email": "eingeschraenkt@th-luebeck.de",
+        "user_id": 2, "email": "eingeschraenkt@example.org",
         "role": "custom", "custom_role_id": 5,
     }
     yield TestClient(app)
@@ -60,8 +56,6 @@ def limited_client(monkeypatch):
 @pytest.fixture
 def client_ohne_recht(monkeypatch):
     """A caller with no admin rights at all, to prove the gate itself holds."""
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -70,7 +64,7 @@ def client_ohne_recht(monkeypatch):
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 3, "email": "student@th-luebeck.de", "role": "user",
+        "user_id": 3, "email": "student@example.org", "role": "user",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -428,13 +422,13 @@ GESTERN = datetime.now() - timedelta(days=1)
 
 def test_the_user_list_carries_the_state_of_every_account(client):
     konten = [
-        {"id": 1, "ldap_username": "abc12345", "created_at": MORGEN,
+        {"id": 1, "username": "abc12345", "created_at": MORGEN,
          "access_expires_at": MORGEN, "active": True},
-        {"id": 2, "ldap_username": "def67890", "created_at": MORGEN,
+        {"id": 2, "username": "def67890", "created_at": MORGEN,
          "access_expires_at": GESTERN, "active": True},
-        {"id": 3, "ldap_username": "ghi13579", "created_at": MORGEN,
+        {"id": 3, "username": "ghi13579", "created_at": MORGEN,
          "access_expires_at": MORGEN, "active": False},
-        {"id": 4, "ldap_username": "jkl24680", "created_at": MORGEN,
+        {"id": 4, "username": "jkl24680", "created_at": MORGEN,
          "access_expires_at": None, "active": True},
     ]
     with patch("src.routes.admin.access_codes.repo.list_users_for_code", return_value=konten):
@@ -449,7 +443,7 @@ def test_the_user_list_carries_the_state_of_every_account(client):
 def test_resetting_a_password_writes_a_hash_of_the_new_one(client):
     from src.features.accounts.passwords import verify_password
 
-    konto = {"id": 42, "ldap_username": "abc12345", "access_code_id": 7}
+    konto = {"id": 42, "username": "abc12345", "access_code_id": 7}
     with patch("src.routes.admin.access_codes.database.get_user_by_id", return_value=konto), \
          patch("src.routes.admin.access_codes.database.set_user_password") as setzen:
         r = client.post("/admin/access-codes/users/42/password")
@@ -463,7 +457,7 @@ def test_resetting_a_password_writes_a_hash_of_the_new_one(client):
 
 
 def test_resetting_a_password_for_an_account_without_a_code_is_refused(client):
-    konto = {"id": 5, "ldap_username": "staffuser", "access_code_id": None}
+    konto = {"id": 5, "username": "staffuser", "access_code_id": None}
     with patch("src.routes.admin.access_codes.database.get_user_by_id", return_value=konto), \
          patch("src.routes.admin.access_codes.database.set_user_password") as setzen:
         r = client.post("/admin/access-codes/users/5/password")
@@ -473,7 +467,7 @@ def test_resetting_a_password_for_an_account_without_a_code_is_refused(client):
 
 
 def test_the_activity_route_returns_modules_and_messages(client):
-    konto = {"id": 42, "ldap_username": "abc12345", "access_code_id": 7}
+    konto = {"id": 42, "username": "abc12345", "access_code_id": 7}
     module = [{"workspace_id": 1, "title": "Deutsch A1", "relation": "owner", "since": MORGEN}]
     nachrichten = [{
         "role": "user", "content": "Was bedeutet das?", "created_at": MORGEN,
@@ -493,7 +487,7 @@ def test_the_activity_route_returns_modules_and_messages(client):
 
 
 def test_the_activity_route_refuses_an_account_without_a_code(client):
-    konto = {"id": 5, "ldap_username": "staffuser", "access_code_id": None}
+    konto = {"id": 5, "username": "staffuser", "access_code_id": None}
     with patch("src.routes.admin.access_codes.database.get_user_by_id", return_value=konto), \
          patch("src.routes.admin.access_codes.repo.list_workspaces_for_user") as ws, \
          patch("src.routes.admin.access_codes.repo.list_messages_for_user") as msg:
@@ -564,9 +558,9 @@ def test_the_message_cap_is_fifty(monkeypatch):
 def test_the_user_list_says_when_every_account_will_be_deleted(client):
     """The admin needs to see how long the evaluation data is still there."""
     konten = [
-        {"id": 1, "ldap_username": "abc12345", "created_at": MORGEN,
+        {"id": 1, "username": "abc12345", "created_at": MORGEN,
          "access_expires_at": datetime(2026, 9, 1, 12, 0), "active": False},
-        {"id": 2, "ldap_username": "def67890", "created_at": MORGEN,
+        {"id": 2, "username": "def67890", "created_at": MORGEN,
          "access_expires_at": None, "active": True},
     ]
     with patch("src.routes.admin.access_codes.repo.list_users_for_code", return_value=konten), \
@@ -580,7 +574,7 @@ def test_the_user_list_says_when_every_account_will_be_deleted(client):
 
 def test_the_user_list_promises_no_deletion_while_the_sweep_is_off(client):
     konten = [
-        {"id": 1, "ldap_username": "abc12345", "created_at": MORGEN,
+        {"id": 1, "username": "abc12345", "created_at": MORGEN,
          "access_expires_at": datetime(2026, 9, 1, 12, 0), "active": False},
     ]
     with patch("src.routes.admin.access_codes.repo.list_users_for_code", return_value=konten), \

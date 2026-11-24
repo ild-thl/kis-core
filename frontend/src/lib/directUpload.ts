@@ -89,7 +89,7 @@ export function forgetUpload(tool: string, file: File, context?: Record<string, 
 
 /**
  * Uploads the file in parts, joins it on the server and returns the token the tool takes it by.
- * Null means the classic upload fits better: no bucket, or a file type the tool takes directly.
+ * Null means there is no bucket, the file then goes whole with the tool's own request.
  */
 export async function uploadFile(opts: UploadOptions): Promise<string | null> {
   const { tool, file, signal, context } = opts;

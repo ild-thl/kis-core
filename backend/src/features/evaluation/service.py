@@ -42,7 +42,8 @@ def default_config() -> dict:
         "outro_text": "Vielen Dank, dass du dir die Zeit genommen hast.",
         "outro_link_label": "",
         "outro_link_url": "",
-        "contact_email": "hamid.mergan@th-luebeck.de",
+        # The repository fills in the installation's contact address while nothing was saved.
+        "contact_email": "",
         "questions": [
             # Broad first (funnel technique), then the area question, then specific per area, open questions and the two overall verdicts last.
             {"id": "zurechtgefunden", "type": "choice", "text": "Hast du dich auf askFrancis zurechtgefunden?",

@@ -16,7 +16,7 @@ interface QuotaEntry {
 
 interface QuotaUser {
   user_id: number;
-  ldap_username: string;
+  username: string;
   display_name: string;
   quotas: QuotaEntry[];
 }
@@ -72,7 +72,7 @@ export default function QuotaTab({ targetUserId, onConsumed, onBack }: QuotaTabP
     openUser({
       user_id: targetUserId,
       display_name: "",
-      ldap_username: "",
+      username: "",
       quotas: [],
     });
     onConsumed();

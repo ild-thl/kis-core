@@ -49,7 +49,7 @@ def _neu_anlegen(name: str, adresse: str, password: str) -> int | None:
     """Creates the admin and notes which row it is."""
     database.add_to_whitelist(adresse)
     user_id = database.create_user(
-        ldap_username=name,
+        username=name,
         display_name="Admin",
         email=adresse,
         active=1,
@@ -77,7 +77,7 @@ def _abgleichen(konto, name: str, adresse: str, password: str) -> None:
 
 def _pruefe_name(konto, name: str) -> str:
     """Keeps the old name when the wished one would break the login or is taken."""
-    alt = konto["ldap_username"]
+    alt = konto["username"]
     if name == alt:
         return alt
     if not ist_anmeldename(name):
@@ -95,7 +95,7 @@ def _rename_and_remail(user_id: int, name: str, adresse: str) -> None:
     with database.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE users SET ldap_username = %s, email = %s WHERE id = %s",
+                "UPDATE users SET username = %s, email = %s WHERE id = %s",
                 (name, adresse, user_id),
             )
         conn.commit()

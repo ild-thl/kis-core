@@ -64,7 +64,7 @@ def test_creating_an_invite_commits(fake_db):
 
     neu = repo.create_invite(
         token="tok",
-        email="a@th-luebeck.de",
+        email="a@example.org",
         uid="a",
         role="staff",
         custom_role_id=None,

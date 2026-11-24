@@ -1,10 +1,12 @@
 """Loads the place list of the campus map and keeps one indexed page per place."""
 import json
-from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urljoin, urlsplit, urlunsplit
+
+import httpx
 
 from src.features.campus.repository import pages as page_repo
 from src.features.campus.repository import places as place_repo
+from src.features.campus.services import fetch as fetch_mod
 from src.features.campus.services.indexer import EmbedFn, index_markdown
 from src.features.campus.services.place_match import show_param
 
@@ -49,16 +51,36 @@ def place_markdown(place: dict) -> str:
     return "\n\n".join(parts)
 
 
+def _page_url(map_url: str) -> str:
+    """The map address without query, a folder address always ending in a slash."""
+    parts = urlsplit(map_url.strip())
+    path = parts.path or "/"
+    if not path.endswith("/") and "." not in path.rsplit("/", 1)[-1]:
+        path += "/"
+    return urlunsplit((parts.scheme, parts.netloc, path, "", ""))
+
+
 def place_url(map_url: str, place: dict) -> str:
-    base = map_url.strip()
-    if not base:
+    if not map_url.strip():
         return f"place:{place['id']}"
-    if not base.endswith("/"):
-        base += "/"
-    return f"{base}?show={quote(show_param(place))}"
+    return f"{_page_url(map_url)}?show={quote(show_param(place))}"
 
 
-BUNDLED_PLACES = Path(__file__).resolve().parents[1] / "data" / "places.json"
+def places_url(map_url: str) -> str:
+    """The place list sits next to the map page, so the map brings its own places."""
+    return urljoin(_page_url(map_url), "places.json")
+
+
+def fetch_places(client: httpx.Client, map_url: str) -> bytes:
+    """No map means no places, a map without places.json is fine, any other failure raises."""
+    if not map_url.strip():
+        return b"[]"
+    result = fetch_mod.fetch_conditional(client, places_url(map_url))
+    if result.status == "gone":
+        return b"[]"
+    if result.status != "ok":
+        raise ValueError(f"places.json not loaded: {result.error or result.status}")
+    return result.body
 
 
 def parse_places(raw: bytes | str) -> list[dict]:

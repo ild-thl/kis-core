@@ -5,8 +5,8 @@ import { inviteUrl } from "./inviteUrl";
 
 describe("inviteUrl", () => {
   it("haengt den Schluessel an die Einladungsseite", () => {
-    expect(inviteUrl("https://kis.th-luebeck.de", "7Kq2xR")).toBe(
-      "https://kis.th-luebeck.de/invite/7Kq2xR",
+    expect(inviteUrl("https://kis.example.org", "7Kq2xR")).toBe(
+      "https://kis.example.org/invite/7Kq2xR",
     );
   });
 

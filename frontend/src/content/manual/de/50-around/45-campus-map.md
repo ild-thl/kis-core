@@ -15,11 +15,12 @@ und lässt sich auch in einem eigenen Tab öffnen.
 
 ## Campusplan einbinden
 
-Der Campusplan lässt sich auch auf anderen Seiten einbinden, als eigenständiges iframe.
+Der Campusplan lässt sich auch auf anderen Seiten einbinden, als eigenständiges iframe. Die Adresse
+der Karte steht im Admin unter System → Campus Map.
 
 ```html
 <iframe
-    src="https://kis.th-luebeck.de/campus-map/?lang=de"
+    src="https://s3.mylab.th-luebeck.de/mb00083805-campus-map/campus-map/index.html?lang=de"
     title="Campusplan TH Lübeck"
     width="100%"
     height="700"

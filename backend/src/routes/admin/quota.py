@@ -61,7 +61,7 @@ def get_quota_overview(_admin=Depends(_require)):
         if uid not in users:
             users[uid] = {
                 "user_id": uid,
-                "ldap_username": row["ldap_username"],
+                "username": row["username"],
                 "display_name": row["display_name"],
                 "quotas": [],
             }

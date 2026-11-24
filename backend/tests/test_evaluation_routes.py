@@ -15,7 +15,7 @@ def client():
 
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 42, "email": "t@th-luebeck.de"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 42, "email": "t@example.org"}
     yield TestClient(app)
     app.dependency_overrides.clear()
     get_settings.cache_clear()
@@ -31,7 +31,7 @@ def client_admin():
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: {
-        "user_id": 1, "email": "admin@th-luebeck.de", "role": "admin",
+        "user_id": 1, "email": "admin@example.org", "role": "admin",
     }
     yield TestClient(app)
     app.dependency_overrides.clear()

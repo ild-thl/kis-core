@@ -18,8 +18,8 @@ def _ssha(password: str) -> str:
 def test_an_input_with_an_at_sign_goes_to_the_mail_lookup():
     with patch("src.features.accounts.login.database.get_user_by_email", return_value={"id": 1}) as mail, \
          patch("src.features.accounts.login.database.get_user_by_username") as name:
-        assert find_user("max@th-luebeck.de")["id"] == 1
-    mail.assert_called_once_with("max@th-luebeck.de")
+        assert find_user("max@example.org")["id"] == 1
+    mail.assert_called_once_with("max@example.org")
     name.assert_not_called()
 
 

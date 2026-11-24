@@ -62,7 +62,7 @@ def konto_bauen(schema):
         with schema() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO users (ldap_username, display_name, email, active, role) "
+                    "INSERT INTO users (username, display_name, email, active, role) "
                     "VALUES (%s, %s, %s, 0, 'user') RETURNING id",
                     (f"test.schonfrist.{kennung}", "Test Schonfrist",
                      f"test.schonfrist.{kennung}@demo.kis.local"),
