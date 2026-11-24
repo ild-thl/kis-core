@@ -26,7 +26,7 @@ _AAD = "providers.api_key"
 
 
 def _encrypt_key(raw: Optional[str]) -> Optional[str]:
-    """Wraps a key for storage; passes it through unchanged without KIS_SECRETS_KEY."""
+    """Wraps a key for storage; passes it through unchanged without ASKF_SECRETS_KEY."""
     if raw is None or not export_crypto.is_export_key_configured():
         return raw
     return json.dumps(export_crypto.wrap_api_key(raw, provider_name=_AAD))

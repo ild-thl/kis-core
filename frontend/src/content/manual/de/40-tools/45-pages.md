@@ -58,7 +58,7 @@ Bearbeiten erscheinen dort nicht.
 
 Jede Seite ist zunächst privat. Der Schalter auf der Karte oder das Teilen-Symbol im Editor
 macht sie teilbar, Sie bekommen einen Link. Wer ihn öffnet, sieht die Vorschau und kann nichts
-ändern. Im Teilen-Fenster legen Sie fest, für wen der Link gilt: Mit KIS-Konto heißt, nur
+ändern. Im Teilen-Fenster legen Sie fest, für wen der Link gilt: Mit askFrancis-Konto heißt, nur
 angemeldete Personen öffnen ihn. Alle mit dem Link heißt, auch Personen ohne Konto, etwa Gäste
 einer Veranstaltung. Die Seite ist auch dann nirgends gelistet und bittet Suchmaschinen, sie nicht
 aufzunehmen. Das ist eine Bitte, kein Schutz: Wer den Link hat, kann ihn weitergeben. Schalten Sie zurück auf Privat, funktioniert der Link nicht mehr. Schalten Sie wieder

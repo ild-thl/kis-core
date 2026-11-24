@@ -80,7 +80,7 @@ export function StudioOverview({
   const t = useTranslations("workspace.detail.studio");
   const [studioTab, _setStudioTab] = useState<StudioTab>(() => {
     if (typeof window !== "undefined") {
-      const saved = sessionStorage.getItem("kis-studio-tab");
+      const saved = sessionStorage.getItem("askf-studio-tab");
       if (saved && ["tools", "glossary", "notes", "statistik", "schedule"].includes(saved))
         return saved as StudioTab;
     }
@@ -88,7 +88,7 @@ export function StudioOverview({
   });
   const setStudioTab = (tab: StudioTab) => {
     _setStudioTab(tab);
-    sessionStorage.setItem("kis-studio-tab", tab);
+    sessionStorage.setItem("askf-studio-tab", tab);
   };
 
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);

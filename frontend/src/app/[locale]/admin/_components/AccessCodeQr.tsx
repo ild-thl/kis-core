@@ -6,11 +6,13 @@ import { forwardRef, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Key } from "@phosphor-icons/react";
 import {
-  ACCENT, INK, ISY_W, LOGO_H, LOGO_IMG_H, LOGO_W, MONO, PAPER, PLATE_PAD, PLATE_W, SANS, SOFT, THL_W,
+  ACCENT, INK, ISY_W, LOGO_IMG_H, LOGO_W, MONO, PAPER, PLATE_PAD, PLATE_W, SANS, SOFT, THL_W,
   nameLines, usePosterArt, type PosterArt,
 } from "./event/PosterSvg";
-import { KIS_LOGO_MARKUP, KIS_LOGO_VIEWBOX } from "./event/kisLogo";
 import { POSTER_MM, exportPosterPng } from "./event/posterExport";
+
+// Height of the askFrancis wordmark at the logo width, from its aspect ratio.
+const WORDMARK_H = (LOGO_W * 13.08) / 89.78;
 
 type Props = {
   code: string;
@@ -44,15 +46,13 @@ const AccessCodePoster = forwardRef<SVGSVGElement, PosterProps>(function AccessC
     >
       <rect width={POSTER_MM.w} height={POSTER_MM.h} fill={PAPER} />
       <rect width={POSTER_MM.w} height={16} fill={ACCENT} />
-      <svg
-        x={10}
-        y={4}
-        width={LOGO_W}
-        height={LOGO_H}
-        viewBox={`${KIS_LOGO_VIEWBOX.x} ${KIS_LOGO_VIEWBOX.y} ${KIS_LOGO_VIEWBOX.w} ${KIS_LOGO_VIEWBOX.h}`}
-        dangerouslySetInnerHTML={{ __html: KIS_LOGO_MARKUP }}
-      />
-      <text x={10 + LOGO_W + 3} y={10.6} fontFamily={SANS} fontSize="5" fontWeight="600" fill={PAPER} letterSpacing="0.3">
+      {art && (
+        <>
+          <rect x={10} y={2} width={LOGO_W + PLATE_PAD * 2} height={12} rx={1.5} fill={PAPER} />
+          <image href={art.francis} x={10 + PLATE_PAD} y={8 - WORDMARK_H / 2} width={LOGO_W} height={WORDMARK_H} />
+        </>
+      )}
+      <text x={10 + LOGO_W + PLATE_PAD * 2 + 3} y={10.6} fontFamily={SANS} fontSize="5" fontWeight="600" fill={PAPER} letterSpacing="0.3">
         {t("kicker")}
       </text>
       {art && (

@@ -5,7 +5,7 @@
 Das Zahnrad oben rechts gilt für die ganze Plattform. Sprache und Ansicht sehen alle, die weiteren
 Einträge hängen an Rechten und daran, was die Verwaltung eingeschaltet hat:
 
-- **Sprache** der Oberfläche, Deutsch oder Englisch. KIS merkt sie an Ihrem Konto, auch für das
+- **Sprache** der Oberfläche, Deutsch oder Englisch. askFrancis merkt sie an Ihrem Konto, auch für das
   nächste Mal
 - **Ansicht**, hell oder dunkel. Das merkt sich der Browser
 - **Sprachniveau**, mit dem Recht Eigenes Sprachniveau und Sprachtest

@@ -244,7 +244,7 @@ export function MindmapStudio({
         scaleMax: 5,
         theme: {
           ...baseTheme,
-          name: "kis-mindmap",
+          name: "askf-mindmap",
           palette: ["var(--mm-c1)", "var(--mm-c2)", "var(--mm-c3)", "var(--mm-c4)", "var(--mm-c5)", "var(--mm-c6)"],
         },
       });

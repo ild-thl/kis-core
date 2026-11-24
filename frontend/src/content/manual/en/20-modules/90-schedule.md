@@ -15,7 +15,7 @@ citations stay out.
 - A material is read only once. The line above the button says how many of the ticked materials
   are already processed
 - When new materials arrive, press the button again
-- If the source gives no year, KIS takes the year that puts the date closest to today. Such
+- If the source gives no year, askFrancis takes the year that puts the date closest to today. Such
   dates carry a small question mark that explains it
 - A deleted material takes its dates along
 

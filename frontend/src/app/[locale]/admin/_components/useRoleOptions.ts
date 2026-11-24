@@ -26,10 +26,10 @@ export function useRoleOptions(staffLabel: string, userLabel: string) {
 }
 
 /** Splits a select value like "custom:7" into the two fields the backend expects. */
-export function roleToPayload(role: string): { kis_role: string; custom_role_id: number | null } {
+export function roleToPayload(role: string): { askf_role: string; custom_role_id: number | null } {
   const custom = role.startsWith("custom:");
   return {
-    kis_role: custom ? "custom" : role,
+    askf_role: custom ? "custom" : role,
     custom_role_id: custom ? Number(role.slice("custom:".length)) : null,
   };
 }

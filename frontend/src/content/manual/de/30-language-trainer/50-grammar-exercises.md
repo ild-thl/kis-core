@@ -22,7 +22,7 @@ mitgeben.
 
 ## Bevor die Übung erscheint
 
-KIS lässt jeden fertigen Satz noch einmal von der KI prüfen. Sätze, die mit der Lösung
+askFrancis lässt jeden fertigen Satz noch einmal von der KI prüfen. Sätze, die mit der Lösung
 ungrammatisch werden oder die geübte Form gar nicht zeigen, fallen weg. Deshalb hat eine Übung
 manchmal weniger Sätze als gewählt. Bleibt weniger als die Hälfte übrig, scheitert sie.
 
@@ -30,7 +30,7 @@ manchmal weniger Sätze als gewählt. Bleibt weniger als die Hälfte übrig, sch
 
 ## Beim Lösen
 
-- **Getippte Formate**: Umformen und Lücke füllen prüft KIS ohne KI-Aufruf, per Vergleich mit der
+- **Getippte Formate**: Umformen und Lücke füllen prüft askFrancis ohne KI-Aufruf, per Vergleich mit der
   Musterlösung und den weiteren richtigen Fassungen, die die KI beim Erzeugen mitliefert. Groß- und
   Kleinschreibung und Satzzeichen zählen nicht. Das Urteil ist dreistufig: Richtig, Fast, Noch
   nicht richtig. Fast heißt, mindestens 72 % der Wörter stimmen mit einer richtigen Fassung überein
@@ -67,7 +67,7 @@ eingeschaltetem Sprachtrainer und einem Niveau.
 - **Name**: frei, etwa „Konjunktiv II". Prüfen lässt die KI daraus ein Musterpaar bauen, einen
   Satz vorher und denselben Satz nachher. Dazu schreibt sie eine Regel, die nicht angezeigt wird,
   aber die Übungen steuert
-- **Kein Grammatikthema**: Erkennt die KI im Namen keines, legt KIS nichts an
+- **Kein Grammatikthema**: Erkennt die KI im Namen keines, legt askFrancis nichts an
 - **Verstanden als**: Macht die KI aus dem Namen eine genauere Form, schlägt sie diesen Namen vor.
   Namen übernehmen setzt ihn ein
 - **Musterpaare**: Das vorgeschlagene Paar lässt sich überschreiben. + weiteres Muster ergänzt

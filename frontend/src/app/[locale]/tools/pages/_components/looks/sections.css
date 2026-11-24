@@ -1,48 +1,48 @@
 /* The builds of a section around its blocks, sx-<name> on the section. The rules carry .wrap so they beat page.css, which comes later in the bundle. */
-.kis-page .wrap { container-type: inline-size; }
+.askf-page .wrap { container-type: inline-size; }
 
 /* top: title and lead, then the blocks, nothing in between */
-.kis-page .wrap section.sx-top > .txt { max-width: 820px; }
+.askf-page .wrap section.sx-top > .txt { max-width: 820px; }
 
 /* split: the picture takes the left half, title, lead and the other block the right half */
-.kis-page .wrap section.sx-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; align-items: start; }
-.kis-page .wrap section.sx-split > .ed-tools { grid-column: 1 / -1; }
-.kis-page .wrap section.sx-split > .txt { grid-column: 2; grid-row: 2; max-width: none; }
-.kis-page .wrap section.sx-split > .body { display: contents; }
-.kis-page .wrap section.sx-split > .body > .k-image { grid-column: 1; grid-row: 2 / 4; align-self: stretch; margin-top: 0; min-width: 0; }
-.kis-page .wrap section.sx-split > .body > .blk:not(.k-image) { grid-column: 2; grid-row: 3; margin-top: 18px; min-width: 0; }
-.kis-page .wrap section.sx-split > .body > .k-image figure, .kis-page .wrap section.sx-split > .body > .k-image figure > div { display: flex; flex-direction: column; height: 100%; }
-.kis-page .wrap section.sx-split > .body > .k-image .pic { position: relative; flex: 1; min-height: 320px; }
-.kis-page .wrap section.sx-split > .body > .k-image .pic img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; max-height: none; object-fit: cover; border-radius: 8px; }
-.kis-page .wrap section.sx-split > .body > .k-image figcaption { margin: 10px 0 0; text-align: left; }
+.askf-page .wrap section.sx-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; align-items: start; }
+.askf-page .wrap section.sx-split > .ed-tools { grid-column: 1 / -1; }
+.askf-page .wrap section.sx-split > .txt { grid-column: 2; grid-row: 2; max-width: none; }
+.askf-page .wrap section.sx-split > .body { display: contents; }
+.askf-page .wrap section.sx-split > .body > .k-image { grid-column: 1; grid-row: 2 / 4; align-self: stretch; margin-top: 0; min-width: 0; }
+.askf-page .wrap section.sx-split > .body > .blk:not(.k-image) { grid-column: 2; grid-row: 3; margin-top: 18px; min-width: 0; }
+.askf-page .wrap section.sx-split > .body > .k-image figure, .askf-page .wrap section.sx-split > .body > .k-image figure > div { display: flex; flex-direction: column; height: 100%; }
+.askf-page .wrap section.sx-split > .body > .k-image .pic { position: relative; flex: 1; min-height: 320px; }
+.askf-page .wrap section.sx-split > .body > .k-image .pic img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; max-height: none; object-fit: cover; border-radius: 8px; }
+.askf-page .wrap section.sx-split > .body > .k-image figcaption { margin: 10px 0 0; text-align: left; }
 
 /* rail: a line runs down the left, a square marks the title, a ring every block */
-.kis-page .wrap section.sx-rail { --sx-pad: 32px; }
-.kis-page .wrap section.sx-rail > .txt, .kis-page .wrap section.sx-rail > .body { margin-left: 8px; border-left: 2px solid var(--pg-accent); padding-left: var(--sx-pad); }
-.kis-page .wrap section.sx-rail > .txt { padding-top: 4px; }
-.kis-page .wrap section.sx-rail > .body { padding-bottom: 4px; }
-.kis-page .wrap section.sx-rail > .txt h2 { position: relative; }
-.kis-page .wrap section.sx-rail > .txt h2::before { content: ""; position: absolute; left: calc(-1 * var(--sx-pad) - 8px); top: 0.35em; width: 14px; height: 14px; background: var(--pg-accent); }
-.kis-page .wrap section.sx-rail > .body > .blk { position: relative; }
-.kis-page .wrap section.sx-rail > .body > .blk::before { content: ""; position: absolute; left: calc(-1 * var(--sx-pad) - 7px); top: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--pg-cell); border: 2px solid var(--pg-accent); box-sizing: border-box; }
+.askf-page .wrap section.sx-rail { --sx-pad: 32px; }
+.askf-page .wrap section.sx-rail > .txt, .askf-page .wrap section.sx-rail > .body { margin-left: 8px; border-left: 2px solid var(--pg-accent); padding-left: var(--sx-pad); }
+.askf-page .wrap section.sx-rail > .txt { padding-top: 4px; }
+.askf-page .wrap section.sx-rail > .body { padding-bottom: 4px; }
+.askf-page .wrap section.sx-rail > .txt h2 { position: relative; }
+.askf-page .wrap section.sx-rail > .txt h2::before { content: ""; position: absolute; left: calc(-1 * var(--sx-pad) - 8px); top: 0.35em; width: 14px; height: 14px; background: var(--pg-accent); }
+.askf-page .wrap section.sx-rail > .body > .blk { position: relative; }
+.askf-page .wrap section.sx-rail > .body > .blk::before { content: ""; position: absolute; left: calc(-1 * var(--sx-pad) - 7px); top: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--pg-cell); border: 2px solid var(--pg-accent); box-sizing: border-box; }
 
 /* poster: the lead as a kicker on top, the blocks, then the title large at the bottom */
 
 /* pair: two short sections side by side */
-.kis-page .wrap .sx-pair-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; align-items: start; padding-top: 84px; }
-.kis-page .wrap .sx-pair-row > section.sx-pair { padding-top: 0; margin-top: 0; min-width: 0; }
-.kis-page .wrap .sx-pair-row > section.sx-pair > .txt { max-width: none; }
-.kis-page .wrap .sx-pair-row > section.sx-pair > .txt h2 { font-size: 26px; margin-bottom: 8px; }
-.kis-page .wrap .sx-pair-row > section.sx-pair > .txt .lead { font-size: 16px; }
-.kis-page .wrap .sx-pair-row > section.sx-pair > .body > .blk:first-child { margin-top: 14px; }
+.askf-page .wrap .sx-pair-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; align-items: start; padding-top: 84px; }
+.askf-page .wrap .sx-pair-row > section.sx-pair { padding-top: 0; margin-top: 0; min-width: 0; }
+.askf-page .wrap .sx-pair-row > section.sx-pair > .txt { max-width: none; }
+.askf-page .wrap .sx-pair-row > section.sx-pair > .txt h2 { font-size: 26px; margin-bottom: 8px; }
+.askf-page .wrap .sx-pair-row > section.sx-pair > .txt .lead { font-size: 16px; }
+.askf-page .wrap .sx-pair-row > section.sx-pair > .body > .blk:first-child { margin-top: 14px; }
 
 @container (max-width: 600px) {
-  .kis-page .wrap section.sx-split { display: block; }
-  .kis-page .wrap section.sx-split > .body { display: block; }
-  .kis-page .wrap section.sx-split > .body > .blk, .kis-page .wrap section.sx-split > .body > .blk:not(.k-image) { margin-top: 26px; }
-  .kis-page .wrap section.sx-split > .body > .k-image figure, .kis-page .wrap section.sx-split > .body > .k-image figure > div { display: block; height: auto; }
-  .kis-page .wrap section.sx-split > .body > .k-image .pic { min-height: 0; }
-  .kis-page .wrap section.sx-split > .body > .k-image .pic img { position: static; height: auto; aspect-ratio: 16 / 9; }
-  .kis-page .wrap section.sx-rail { --sx-pad: 20px; }
-  .kis-page .wrap .sx-pair-row { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .askf-page .wrap section.sx-split { display: block; }
+  .askf-page .wrap section.sx-split > .body { display: block; }
+  .askf-page .wrap section.sx-split > .body > .blk, .askf-page .wrap section.sx-split > .body > .blk:not(.k-image) { margin-top: 26px; }
+  .askf-page .wrap section.sx-split > .body > .k-image figure, .askf-page .wrap section.sx-split > .body > .k-image figure > div { display: block; height: auto; }
+  .askf-page .wrap section.sx-split > .body > .k-image .pic { min-height: 0; }
+  .askf-page .wrap section.sx-split > .body > .k-image .pic img { position: static; height: auto; aspect-ratio: 16 / 9; }
+  .askf-page .wrap section.sx-rail { --sx-pad: 20px; }
+  .askf-page .wrap .sx-pair-row { grid-template-columns: minmax(0, 1fr); gap: 28px; }
 }

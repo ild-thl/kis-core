@@ -1,6 +1,6 @@
 "use client";
 
-/** System, campus map: the address of a map hosted outside KIS. */
+/** System, campus map: the address of a map hosted outside askFrancis. */
 
 import CampusMapCard from "../../_settings/CampusMapCard";
 

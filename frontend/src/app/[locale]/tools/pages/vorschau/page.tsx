@@ -34,7 +34,7 @@ export default function Vorschau() {
       </div>
       {tab === "looks" ? (
         <PageLang.Provider value="de">
-          <div className="kis-page d-chapters">
+          <div className="askf-page d-chapters">
             <main className="wrap">
               {SAMPLES.map((b, s) => {
                 const all = (LOOKS[b.kind] as Look[] | undefined) ?? [];

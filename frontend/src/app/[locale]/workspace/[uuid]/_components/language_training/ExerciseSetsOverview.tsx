@@ -122,7 +122,7 @@ export function ExerciseSetsOverview({
                           onCancel={() => setUmbenennt(null)}
                         />
                       ) : (
-                        <span className="text-sm font-semibold leading-snug flex-1 line-clamp-3 mt-0.5 kis-tooltip"
+                        <span className="text-sm font-semibold leading-snug flex-1 line-clamp-3 mt-0.5 askf-tooltip"
                           style={{ color: failed ? "var(--error-strong)" : "var(--foreground)" }}
                           onDoubleClick={(e) => { if (umbenennbar) { e.stopPropagation(); setUmbenennt(s.id); } }}
                           data-tip={generating || failed ? undefined : anzeigeTitel}>

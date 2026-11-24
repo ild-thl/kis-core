@@ -25,7 +25,7 @@ export function useSources({ uuid, onModuleUpdate }: UseSourcesOptions) {
   // Persist selected sources
   useEffect(() => {
     if (selectedSourceIds.length > 0) {
-      sessionStorage.setItem(`kis-selected-sources-${uuid}`, JSON.stringify(selectedSourceIds));
+      sessionStorage.setItem(`askf-selected-sources-${uuid}`, JSON.stringify(selectedSourceIds));
     }
   }, [selectedSourceIds, uuid]);
 

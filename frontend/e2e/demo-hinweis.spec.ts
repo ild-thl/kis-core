@@ -27,7 +27,7 @@ test("Leere Modulliste bietet die Demo-Module an", async ({ page, baseURL }) => 
       max_uses: 2,
       valid_days: 1,
       access_hours: 24,
-      kis_role: "staff",
+      askf_role: "staff",
       custom_role_id: null,
     },
   })).json();

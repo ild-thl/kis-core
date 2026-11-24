@@ -31,7 +31,7 @@ job has finished or failed.
 
 ## What happens on a failure
 
-Long jobs work in stages and save their progress. If a piece fails, KIS makes up to 3 new
+Long jobs work in stages and save their progress. If a piece fails, askFrancis makes up to 3 new
 attempts by itself, after 1 minute, 3 minutes and 10 minutes. Then the job stands on Paused and
 names the last error. Continue picks up where it stopped, finished parts stay.
 

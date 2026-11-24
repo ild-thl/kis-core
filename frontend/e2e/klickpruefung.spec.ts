@@ -86,7 +86,7 @@ test.describe("abgemeldet", () => {
     const reiter = page.getByRole("tab", { name: /Mit Zugangscode|With access code/ }).or(page.getByRole("button", { name: /Mit Zugangscode|With access code/ }));
     test.skip(await reiter.count() === 0, "access codes are switched off on this instance");
     await reiter.first().click();
-    await page.locator("#access-code").fill("KIS-ZZZZ-0000");
+    await page.locator("#access-code").fill("ASKF-ZZZZ-0000");
     await page.getByTestId("access-code-form").locator('button[type="submit"]').click();
     await expect(page.getByTestId("access-code-form").getByRole("alert")).toBeVisible({ timeout: 15_000 });
     await page.screenshot({ path: "e2e/screens/klick-login-code.png" });
@@ -97,7 +97,7 @@ test.describe("abgemeldet", () => {
     const fehler = fehlerSammeln(page);
     await page.goto("/redeem", { waitUntil: "load" });
     await expect(page.getByRole("heading", { name: /Zugang einlösen|Redeem access/ })).toBeVisible({ timeout: 30_000 });
-    await page.locator("#access-code").fill("KIS-ZZZZ-0000");
+    await page.locator("#access-code").fill("ASKF-ZZZZ-0000");
     await page.getByTestId("access-code-form").locator('button[type="submit"]').click();
     await expect(page.getByTestId("access-code-form").getByRole("alert")).toBeVisible({ timeout: 15_000 });
     await page.screenshot({ path: "e2e/screens/klick-redeem.png" });

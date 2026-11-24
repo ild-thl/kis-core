@@ -123,7 +123,7 @@ def default_config() -> dict:
                         "Try askFrancis with a demo account.",
                     ),
                     "button": _text("Ausprobieren", "Try it"),
-                    "target": {"kind": "directLogin", "accessCode": "KIS-DEMO-0000"},
+                    "target": {"kind": "directLogin", "accessCode": "ASKF-DEMO-0000"},
                     "active": False,
                     "availableFrom": "2026-11-13",
                     "placement": "block",
@@ -170,7 +170,7 @@ def default_task_card() -> dict:
         "ignoreWindow": True,
         "from": "2026-11-13",
         "until": "2026-11-13",
-        "accessCode": "KIS-DEMO-0000",
+        "accessCode": "ASKF-DEMO-0000",
         "workspace": "",
         "forEveryone": True,
     }

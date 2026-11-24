@@ -39,7 +39,7 @@ def konto_am_code(schema):
     """A code plus an account created by it, both disappear afterwards."""
     kennung = uuid_modul.uuid4().hex[:8]
     code_id = repo.create_code(
-        code=f"KIS-TEST-{kennung.upper()}",
+        code=f"ASKF-TEST-{kennung.upper()}",
         label="Testrunde Loeschen",
         role="user",
         custom_role_id=None,
@@ -56,7 +56,7 @@ def konto_am_code(schema):
                 "INSERT INTO users (username, display_name, email, active, role) "
                 "VALUES (%s, %s, %s, 1, 'user') RETURNING id",
                 (f"test.loeschen.{kennung}", "Test Loeschen",
-                 f"test.loeschen.{kennung}@demo.kis.local"),
+                 f"test.loeschen.{kennung}@demo.askfrancis.local"),
             )
             user_id = cur.fetchone()[0]
         conn.commit()
@@ -146,7 +146,7 @@ def test_set_users_active_switches_code_accounts_but_never_others(schema, konto_
             cur.execute(
                 "INSERT INTO users (username, display_name, email, active, role) "
                 "VALUES (%s, 'Echt', %s, 1, 'user') RETURNING id",
-                (f"test.echt.{kennung}", f"test.echt.{kennung}@demo.kis.local"),
+                (f"test.echt.{kennung}", f"test.echt.{kennung}@demo.askfrancis.local"),
             )
             echt_id = cur.fetchone()[0]
         conn.commit()

@@ -34,7 +34,7 @@ test.describe("Infoassistent", () => {
     await page.locator('[data-testid="campus-sidebar-toggle"]').click();
     const streifen = page.locator('[data-testid="campus-history-collapsed"]');
     await expect(streifen).toBeVisible();
-    await expect(streifen.locator('img[src*="kis-vogel"]')).toBeVisible();
+    await expect(streifen.locator('img[src*="askfrancis-icon"]')).toBeVisible();
     await expect(streifen.locator("button, a")).toHaveCount(2);
     await streifen.locator('[data-testid="campus-new-chat"]').click();
     await expect(page.locator('[data-testid="campus-examples"]')).toBeVisible();

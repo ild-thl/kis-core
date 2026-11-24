@@ -15,7 +15,7 @@ def dns(monkeypatch):
         "example.org": ["93.184.216.34"],
         "intern.example": ["10.0.0.5"],
         "beides.example": ["93.184.216.34", "10.0.0.5"],
-        "kis-redis": ["172.18.0.3"],
+        "askf-redis": ["172.18.0.3"],
     }
 
     def _aufloesen(host):
@@ -83,7 +83,7 @@ def test_steuerzeichen_im_link_werden_abgelehnt(dns, link):
     "127.0.0.1", "10.1.2.3", "172.16.0.1", "192.168.1.1", "169.254.169.254",
     "0.0.0.0", "224.0.0.1", "100.64.0.1",
     "[::1]", "[fd00::1]", "[fe80::1]", "[::ffff:127.0.0.1]", "[::]",
-    "localhost", "intern.example", "kis-redis", "beides.example",
+    "localhost", "intern.example", "askf-redis", "beides.example",
 ])
 def test_interne_adressen_sind_gesperrt(dns, host):
     _abgelehnt(f"http://{host}/", "ai.link.forbiddenAddress", 400)

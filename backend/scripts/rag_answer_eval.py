@@ -15,9 +15,9 @@ import psycopg2.extras
 
 from src.core.db.pool import get_connection
 
-API = os.environ.get("KIS_API", "http://localhost:8000")
-USER = os.environ.get("KIS_USER", "a")
-PASS = os.environ.get("KIS_PASS", "a")
+API = os.environ.get("ASKF_API", "http://localhost:8000")
+USER = os.environ.get("ASKF_USER", "a")
+PASS = os.environ.get("ASKF_PASS", "a")
 
 FAELLE = json.loads(
     (Path(__file__).parent / "rag_answer_cases.json").read_text(encoding="utf-8")

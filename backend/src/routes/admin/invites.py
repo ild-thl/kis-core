@@ -26,15 +26,15 @@ MAX_DAYS = 30
 class CreateInvitePayload(BaseModel):
     username: str = Field(..., min_length=1, max_length=64)
     email: str | None = Field(None, max_length=254)
-    kis_role: str = Field(..., pattern="^(staff|user|custom)$")
+    askf_role: str = Field(..., pattern="^(staff|user|custom)$")
     custom_role_id: int | None = None
     days: int = Field(7, ge=1, le=MAX_DAYS)
 
     @model_validator(mode="after")
     def _custom_role_id_required_for_custom(self):
-        if self.kis_role == "custom" and self.custom_role_id is None:
-            raise ValueError("custom_role_id required when kis_role is 'custom'")
-        if self.kis_role != "custom":
+        if self.askf_role == "custom" and self.custom_role_id is None:
+            raise ValueError("custom_role_id required when askf_role is 'custom'")
+        if self.askf_role != "custom":
             self.custom_role_id = None
         return self
 
@@ -66,7 +66,7 @@ def create_invite(
     if repo.open_invite_for_uid(uid) is not None:
         raise HTTPException(status_code=409, detail=t("invite.alreadyInvited", locale))
 
-    if payload.kis_role == "custom" and database.get_custom_role(payload.custom_role_id) is None:
+    if payload.askf_role == "custom" and database.get_custom_role(payload.custom_role_id) is None:
         raise HTTPException(status_code=400, detail=t("invite.invalidCustomRole", locale))
 
     token = new_token()
@@ -75,7 +75,7 @@ def create_invite(
         token=token,
         email=email,
         uid=uid,
-        role=payload.kis_role,
+        role=payload.askf_role,
         custom_role_id=payload.custom_role_id,
         created_by=admin.get("user_id", 0),
         expires_at=expires_at,

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to KIS are listed here.
+All notable changes to askFrancis are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versions follow [Semantic Versioning](https://semver.org/).
 

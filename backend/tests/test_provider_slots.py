@@ -42,7 +42,7 @@ def test_bis_zur_grenze_gibt_es_sofort_einen_platz(uhr):
     r = _Redis()
     for _ in range(4):
         assert provider_slots.claim("mylab", limit=4, wait_seconds=0, r=r)
-    assert r.zcard("kis:provider-slots:mylab") == 4
+    assert r.zcard("askf:provider-slots:mylab") == 4
 
 
 def test_ueber_der_grenze_wartet_die_anfrage_und_gibt_dann_als_voll_auf(uhr):
@@ -94,7 +94,7 @@ def test_der_platz_wird_auch_bei_einem_fehler_zurueckgegeben(uhr):
     with pytest.raises(RuntimeError):
         with provider_slots.slot("mylab", limit=1, wait_seconds=0, r=r):
             raise RuntimeError("Anbieter antwortet 500")
-    assert r.zcard("kis:provider-slots:mylab") == 0
+    assert r.zcard("askf:provider-slots:mylab") == 0
 
 
 def test_eine_zeitgrenze_beim_warten_laesst_die_anfrage_nicht_ohne_platz_durch(uhr, monkeypatch):
@@ -110,7 +110,7 @@ def test_eine_zeitgrenze_beim_warten_laesst_die_anfrage_nicht_ohne_platz_durch(u
     monkeypatch.setattr(provider_slots.time, "sleep", grenze)
     with pytest.raises(SoftTimeLimitExceeded):
         provider_slots.claim("mylab", limit=1, wait_seconds=60, r=r)
-    assert r.zcard("kis:provider-slots:mylab") == 1
+    assert r.zcard("askf:provider-slots:mylab") == 1
 
 
 # ─── Order at the door ────────────────────────────────────────────────
@@ -148,7 +148,7 @@ def test_eine_niedrigere_stufe_kommt_zuerst_dran(uhr):
     assert not provider_slots._try_sit_ranked(r, "mylab:llm", "lang", 1, 900, 2)
     uhr["t"] += 1
     assert not provider_slots._try_sit_ranked(r, "mylab:llm", "kurz", 1, 900, 0)
-    r.sets["kis:provider-slots:mylab:llm"].clear()
+    r.sets["askf:provider-slots:mylab:llm"].clear()
     assert not provider_slots._try_sit_ranked(r, "mylab:llm", "lang", 1, 900, 2)
     assert provider_slots._try_sit_ranked(r, "mylab:llm", "kurz", 1, 900, 0)
 
@@ -159,7 +159,7 @@ def test_in_derselben_stufe_gilt_wer_zuerst_kam(uhr):
     assert not provider_slots._try_sit_ranked(r, "mylab:llm", "erster", 1, 900, 1)
     uhr["t"] += 1
     assert not provider_slots._try_sit_ranked(r, "mylab:llm", "zweiter", 1, 900, 1)
-    r.sets["kis:provider-slots:mylab:llm"].clear()
+    r.sets["askf:provider-slots:mylab:llm"].clear()
     assert not provider_slots._try_sit_ranked(r, "mylab:llm", "zweiter", 1, 900, 1)
     assert provider_slots._try_sit_ranked(r, "mylab:llm", "erster", 1, 900, 1)
 
@@ -169,7 +169,7 @@ def test_wer_nicht_mehr_fragt_verlaesst_die_schlange(uhr):
     r = _RangRedis()
     provider_slots.claim_ranked("mylab:llm", limit=1, wait_seconds=0, rank=0, r=r)
     assert not provider_slots._try_sit_ranked(r, "mylab:llm", "tot", 1, 900, 0)
-    r.sets["kis:provider-slots:mylab:llm"].clear()
+    r.sets["askf:provider-slots:mylab:llm"].clear()
     uhr["t"] += 60
     assert provider_slots._try_sit_ranked(r, "mylab:llm", "lebt", 1, 900, 0)
 
@@ -179,7 +179,7 @@ def test_wer_aufgibt_raeumt_seinen_platz_in_der_schlange(uhr):
     provider_slots.claim_ranked("mylab:llm", limit=1, wait_seconds=0, rank=0, r=r)
     with pytest.raises(provider_slots.ProviderFull):
         provider_slots.claim_ranked("mylab:llm", limit=1, wait_seconds=5, rank=2, r=r)
-    assert r.zcard("kis:provider-wait:mylab:llm") == 0
+    assert r.zcard("askf:provider-wait:mylab:llm") == 0
 
 
 def test_die_asynchrone_tuer_haelt_dieselbe_reihenfolge(uhr, monkeypatch):
@@ -193,7 +193,7 @@ def test_die_asynchrone_tuer_haelt_dieselbe_reihenfolge(uhr, monkeypatch):
     asyncio.run(provider_slots.claim_ranked_async("mylab:llm", limit=1, wait_seconds=0, rank=0, r=r))
     with pytest.raises(provider_slots.ProviderFull):
         asyncio.run(provider_slots.claim_ranked_async("mylab:llm", limit=1, wait_seconds=5, rank=2, r=r))
-    assert r.zcard("kis:provider-wait:mylab:llm") == 0
+    assert r.zcard("askf:provider-wait:mylab:llm") == 0
 
 
 # ─── Keeping fresh ────────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ def test_ein_gehaltener_platz_wird_erneuert_und_ein_freigegebener_nicht(uhr, mon
     provider_slots.release("mylab:llm", frei)
     uhr["t"] += 60
     provider_slots._refresh_once()
-    assert r.sets["kis:provider-slots:mylab:llm"] == {gehalten: uhr["t"]}
+    assert r.sets["askf:provider-slots:mylab:llm"] == {gehalten: uhr["t"]}
     provider_slots.release("mylab:llm", gehalten)
 
 
@@ -217,7 +217,7 @@ def test_der_platz_eines_toten_prozesses_wird_nach_kurzer_zeit_frei(uhr, monkeyp
     r = _RangRedis()
     monkeypatch.setattr(provider_slots, "_redis", lambda: r)
     monkeypatch.setattr(provider_slots, "_start_refresher", lambda: None)
-    r.zadd("kis:provider-slots:mylab:llm", {"tot": uhr["t"]})
+    r.zadd("askf:provider-slots:mylab:llm", {"tot": uhr["t"]})
     uhr["t"] += provider_slots.HELD_STALE_SECONDS + 1
     assert provider_slots.claim_ranked("mylab:llm", limit=1, wait_seconds=0, rank=0,
                                        stale_seconds=provider_slots.HELD_STALE_SECONDS)
@@ -239,8 +239,8 @@ def test_ein_abbruch_zwischen_hinsetzen_und_zaehlen_laesst_keinen_platz_besetzt(
     r = _Bricht()
     with pytest.raises(SoftTimeLimitExceeded):
         provider_slots.claim_ranked("mylab:llm", limit=1, wait_seconds=0, rank=0, r=r)
-    assert r.zcard("kis:provider-slots:mylab:llm") == 0
-    assert r.zcard("kis:provider-wait:mylab:llm") == 0
+    assert r.zcard("askf:provider-slots:mylab:llm") == 0
+    assert r.zcard("askf:provider-wait:mylab:llm") == 0
 
 
 def test_ein_abgebrochenes_asynchrones_warten_verlaesst_die_schlange(uhr, monkeypatch):
@@ -251,8 +251,8 @@ def test_ein_abgebrochenes_asynchrones_warten_verlaesst_die_schlange(uhr, monkey
 
     monkeypatch.setattr(asyncio, "sleep", abbruch)
     r = _RangRedis()
-    r.zadd("kis:provider-slots:mylab:llm", {"besetzt": uhr["t"]})
+    r.zadd("askf:provider-slots:mylab:llm", {"besetzt": uhr["t"]})
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(provider_slots.claim_ranked_async("mylab:llm", limit=1, wait_seconds=60, rank=0, r=r))
-    assert r.zcard("kis:provider-wait:mylab:llm") == 0
-    assert r.zcard("kis:provider-seen:mylab:llm") == 0
+    assert r.zcard("askf:provider-wait:mylab:llm") == 0
+    assert r.zcard("askf:provider-seen:mylab:llm") == 0

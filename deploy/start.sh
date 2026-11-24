@@ -1,5 +1,5 @@
 #!/bin/bash
-# Starts KIS on a server, with the bundled Caddy when AUTO_HTTPS=true is in the .env.
+# Starts askFrancis on a server, with the bundled Caddy when AUTO_HTTPS=true is in the .env.
 # Run from the repo root: bash deploy/start.sh [up|down|restart]
 # shellcheck source=deploy/common.sh
 source "$(dirname "$0")/common.sh"

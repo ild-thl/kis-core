@@ -205,7 +205,7 @@ export async function fetchExportConfig(): Promise<{ config: unknown; filename: 
   if (!res.ok) throw new Error(await errorText(res));
   const filename = filenameFromDisposition(
     res.headers.get("Content-Disposition"),
-    `kis-ai-config-${new Date().toISOString().slice(0, 10)}.json`,
+    `askfrancis-ai-config-${new Date().toISOString().slice(0, 10)}.json`,
   );
   const config = await res.json();
   return { config, filename };

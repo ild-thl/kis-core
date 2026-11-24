@@ -31,7 +31,7 @@ export default function ChatVerlauf({
   onNew: () => void;
   onRename: (id: number, title: string) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
-  /** Only the narrow strip with bird, toggle and new chat. */
+  /** Only the narrow strip with Francis, toggle and new chat. */
   collapsed?: boolean;
   /** Folds the bar on the desktop, closes the drawer on the phone. */
   onToggle: () => void;
@@ -72,7 +72,7 @@ export default function ChatVerlauf({
   if (collapsed) {
     return (
       <div className="flex flex-col items-center h-full min-h-0 gap-2 py-2" data-testid="campus-history-collapsed">
-        {/* The strip shows only the bird, it opens the bar again. */}
+        {/* The strip shows only Francis, it opens the bar again. */}
         <button
           type="button"
           onClick={onToggle}
@@ -82,7 +82,7 @@ export default function ChatVerlauf({
           className="w-11 h-9 flex items-center justify-center logo-link"
           data-testid="campus-sidebar-toggle"
         >
-          <Image src="/logos/kis-vogel.svg" alt="" width={154} height={78} className="h-5 w-auto" />
+          <Image src="/logos/askfrancis-icon.svg" alt="" width={27} height={27} className="h-7 w-auto" />
         </button>
       </div>
     );

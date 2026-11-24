@@ -83,7 +83,7 @@ describe("uploadFile", () => {
 
   it("macht dort weiter, wo ein abgebrochener Upload stand", async () => {
     const file = fileOf(PART * 2 + 5);
-    store[`kis-upload:transcription::${file.name}:${file.size}:${file.lastModified}`] = "tok";
+    store[`askf-upload:transcription::${file.name}:${file.size}:${file.lastModified}`] = "tok";
     serverWith({ count: 3, uploaded: [1, 2] });
     expect(await run(file)).toBe("tok");
     expect(calls.filter((c) => c.method === "PUT")).toHaveLength(1);
@@ -92,7 +92,7 @@ describe("uploadFile", () => {
 
   it("schließt einen schon fertigen Upload nur noch ab, ohne Teile", async () => {
     const file = fileOf(PART + 1);
-    store[`kis-upload:transcription::${file.name}:${file.size}:${file.lastModified}`] = "tok";
+    store[`askf-upload:transcription::${file.name}:${file.size}:${file.lastModified}`] = "tok";
     serverWith({ count: 2, uploaded: [1, 2], done: true });
     expect(await run(file)).toBe("tok");
     expect(calls.filter((c) => c.method === "PUT")).toHaveLength(0);

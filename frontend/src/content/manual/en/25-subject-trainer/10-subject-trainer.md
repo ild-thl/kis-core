@@ -24,11 +24,11 @@ activity. The title can be changed later, with the pencil or by double-clicking 
 There is no limit on the number of ticked materials. How much of it is read depends on the tool:
 
 - **Flashcards and Quiz** read a fixed amount of text per item, for a set of 15 items about
-  100,000 characters. If not everything fits, KIS remembers per material where it stopped and
+  100,000 characters. If not everything fits, askFrancis remembers per material where it stopped and
   continues there with the next set. Over several sets every file gets its turn. That position
   belongs to the workspace, not to the person
 - **Mind map and Data table** read everything that fits into one call, 500,000 characters by
-  default. If the material is larger, they work from the summaries KIS has created for every
+  default. If the material is larger, they work from the summaries askFrancis has created for every
   material
 
 In the legend below a mind map or data table, materials nothing was used from are greyed out.
@@ -36,9 +36,9 @@ In the legend below a mind map or data table, materials nothing was used from ar
 ## The instruction
 
 When creating a set you can add an instruction of up to 500 characters. For Flashcards and Quiz
-only on the way through the materials, not from the glossary. KIS sorts it first:
+only on the way through the materials, not from the glossary. askFrancis sorts it first:
 
-- **A topic**, such as "only chapter 3": KIS looks for the matching passages in the material and
+- **A topic**, such as "only chapter 3": askFrancis looks for the matching passages in the material and
   uses only those
 - **A wish about the kind**, such as "easy questions" or "columns: term, deadline, consequence":
   the material stays as it is, the wish goes into the task
@@ -50,7 +50,7 @@ The finished result shows the instruction it was made with.
 
 ## The item stock
 
-KIS collects flashcards and quiz items made from materials in a stock, kept apart per material,
+askFrancis collects flashcards and quiz items made from materials in a stock, kept apart per material,
 tool and language level. The same goes for vocab cards, vocabulary and grammar exercises in the
 language trainer, but not for mind map and data table.
 

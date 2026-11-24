@@ -19,7 +19,7 @@ test("Zugangscode: ein Konto einlösen und die Startseite erreichen", async ({ p
       max_uses: 2,
       valid_days: 7,
       access_hours: 168,
-      kis_role: "staff",
+      askf_role: "staff",
       custom_role_id: null,
     },
   });
@@ -78,7 +78,7 @@ test("Zugangscode ohne Zugangsdaten: Link allein meldet an, ganz ohne Klick", as
       valid_days: 1,
       access_hours: 12,
       show_credentials: false,
-      kis_role: "user",
+      askf_role: "user",
       custom_role_id: null,
     },
   });
@@ -175,7 +175,7 @@ test.describe("Zugangscode anlegen im Formular", () => {
         max_uses: 5,
         valid_days: 7,
         access_hours: 12,
-        kis_role: "user",
+        askf_role: "user",
         custom_role_id: null,
       },
     });

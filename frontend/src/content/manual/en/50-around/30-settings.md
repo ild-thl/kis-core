@@ -5,7 +5,7 @@
 The gear in the top right applies to the whole platform. Everyone sees Language and Appearance,
 the other entries depend on permissions and on what the administration has switched on:
 
-- **Language** of the interface, German or English. KIS remembers it on your account, for the next
+- **Language** of the interface, German or English. askFrancis remembers it on your account, for the next
   time as well
 - **Appearance**, light or dark. The browser remembers that
 - **Language level**, with the permission Own language level and language test

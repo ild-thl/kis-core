@@ -39,7 +39,7 @@ class CreateCodePayload(BaseModel):
     access_hours: int | None = Field(336)
     show_credentials: bool = True
     show_evaluation: bool = False
-    kis_role: str = Field("user", pattern="^(staff|user|custom)$")
+    askf_role: str = Field("user", pattern="^(staff|user|custom)$")
     custom_role_id: int | None = None
     workspace_ids: list[int] = Field(default_factory=list, max_length=MAX_WORKSPACES)
 
@@ -50,9 +50,9 @@ class CreateCodePayload(BaseModel):
         self.label = self.label.strip()
         if self.access_hours is not None and not (1 <= self.access_hours <= MAX_ACCESS_HOURS):
             raise ValueError(f"access_hours must be between 1 and {MAX_ACCESS_HOURS}")
-        if self.kis_role == "custom" and self.custom_role_id is None:
-            raise ValueError("custom_role_id required when kis_role is 'custom'")
-        if self.kis_role != "custom":
+        if self.askf_role == "custom" and self.custom_role_id is None:
+            raise ValueError("custom_role_id required when askf_role is 'custom'")
+        if self.askf_role != "custom":
             self.custom_role_id = None
         return self
 
@@ -65,25 +65,25 @@ class PatchCodePayload(BaseModel):
     access_hours: int | None = None
     show_credentials: bool = True
     show_evaluation: bool = False
-    kis_role: str | None = Field(None, pattern="^(staff|user|custom)$")
+    askf_role: str | None = Field(None, pattern="^(staff|user|custom)$")
     custom_role_id: int | None = None
     # None leaves the workspaces as they are.
     workspace_ids: list[int] | None = Field(None, max_length=MAX_WORKSPACES)
 
     @model_validator(mode="after")
     def _edit_fields_travel_together(self):
-        bearbeitungsfelder = (self.label, self.max_uses, self.valid_days, self.kis_role)
+        bearbeitungsfelder = (self.label, self.max_uses, self.valid_days, self.askf_role)
         if any(f is not None for f in bearbeitungsfelder) and not all(f is not None for f in bearbeitungsfelder):
-            raise ValueError("label, max_uses, valid_days and kis_role must be provided together")
+            raise ValueError("label, max_uses, valid_days and askf_role must be provided together")
         if self.label is not None:
             if not self.label.strip():
                 raise ValueError("label must not be blank")
             self.label = self.label.strip()
         if self.access_hours is not None and not (1 <= self.access_hours <= MAX_ACCESS_HOURS):
             raise ValueError(f"access_hours must be between 1 and {MAX_ACCESS_HOURS}")
-        if self.kis_role == "custom" and self.custom_role_id is None:
-            raise ValueError("custom_role_id required when kis_role is 'custom'")
-        if self.kis_role is not None and self.kis_role != "custom":
+        if self.askf_role == "custom" and self.custom_role_id is None:
+            raise ValueError("custom_role_id required when askf_role is 'custom'")
+        if self.askf_role is not None and self.askf_role != "custom":
             self.custom_role_id = None
         return self
 
@@ -107,14 +107,14 @@ def create_access_code(
     locale: str = Depends(get_locale),
 ):
 
-    _assert_may_hand_out(admin, payload.kis_role, payload.custom_role_id, locale)
+    _assert_may_hand_out(admin, payload.askf_role, payload.custom_role_id, locale)
 
     code = new_code()
     valid_until = datetime.now() + timedelta(days=payload.valid_days)
     code_id = repo.create_code(
         code=code,
         label=payload.label,
-        role=payload.kis_role,
+        role=payload.askf_role,
         custom_role_id=payload.custom_role_id,
         max_uses=payload.max_uses,
         valid_until=valid_until,
@@ -200,13 +200,13 @@ def patch_access_code(
         if repo.get_code_by_id(code_id) is None:
             raise HTTPException(status_code=404, detail=t("access.notFound", locale))
 
-        _assert_may_hand_out(admin, payload.kis_role, payload.custom_role_id, locale)
+        _assert_may_hand_out(admin, payload.askf_role, payload.custom_role_id, locale)
 
         valid_until = datetime.now() + timedelta(days=payload.valid_days)
         if not repo.update_code(
             code_id,
             label=payload.label,
-            role=payload.kis_role,
+            role=payload.askf_role,
             custom_role_id=payload.custom_role_id,
             max_uses=payload.max_uses,
             valid_until=valid_until,

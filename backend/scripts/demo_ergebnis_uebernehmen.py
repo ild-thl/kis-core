@@ -1,7 +1,7 @@
 """Takes finished summary, presentation and podcast runs over as the demo results, safe to run again.
 
-    docker exec kis-backend python scripts/demo_ergebnis_uebernehmen.py --ziel /tmp/demo <job_uuid> [...]
-    docker cp kis-backend:/tmp/demo/. backend/demo/
+    docker exec askf-backend python scripts/demo_ergebnis_uebernehmen.py --ziel /tmp/demo <job_uuid> [...]
+    docker cp askf-backend:/tmp/demo/. backend/demo/
 
 The container mounts demo/ read only, so the results go to a folder of its own first.
 """

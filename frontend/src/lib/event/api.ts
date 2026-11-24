@@ -1,6 +1,6 @@
 import type { Card, EventConfig, EventStats, PublicEvent, RaffleEntry } from "@/lib/event/types";
 
-const VISITOR_KEY = "kis.event.visitor";
+const VISITOR_KEY = "askf.event.visitor";
 let memoryId: string | undefined;
 
 /** A random id that stays in this browser, the server only ever sees its hash. */

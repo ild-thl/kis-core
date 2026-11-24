@@ -116,7 +116,7 @@ def get_settings(_admin=Depends(require_any_settings)):
         "welcome_modal_enabled": _enabled("welcome_modal_enabled"),
         "welcome_modal_text": db.get_setting("welcome_modal_text", DEFAULT_WELCOME_MODAL_TEXT),
         **{key: db.get_setting(key, "") for key in LEGAL_KEYS},
-        # Campus map outside KIS, an empty address means no map anywhere.
+        # Campus map outside askFrancis, an empty address means no map anywhere.
         "campus_map_url": campus_map.map_url,
         "campus_map_enabled": campus_map.map_enabled,
         # OCR on image-heavy pages during indexing (system-wide, default on)

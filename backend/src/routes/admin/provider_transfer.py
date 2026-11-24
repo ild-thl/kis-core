@@ -93,7 +93,7 @@ def export_config(
 ):
     """Download the full AI config as JSON. Never includes api_keys."""
     payload = build_export(exported_from=None)
-    filename = f"kis-ai-config-{date.today().isoformat()}.json"
+    filename = f"askfrancis-ai-config-{date.today().isoformat()}.json"
     return JSONResponse(
         content=payload,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},

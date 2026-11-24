@@ -51,7 +51,7 @@ export function useTickEventTask(id: ClientTaskId) {
   }, [id]);
 }
 
-const MIN_KEY = "kis.event.tasks.min";
+const MIN_KEY = "askf.event.tasks.min";
 
 /** Whether this browser folded the card away, open on the first visit. */
 export function useTaskCardMinimized(): [boolean, (next: boolean) => void] {

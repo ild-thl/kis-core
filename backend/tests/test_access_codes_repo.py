@@ -63,7 +63,7 @@ def test_creating_a_code_commits(fake_db):
     calls = fake_db(rows=[(7,)])
 
     neu = repo.create_code(
-        code="KIS-4K2P-7RXM",
+        code="ASKF-4K2P-7RXM",
         label="Kollegen August",
         role="staff",
         custom_role_id=None,
@@ -83,7 +83,7 @@ def test_creating_a_code_stores_the_hours_and_the_credentials_switch(fake_db):
     calls = fake_db(rows=[(7,)])
 
     repo.create_code(
-        code="KIS-4K2P-7RXM",
+        code="ASKF-4K2P-7RXM",
         label="Tag der Lehre",
         role="user",
         custom_role_id=None,
@@ -106,7 +106,7 @@ def test_creating_a_code_stores_the_evaluation_switch(fake_db):
     calls = fake_db(rows=[(7,)])
 
     repo.create_code(
-        code="KIS-4K2P-7RXM",
+        code="ASKF-4K2P-7RXM",
         label="Tag der Lehre",
         role="user",
         custom_role_id=None,
@@ -182,7 +182,7 @@ def test_get_code_by_id_returns_none_when_missing(fake_db):
 
 
 def test_get_code_by_id_returns_the_row(fake_db):
-    zeile = {"id": 7, "code": "KIS-4K2P-7RXM", "label": "Kollegen August", "max_uses": 50, "used_count": 3}
+    zeile = {"id": 7, "code": "ASKF-4K2P-7RXM", "label": "Kollegen August", "max_uses": 50, "used_count": 3}
     fake_db(rows=[zeile])
     assert repo.get_code_by_id(7) == zeile
 

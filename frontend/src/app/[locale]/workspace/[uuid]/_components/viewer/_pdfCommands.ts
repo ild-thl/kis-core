@@ -35,12 +35,12 @@ export function registerSelectionCommands(reg: any, deps: CommandDeps): void {
   if (actions?.length && onAskWithSelectionRef.current) {
     for (const action of actions) {
       commands.registerCommand({
-        id: `kis.${action.key}`,
+        id: `askf.${action.key}`,
         label: action.label,
         description: action.label,
         icon: EMBEDPDF_ICON_MAP[action.icon] ?? "info",
         iconProps: { title: action.label },
-        categories: ["kis-actions"],
+        categories: ["askf-actions"],
         visible: (sel: SelectionState) => {
           const totalChars = selectedCharCount(sel);
           if (totalChars === null) return true;
@@ -60,12 +60,12 @@ export function registerSelectionCommands(reg: any, deps: CommandDeps): void {
 
   // Register custom question command – prefills chat input with selected text
   commands.registerCommand({
-    id: "kis.custom-question",
+    id: "askf.custom-question",
     label: t("askQuestion"),
     description: t("askQuestion"),
     icon: "ph-chat-circle",
     iconProps: { title: t("askQuestion") },
-    categories: ["kis-actions"],
+    categories: ["askf-actions"],
     visible: selectionHasText,
     action: ({ registry: r, documentId }: { registry: unknown; documentId: string }) => {
       withSelectedText(r, documentId, (text) => onCustomQuestionRef.current?.(text));
@@ -74,7 +74,7 @@ export function registerSelectionCommands(reg: any, deps: CommandDeps): void {
 
   // Our own copy handler so the user gesture is not lost on the phone.
   commands.registerCommand({
-    id: "kis.copy-selection",
+    id: "askf.copy-selection",
     label: t("copy"),
     description: t("copySelection"),
     icon: "copy",
@@ -95,12 +95,12 @@ export function registerSelectionCommands(reg: any, deps: CommandDeps): void {
 
   // Register glossary extract command
   commands.registerCommand({
-    id: "kis.add-to-glossary",
+    id: "askf.add-to-glossary",
     label: t("addToGlossary"),
     description: t("addToGlossaryDescription"),
     icon: "ph-book",
     iconProps: { title: t("addToGlossaryTitle") },
-    categories: ["kis-actions"],
+    categories: ["askf-actions"],
     visible: selectionHasText,
     action: ({ registry: r, documentId }: { registry: unknown; documentId: string }) => {
       withSelectedText(r, documentId, (text, page) => onAddToGlossaryRef.current?.(text, sourceRef.current.uuid, page()));
@@ -109,12 +109,12 @@ export function registerSelectionCommands(reg: any, deps: CommandDeps): void {
 
   // Register add-to-note command – stores selection as a new note with source chip
   commands.registerCommand({
-    id: "kis.add-to-note",
+    id: "askf.add-to-note",
     label: t("addToNote"),
     description: t("addToNoteDescription"),
     icon: "ph-note-pencil",
     iconProps: { title: t("addToNoteTitle") },
-    categories: ["kis-actions"],
+    categories: ["askf-actions"],
     visible: selectionHasText,
     action: ({ registry: r, documentId }: { registry: unknown; documentId: string }) => {
       withSelectedText(r, documentId, (text, page) => onAddToNoteRef.current?.(text, sourceRef.current.uuid, page()));
@@ -123,7 +123,7 @@ export function registerSelectionCommands(reg: any, deps: CommandDeps): void {
 
   // Only the AI actions and copying stay in the selection menu.
   const existingSchema = ui.getSchema?.();
-  // We replace copy-selection with kis.copy-selection (touch fix, see above)
+  // We replace copy-selection with askf.copy-selection (touch fix, see above)
   const KEEP_DEFAULT_IDS = new Set(["add-highlight"]);
   const existingSelItems: unknown[] = (existingSchema?.selectionMenus?.selection?.items ?? [])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,18 +141,18 @@ export function registerSelectionCommands(reg: any, deps: CommandDeps): void {
       selection: {
         id: "selection",
         items: [
-          { type: "command-button", id: "kis.copy-selection", commandId: "kis.copy-selection", variant: "icon", categories: ["selection", "selection-copy"] },
+          { type: "command-button", id: "askf.copy-selection", commandId: "askf.copy-selection", variant: "icon", categories: ["selection", "selection-copy"] },
           ...existingSelItems,
-          { type: "divider", id: "kis-custom-divider", categories: ["kis-actions"] },
-          { type: "command-button", id: "kis.add-to-glossary", commandId: "kis.add-to-glossary", variant: "icon", categories: ["kis-actions"] },
-          { type: "command-button", id: "kis.add-to-note", commandId: "kis.add-to-note", variant: "icon", categories: ["kis-actions"] },
-          { type: "command-button", id: "kis.custom-question", commandId: "kis.custom-question", variant: "icon", categories: ["kis-actions"] },
+          { type: "divider", id: "askf-custom-divider", categories: ["askf-actions"] },
+          { type: "command-button", id: "askf.add-to-glossary", commandId: "askf.add-to-glossary", variant: "icon", categories: ["askf-actions"] },
+          { type: "command-button", id: "askf.add-to-note", commandId: "askf.add-to-note", variant: "icon", categories: ["askf-actions"] },
+          { type: "command-button", id: "askf.custom-question", commandId: "askf.custom-question", variant: "icon", categories: ["askf-actions"] },
           ...(actions?.length ? actions.map(a => ({
             type: "command-button",
-            id: `kis.${a.key}`,
-            commandId: `kis.${a.key}`,
+            id: `askf.${a.key}`,
+            commandId: `askf.${a.key}`,
             variant: "icon",
-            categories: ["kis-actions"],
+            categories: ["askf-actions"],
           })) : []),
         ],
       },

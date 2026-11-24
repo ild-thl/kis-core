@@ -39,10 +39,10 @@ def test_export_empty_db_returns_empty_arrays(monkeypatch):
 
 
 def test_export_omits_api_key_when_export_key_unset(monkeypatch):
-    """No KIS_SECRETS_KEY → export drops api_key entirely (legacy behavior)."""
+    """No ASKF_SECRETS_KEY → export drops api_key entirely (legacy behavior)."""
     from src.routes.admin.providers import build_export
 
-    monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
+    monkeypatch.delenv("ASKF_SECRETS_KEY", raising=False)
     monkeypatch.setattr(
         "src.routes.admin.providers.db.list_providers",
         lambda: [_make_provider(1, "Anbieter A", api_key="sk-secret",
@@ -61,11 +61,11 @@ def test_export_omits_api_key_when_export_key_unset(monkeypatch):
 
 
 def test_export_wraps_api_key_when_export_key_set(monkeypatch):
-    """KIS_SECRETS_KEY set → api_key is included as AES-GCM envelope."""
+    """ASKF_SECRETS_KEY set → api_key is included as AES-GCM envelope."""
     from src.routes.admin.providers import build_export
     from src.services.export_crypto import try_unwrap_api_key
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret-xyz")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret-xyz")
     monkeypatch.setattr(
         "src.routes.admin.providers.db.list_providers",
         lambda: [_make_provider(1, "Anbieter A", api_key="sk-secret")],
@@ -87,7 +87,7 @@ def test_export_envelope_rejects_provider_name_swap(monkeypatch):
         try_unwrap_api_key, wrap_api_key,
     )
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret-xyz")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret-xyz")
     env = wrap_api_key("sk-secret", provider_name="Anbieter A")
     assert try_unwrap_api_key(env, provider_name="Anbieter A") == "sk-secret"
     assert try_unwrap_api_key(env, provider_name="Evil") is None
@@ -99,7 +99,7 @@ def test_export_v1_envelope_still_decryptable(monkeypatch):
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     from src.services.export_crypto import _derive_key, _b64e, try_unwrap_api_key
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret-xyz")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret-xyz")
     key = _derive_key("test-secret-xyz")
     nonce = os.urandom(12)
     ct = AESGCM(key).encrypt(nonce, b"sk-legacy", None)
@@ -110,7 +110,7 @@ def test_export_v1_envelope_still_decryptable(monkeypatch):
 def test_export_skips_envelope_for_providers_without_key(monkeypatch):
     from src.routes.admin.providers import build_export
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret-xyz")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret-xyz")
     monkeypatch.setattr(
         "src.routes.admin.providers.db.list_providers",
         lambda: [_make_provider(1, "Stimmen lokal", api_key=None)],
@@ -403,11 +403,11 @@ def test_import_creates_new_provider_without_api_key(monkeypatch):
 
 
 def test_import_decrypts_envelope_and_sets_key_on_create(monkeypatch):
-    """Envelope present + matching KIS_SECRETS_KEY → recovered key reaches DB."""
+    """Envelope present + matching ASKF_SECRETS_KEY → recovered key reaches DB."""
     from src.routes.admin.providers import perform_import
     from src.services.export_crypto import wrap_api_key
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "roundtrip-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "roundtrip-secret")
     monkeypatch.setattr("src.routes.admin.providers.db.list_providers",
                         lambda: [])
     monkeypatch.setattr("src.routes.admin.providers.db.list_routes",
@@ -432,9 +432,9 @@ def test_import_ignores_envelope_with_wrong_secret(monkeypatch):
     from src.routes.admin.providers import perform_import
     from src.services.export_crypto import wrap_api_key
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "secret-A")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "secret-A")
     envelope = wrap_api_key("sk-real", provider_name="Anbieter A")
-    monkeypatch.setenv("KIS_SECRETS_KEY", "secret-B")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "secret-B")
 
     monkeypatch.setattr("src.routes.admin.providers.db.list_providers",
                         lambda: [])
@@ -462,7 +462,7 @@ def test_import_does_not_overwrite_existing_key_with_envelope(monkeypatch):
     from src.routes.admin.providers import perform_import
     from src.services.export_crypto import wrap_api_key
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "same-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "same-secret")
     existing = _make_provider(1, "Anbieter A", api_key="sk-existing")
     monkeypatch.setattr("src.routes.admin.providers.db.list_providers",
                         lambda: [existing])
@@ -486,7 +486,7 @@ def test_import_restores_key_into_empty_existing_row(monkeypatch):
     from src.routes.admin.providers import perform_import
     from src.services.export_crypto import wrap_api_key
 
-    monkeypatch.setenv("KIS_SECRETS_KEY", "same-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "same-secret")
     existing = _make_provider(1, "Anbieter A", api_key=None)
     monkeypatch.setattr("src.routes.admin.providers.db.list_providers",
                         lambda: [existing])

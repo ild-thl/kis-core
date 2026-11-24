@@ -18,7 +18,7 @@ concurrency:
 jobs:
   sync:
     # Only the owner's repository runs this, copies of the code skip it without an error.
-    if: github.repository == 'hamidmergan/kis-core'
+    if: github.repository == 'hamidmergan/askf-core'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

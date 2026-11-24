@@ -15,7 +15,7 @@ Sprechstunden, Fristen und Zeiträume wie die Vorlesungszeit. Daten ohne Kursbez
 - Ein Material wird nur einmal gelesen. Die Zeile über dem Knopf sagt, wie viele der angehakten
   Materialien schon verarbeitet sind
 - Kommen neue Materialien dazu, drücken Sie den Knopf erneut
-- Steht in der Quelle kein Jahr, nimmt KIS das Jahr, in dem das Datum am nächsten an heute liegt.
+- Steht in der Quelle kein Jahr, nimmt askFrancis das Jahr, in dem das Datum am nächsten an heute liegt.
   Solche Termine tragen ein kleines Fragezeichen, das es erklärt
 - Ein gelöschtes Material nimmt seine Termine mit
 

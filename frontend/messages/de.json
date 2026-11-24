@@ -3533,7 +3533,7 @@
       "title": "Campus Map",
       "active": "Aktiv - Kachel im Footer und Ortskarten im Infoassistenten.",
       "disabled": "Aus - keine Karte, keine Kachel, keine Orte.",
-      "hint": "Adresse der Kartenseite, die Karte liegt außerhalb von KIS. Orte (places.json) und Vorschau (preview.jpg) liegen daneben. Leer heißt: keine Karte.",
+      "hint": "Adresse der Kartenseite, die Karte liegt außerhalb von askFrancis. Orte (places.json) und Vorschau (preview.jpg) liegen daneben. Leer heißt: keine Karte.",
       "toggleAria": "Campus Map umschalten"
     }
   },
@@ -4786,7 +4786,7 @@
     "imageOpen": "{alt}, größer anzeigen",
     "imageClose": "Bild schließen",
     "title": "Handbuch",
-    "subtitle": "KIS - KInternationalisierung von Studiengängen",
+    "subtitle": "askFrancis",
     "navLabel": "Artikel des Handbuchs",
     "filterPlaceholder": "Artikel filtern",
     "filterClear": "Suche leeren",
@@ -4849,7 +4849,7 @@
     "title": "Zugang einlösen",
     "intro": "Mit dem Zugangscode aus deiner Einladung legst du dir hier selbst ein Konto an.",
     "code": "Zugangscode",
-    "codeHint": "KIS-XXXX-XXXX",
+    "codeHint": "ASKF-XXXX-XXXX",
     "autoRedeeming": "Wird angemeldet …",
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort verbergen",
@@ -5297,7 +5297,7 @@
     },
     "landing": {
       "title": "Aufsteller Startseite",
-      "description": "Ein Aufsteller mit QR-Code, der Besucher direkt zur Startseite von KIS führt.",
+      "description": "Ein Aufsteller mit QR-Code, der Besucher direkt zur Startseite von askFrancis führt.",
       "headline": "Entdecke askFrancis",
       "scanHint": "Scanne den QR-Code und leg direkt los",
       "png": "Als PNG",

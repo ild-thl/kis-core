@@ -1,4 +1,4 @@
-"""A shared page opens without a KIS account only when its owner opened the link to everyone."""
+"""A shared page opens without a askFrancis account only when its owner opened the link to everyone."""
 
 from datetime import datetime, timedelta
 from unittest.mock import patch
@@ -65,7 +65,7 @@ def _collection(enabled: bool):
 
 @pytest.fixture
 def angemeldet():
-    """A KIS account, the person whose id the test sets."""
+    """A askFrancis account, the person whose id the test sets."""
     from src.app import app
     from src.dependencies import get_current_user
     from src.dependencies_rbac import get_user_permissions

@@ -8,11 +8,11 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Settings from the environment, without provider credentials."""
 
-    # Signs session cookies, derived from kis_secrets_key if empty.
+    # Signs session cookies, derived from askf_secrets_key if empty.
     session_secret: str = ""
 
     # Encrypts provider API keys.
-    kis_secrets_key: str = ""
+    askf_secrets_key: str = ""
 
     # The admin account, written onto the row on every start.
     admin_username: str = ""
@@ -31,14 +31,14 @@ class Settings(BaseSettings):
     modules: str = "aia,tools"
 
     # Key used to encrypt provider credentials on read and write.
-    kis_export_key: str = ""
+    askf_export_key: str = ""
 
     @model_validator(mode="after")
     def _derive_session_secret(self) -> "Settings":
         # Derived so a leaked cookie key does not reveal the master secret.
-        if not self.session_secret and self.kis_secrets_key.strip():
+        if not self.session_secret and self.askf_secrets_key.strip():
             self.session_secret = hmac.new(
-                self.kis_secrets_key.strip().encode("utf-8"), b"kis-session", hashlib.sha256
+                self.askf_secrets_key.strip().encode("utf-8"), b"askf-session", hashlib.sha256
             ).hexdigest()
         return self
 

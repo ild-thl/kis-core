@@ -16,7 +16,7 @@ test.use({ viewport: { width: 1600, height: 900 }, locale: "de-DE" });
 async function openWorkspace(page: Page, studioTab = "tools") {
   await page.addInitScript(({ uuid, tab }) => {
     localStorage.setItem(`ki-assistent-panels-${uuid}`, JSON.stringify({ quellen: true, chat: true, studio: true }));
-    sessionStorage.setItem("kis-studio-tab", tab);
+    sessionStorage.setItem("askf-studio-tab", tab);
   }, { uuid: WORKSPACE, tab: studioTab });
   await page.goto(`/workspace/${WORKSPACE}`, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-tour="chat-panel"]')).toBeVisible({ timeout: 30_000 });

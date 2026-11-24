@@ -40,8 +40,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
-COPY entrypoint.sh /usr/local/bin/kis-entrypoint.sh
-RUN chmod +x /usr/local/bin/kis-entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/askf-entrypoint.sh
+RUN chmod +x /usr/local/bin/askf-entrypoint.sh
 
 EXPOSE 8000
 
@@ -49,4 +49,4 @@ EXPOSE 8000
 # instead of being fixed. The switch for that sits at the top of the script and is
 # off today, so exactly one process runs as before. The Celery containers override
 # this via 'command:' in the compose file.
-CMD ["/usr/local/bin/kis-entrypoint.sh"]
+CMD ["/usr/local/bin/askf-entrypoint.sh"]

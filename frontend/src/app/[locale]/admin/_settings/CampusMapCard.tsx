@@ -1,6 +1,6 @@
 "use client";
 
-/** Address and switch of the campus map, which lives outside KIS and feeds footer tile, place cards and places. */
+/** Address and switch of the campus map, which lives outside askFrancis and feeds footer tile, place cards and places. */
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";

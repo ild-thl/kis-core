@@ -8,7 +8,7 @@ import secrets
 from loguru import logger
 from src.core.redis_url import REDIS_URL
 
-_KEY_PREFIX = "kis:session:"
+_KEY_PREFIX = "askf:session:"
 
 
 class SessionStore:

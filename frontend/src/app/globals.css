@@ -508,10 +508,10 @@ me-tpc:hover .mm-src-chip {
 }
 
 /* Black tooltip for truncated card titles */
-.kis-tooltip {
+.askf-tooltip {
   position: relative;
 }
-.kis-tooltip::after {
+.askf-tooltip::after {
   content: attr(data-tip);
   position: absolute;
   left: 50%;
@@ -532,7 +532,7 @@ me-tpc:hover .mm-src-chip {
   transition: opacity 0.15s;
   z-index: 50;
 }
-.kis-tooltip:hover::after {
+.askf-tooltip:hover::after {
   opacity: 1;
 }
 
@@ -1370,7 +1370,7 @@ body.is-phone-landscape [title="Panel minimieren"] {
 .driver-active-element[data-tour="transcript-note"] {
   opacity: 1 !important;
 }
-.driver-popover.kis-tour {
+.driver-popover.askf-tour {
   background-color: var(--background);
   color: var(--foreground);
   border: 1px solid var(--border);
@@ -1378,35 +1378,35 @@ body.is-phone-landscape [title="Panel minimieren"] {
   box-shadow: var(--shadow-hover);
   max-width: 340px;
 }
-.driver-popover.kis-tour .driver-popover-title {
+.driver-popover.askf-tour .driver-popover-title {
   color: var(--foreground);
   font-size: var(--text-base);
   font-weight: 600;
   /* Keeps a long title clear of the round close button. */
   padding-right: 2rem;
 }
-.driver-popover.kis-tour .driver-popover-description {
+.driver-popover.askf-tour .driver-popover-description {
   color: var(--foreground-soft);
   /* Same size as a chat answer, the tour sits next to it. */
   font-size: var(--text-base);
   line-height: 1.5;
 }
-.driver-popover.kis-tour .driver-popover-progress-text {
+.driver-popover.askf-tour .driver-popover-progress-text {
   color: var(--muted);
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
-.driver-popover.kis-tour .driver-popover-arrow {
+.driver-popover.askf-tour .driver-popover-arrow {
   border-color: var(--background);
 }
 /* Buttons carry the app classes (see useTour), only their placement is set here. */
-.driver-popover.kis-tour .driver-popover-navigation-btns {
+.driver-popover.askf-tour .driver-popover-navigation-btns {
   gap: 0.5rem;
 }
-.driver-popover.kis-tour .driver-popover-navigation-btns button + button {
+.driver-popover.askf-tour .driver-popover-navigation-btns button + button {
   margin-left: 0;
 }
-.driver-popover.kis-tour .driver-popover-close-btn {
+.driver-popover.askf-tour .driver-popover-close-btn {
   top: 0.75rem;
   right: 0.75rem;
 }

@@ -16,7 +16,7 @@ STORAGE_ROOT = Path("/app/storage")
 
 # --- S3 config (read once at import time) ---
 _S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "")
-_S3_BUCKET = os.environ.get("S3_BUCKET", "kis")
+_S3_BUCKET = os.environ.get("S3_BUCKET", "askfrancis")
 USE_S3 = bool(_S3_ENDPOINT)
 
 

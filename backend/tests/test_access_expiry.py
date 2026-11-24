@@ -41,7 +41,7 @@ def _anmelden(client, konto):
 
 def test_an_expired_test_access_cannot_log_in(client):
     konto = {"id": 42, "username": "max.mustermann",
-             "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
+             "display_name": "Max Mustermann", "email": "max.mustermann@demo.askfrancis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     antwort, anlegen = _anmelden(client, konto)
@@ -53,7 +53,7 @@ def test_an_expired_test_access_cannot_log_in(client):
 
 def test_a_blocked_login_takes_the_dead_cookie_with_it(client):
     konto = {"id": 42, "username": "max.mustermann",
-             "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
+             "display_name": "Max Mustermann", "email": "max.mustermann@demo.askfrancis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     antwort, _ = _anmelden(client, konto)
@@ -65,7 +65,7 @@ def test_a_blocked_login_takes_the_dead_cookie_with_it(client):
 
 def test_a_running_test_access_carries_its_deadline_into_the_session(client):
     konto = {"id": 42, "username": "max.mustermann",
-             "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
+             "display_name": "Max Mustermann", "email": "max.mustermann@demo.askfrancis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": MORGEN}
     antwort, anlegen = _anmelden(client, konto)
@@ -151,7 +151,7 @@ async def test_the_gate_lets_a_session_through_when_the_deadline_is_unparseable(
 
 def test_login_lets_an_account_through_when_the_deadline_is_unparseable(client):
     konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "active": 1,
+             "email": "max.mustermann@demo.askfrancis.local", "active": 1,
              "role": "staff", "custom_role_id": None, "access_expires_at": "kaputt"}
     antwort, anlegen = _anmelden(client, konto)
 

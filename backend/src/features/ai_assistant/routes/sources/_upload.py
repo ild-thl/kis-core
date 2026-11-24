@@ -24,7 +24,7 @@ from ._shared import (
 router = APIRouter(tags=["ki-assistent: sources"])
 
 # Global upload brake in Redis, as a sorted set with timestamps.
-_UPLOAD_SET_KEY = "kis:uploads:inflight"
+_UPLOAD_SET_KEY = "askf:uploads:inflight"
 # How long a slot is valid at most, an orphan heals by itself afterwards.
 _UPLOAD_STALE_SECONDS = 15 * 60
 

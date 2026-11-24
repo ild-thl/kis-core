@@ -33,7 +33,7 @@ def aufbau(verbindung):
     init_db()
     kennung = uuid_modul.uuid4().hex[:8]
     code_id = repo.create_code(
-        code=f"KIS-WS-{kennung.upper()}", label="Testrunde Workspaces", role="user",
+        code=f"ASKF-WS-{kennung.upper()}", label="Testrunde Workspaces", role="user",
         custom_role_id=None, max_uses=5, valid_until=datetime.now() + timedelta(days=30),
         access_hours=None, show_credentials=True, show_evaluation=False, created_by=0,
     )
@@ -44,7 +44,7 @@ def aufbau(verbindung):
                 cur.execute(
                     "INSERT INTO users (username, display_name, email, active, role) "
                     "VALUES (%s, %s, %s, 1, 'staff') RETURNING id",
-                    (f"test.ws.{name}.{kennung}", f"Test {name}", f"test.ws.{name}.{kennung}@demo.kis.local"),
+                    (f"test.ws.{name}.{kennung}", f"Test {name}", f"test.ws.{name}.{kennung}@demo.askfrancis.local"),
                 )
                 konten.append(cur.fetchone()[0])
             besitzer, eins, zwei = konten

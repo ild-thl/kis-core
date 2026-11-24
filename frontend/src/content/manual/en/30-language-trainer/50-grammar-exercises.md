@@ -21,7 +21,7 @@ formats. Several formats share the sentences roughly evenly. No instruction can 
 
 ## Before the exercise appears
 
-KIS has the AI check every finished sentence once more. Sentences that turn ungrammatical with the
+askFrancis has the AI check every finished sentence once more. Sentences that turn ungrammatical with the
 solution or do not show the practised form at all are dropped. That is why an exercise sometimes
 has fewer sentences than chosen. If fewer than half are left, it fails.
 
@@ -29,7 +29,7 @@ has fewer sentences than chosen. If fewer than half are left, it fails.
 
 ## While solving
 
-- **Typed formats**: KIS checks Rewrite and Fill the gap without an AI call, by comparing with the
+- **Typed formats**: askFrancis checks Rewrite and Fill the gap without an AI call, by comparing with the
   expected solution and the further correct versions the AI supplies when generating.
   Capitalisation and punctuation do not count. The verdict has three steps: Correct, Almost, Not
   right yet. Almost means at least 72 % of the words match a correct version
@@ -67,7 +67,7 @@ language trainer switched on and a level set.
 - **Name**: free, such as "Konjunktiv II". Check has the AI build a pattern pair from it, a
   sentence before and the same sentence after. It also writes a rule that is not shown but steers
   the exercises
-- **Not a grammar topic**: If the AI finds no grammar topic in the name, KIS creates nothing
+- **Not a grammar topic**: If the AI finds no grammar topic in the name, askFrancis creates nothing
 - **Understood as**: If the AI turns the name into a more precise form, it suggests that name. Use
   this name puts it in
 - **Pattern pairs**: The suggested pair can be overwritten. + Another pattern adds pairs up to

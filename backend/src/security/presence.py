@@ -7,7 +7,7 @@ from loguru import logger
 from src.core.redis_url import REDIS_URL
 from src.core.db.pool import get_connection
 
-_PREFIX = "kis:seen:"
+_PREFIX = "askf:seen:"
 
 # A value below this mark cannot be a timestamp.
 _FRUEHESTENS = 1_600_000_000  # September 2020
