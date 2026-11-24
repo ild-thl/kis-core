@@ -19,6 +19,8 @@
     "stats": "Statistik",
     "calendar": "Kalender",
     "tools": "Dienste",
+    "accessUntil": "Zugang bis {date}",
+    "workspaces": "Workspaces",
     "settingsMenu": "Einstellungen",
     "sectionAppearance": "Ansicht",
     "homeNoticeShow": "Startseite-Hinweis anzeigen",
@@ -4527,7 +4529,6 @@
       "joinAll": "Allen beitreten"
     },
     "list": {
-      "headerTitle": "Hallo {name}!",
       "myWorkspaces": "Meine {label}",
       "allWorkspaces": "Alle {label}",
       "groupFavorites": "Favoriten",

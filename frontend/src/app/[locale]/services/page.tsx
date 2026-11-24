@@ -16,7 +16,6 @@ import WelcomeModal from "../workspace/_components/WelcomeModal";
 
 interface HomeState {
   targets: HomeTarget[];
-  firstName: string;
   stamp: "open" | "upcoming" | null;
 }
 
@@ -49,7 +48,6 @@ function HomeRouter() {
     const perms = auth.permissions ?? EMPTY_PERMS;
     setState({
       targets: homeTargets(auth.modules, perms, enabledToolKeys(enabledTools)),
-      firstName: auth.display_name?.split(" ")[0] ?? auth.username ?? "",
       stamp: stampCardState(event),
     });
   }, [auth, toolsLoaded, enabledTools, event, eventFailed]);
@@ -89,7 +87,6 @@ function HomeRouter() {
         </div>
       ) : (
         <StartOverview
-          firstName={state.firstName}
           targets={tools}
           home={!hasAia}
           stamp={hasAia ? null : state.stamp}

@@ -208,3 +208,20 @@ def test_status_still_reports_a_normal_account_as_authenticated(client):
 
     assert antwort.status_code == 200
     assert antwort.json()["authenticated"] is True
+
+
+def test_status_reports_the_deadline_from_the_account(client):
+    sitzungsdaten = {"user_id": 42, "email": "", "role": "staff", "custom_role_id": None,
+                     "access_expires_at": GESTERN.isoformat()}
+    konto = {"id": 42, "role": "staff", "custom_role_id": None, "access_expires_at": MORGEN}
+    antwort = _status(client, sitzungsdaten, konto)
+
+    assert antwort.json()["access_expires_at"] == MORGEN.isoformat()
+
+
+def test_status_reports_no_deadline_for_a_normal_account(client):
+    sitzungsdaten = {"user_id": 5, "email": "", "role": "admin", "custom_role_id": None}
+    konto = {"id": 5, "role": "admin", "custom_role_id": None, "access_expires_at": None}
+    antwort = _status(client, sitzungsdaten, konto)
+
+    assert antwort.json()["access_expires_at"] is None

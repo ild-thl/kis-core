@@ -175,6 +175,8 @@ def auth_status(request: Request):
                 if expired:
                     # The reason travels along so the login page can say what happened.
                     return {"authenticated": False, "reason": ACCESS_EXPIRED}
+            # The deadline comes from the account, so an extension by the admin shows at once.
+            data["access_expires_at"] = ablauf.isoformat() if isinstance(ablauf, datetime) else None
             data["role"] = db_user.get("role") or data.get("role") or "user"
             data["custom_role_id"] = db_user.get("custom_role_id")
 

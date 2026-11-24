@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { CalendarBlank, Lock } from "@phosphor-icons/react";
 import { useRouter } from "@/i18n/navigation";
 import Spinner from "@/components/ui/Spinner";
-import { Greeting } from "./Greeting";
 import { TourInvite } from "./TourInvite";
 import { LanguageTrainerInvite } from "./LanguageTrainerInvite";
 import { EvaluationInvite } from "./EvaluationInvite";
@@ -41,13 +40,12 @@ function initialen(name: string): string {
 interface Props {
   /** May own workspaces. Controls the owned block only, never the access link. */
   canCreate: boolean;
-  firstName: string;
   /** Everyone holding the language level right gets the trainer offer. */
   languageInvite: boolean;
 }
 
 /** One start page for all roles, ownership decides the view. */
-export default function WorkspaceHome({ canCreate, firstName, languageInvite }: Props) {
+export default function WorkspaceHome({ canCreate, languageInvite }: Props) {
   const t = useTranslations("workspace.list");
   const locale = useLocale();
   const router = useRouter();
@@ -234,12 +232,13 @@ export default function WorkspaceHome({ canCreate, firstName, languageInvite }: 
   return (
     <div className="page-shell pt-6 pb-20 lg:pt-15 lg:pb-30">
       <div className="max-w-7xl mx-auto">
-        {/* The folded task card, or else the stamp card, waits at the right end of the greeting row. */}
-        <div className="flex items-start justify-between gap-4">
-          <Greeting firstName={firstName} as="h2" />
-          {tasks.visible && tasksMin && <TaskGiftButton done={tasks.done} onOpen={() => setTasksMin(false)} />}
-          {stamp && !tasks.visible && <StampButton stamp={stamp} from={event?.stamp?.availableFrom ?? ""} title={event?.stamp?.title} body={event?.stamp?.body} />}
-        </div>
+        {/* The folded task card, or else the stamp card, sits at the right end above the cards. */}
+        {((tasks.visible && tasksMin) || (stamp && !tasks.visible)) && (
+          <div className="flex justify-end mb-4">
+            {tasks.visible && tasksMin && <TaskGiftButton done={tasks.done} onOpen={() => setTasksMin(false)} />}
+            {stamp && !tasks.visible && <StampButton stamp={stamp} from={event?.stamp?.availableFrom ?? ""} title={event?.stamp?.title} body={event?.stamp?.body} />}
+          </div>
+        )}
 
         <div className="flex flex-col md:flex-row gap-4 mb-8 empty:hidden">
           {tasks.visible && !tasksMin && (
