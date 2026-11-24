@@ -231,6 +231,8 @@ SETTING_FIELD_PERMISSIONS: dict[str, str] = {
     "legal_imprint_en": PERM_SET_SYSTEM,
     "legal_privacy_de": PERM_SET_SYSTEM,
     "legal_privacy_en": PERM_SET_SYSTEM,
+    "campus_map_url": PERM_SET_SYSTEM,
+    "campus_map_enabled": PERM_SET_SYSTEM,
     "language_training_enabled": PERM_SET_AIA_LEVEL,
     "ocr_enabled": PERM_SET_AIA_SOURCES,
     "aia_workspace_max_sources": PERM_SET_AIA_SOURCES,

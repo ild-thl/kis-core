@@ -2058,7 +2058,12 @@
       },
       "system": {
         "label": "System",
-        "sub": "What applies to the whole platform: maintenance, labels and notice."
+        "sub": "What holds for the whole platform: operation, legal and campus map.",
+        "tabs": {
+          "betrieb": "Operation",
+          "rechtliches": "Legal",
+          "karte": "Campus map"
+        }
       },
       "mascot": {
         "label": "Mascots",
@@ -2102,9 +2107,6 @@
         "includeHint": "One pattern per line, for example /studies/. Empty means every page of the sitemap.",
         "exclude": "Addresses without",
         "excludeHint": "One pattern per line, for example /news/. Pages with this pattern are skipped.",
-        "mapUrl": "Campus map address",
-        "mapHint": "The page of the campus map. Place cards in the chat open it at the right spot. Places (places.json) and preview (preview.jpg) sit next to it. Empty means no map.",
-        "mapEnabled": "Show campus map",
         "retention": "Keep chats",
         "retentionHint": "Days without activity after which a chat is deleted. 0 keeps all.",
         "days": "days",
@@ -3526,6 +3528,13 @@
       "german": "German",
       "english": "English",
       "markdownHint": "Markdown: ## heading, ### bold line, - list, [text](https://…). If English stays empty, the German text appears."
+    },
+    "campusMapCard": {
+      "title": "Campus map",
+      "active": "On - footer tile and place cards in the info assistant.",
+      "disabled": "Off - no map, no tile, no places.",
+      "hint": "Address of the map page, the map lives outside KIS. Places (places.json) and preview (preview.jpg) sit next to it. Empty means no map.",
+      "toggleAria": "Toggle campus map"
     }
   },
   "permissions": {

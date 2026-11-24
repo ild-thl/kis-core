@@ -16,7 +16,7 @@ page and can also be opened in its own tab.
 ## Embedding the campus map
 
 The campus map can be embedded on other pages too, as a stand-alone iframe. The map address is set
-in the admin under Info assistant.
+in the admin under System → Campus map.
 
 ```html
 <iframe

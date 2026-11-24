@@ -29,6 +29,9 @@ class _UpdateSettingsBase(BaseModel):
     legal_imprint_en: str | None = None
     legal_privacy_de: str | None = None
     legal_privacy_en: str | None = None
+    # Campus map hosted outside KIS, its address drives the footer tile, place cards and places.
+    campus_map_url: str | None = None
+    campus_map_enabled: bool | None = None
     # Text recognition when ingesting image-heavy pages, on by default.
     ocr_enabled: bool | None = None
     # Per-workspace source upload cap (admin-tunable, default 30).

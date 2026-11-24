@@ -2058,7 +2058,12 @@
       },
       "system": {
         "label": "System",
-        "sub": "Was für die ganze Plattform gilt: Wartung, Beschriftungen und Hinweis."
+        "sub": "Was für die ganze Plattform gilt: Betrieb, Rechtliches und Campus Map.",
+        "tabs": {
+          "betrieb": "Betrieb",
+          "rechtliches": "Rechtliches",
+          "karte": "Campus Map"
+        }
       },
       "mascot": {
         "label": "Maskottchen",
@@ -2102,9 +2107,6 @@
         "includeHint": "Ein Muster je Zeile, zum Beispiel /studium/. Leer heißt alle Seiten der Sitemap.",
         "exclude": "Adressen ohne",
         "excludeHint": "Ein Muster je Zeile, zum Beispiel /news/. Seiten mit diesem Muster werden übersprungen.",
-        "mapUrl": "Adresse der Campus Map",
-        "mapHint": "Die Seite der Campus Map. Ortskarten im Chat öffnen sie mit dem passenden Ort. Orte (places.json) und Vorschau (preview.jpg) liegen daneben. Leer heißt: keine Karte.",
-        "mapEnabled": "Campus Map anzeigen",
         "retention": "Chats aufbewahren",
         "retentionHint": "Tage ohne Aktivität, danach wird ein Chat gelöscht. 0 behält alle.",
         "days": "Tage",
@@ -3526,6 +3528,13 @@
       "german": "Deutsch",
       "english": "Englisch",
       "markdownHint": "Markdown: ## Überschrift, ### fette Zeile, - Liste, [Text](https://…). Bleibt Englisch leer, erscheint der deutsche Text."
+    },
+    "campusMapCard": {
+      "title": "Campus Map",
+      "active": "Aktiv - Kachel im Footer und Ortskarten im Infoassistenten.",
+      "disabled": "Aus - keine Karte, keine Kachel, keine Orte.",
+      "hint": "Adresse der Kartenseite, die Karte liegt außerhalb von KIS. Orte (places.json) und Vorschau (preview.jpg) liegen daneben. Leer heißt: keine Karte.",
+      "toggleAria": "Campus Map umschalten"
     }
   },
   "permissions": {

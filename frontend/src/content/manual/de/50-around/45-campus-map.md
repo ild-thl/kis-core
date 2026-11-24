@@ -16,7 +16,7 @@ und lässt sich auch in einem eigenen Tab öffnen.
 ## Campusplan einbinden
 
 Der Campusplan lässt sich auch auf anderen Seiten einbinden, als eigenständiges iframe. Die Adresse
-der Karte steht im Admin unter Infoassistent.
+der Karte steht im Admin unter System → Campus Map.
 
 ```html
 <iframe
