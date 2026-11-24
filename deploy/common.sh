@@ -16,11 +16,13 @@ env_get() {
     printf '%s\n' "$value"
 }
 
-PROXY=$(env_get PROXY)
+AUTO_HTTPS=$(env_get AUTO_HTTPS)
+# Older .env files still use the former name PROXY.
+[ -n "$AUTO_HTTPS" ] || AUTO_HTTPS=$(env_get PROXY)
 
 # -f explicit so a COMPOSE_FILE from the .env cannot add anything.
 COMPOSE_FILES=(-f docker-compose.yml -f deploy/docker-compose.server.yml)
-if [ "$PROXY" = "true" ]; then
+if [ "$AUTO_HTTPS" = "true" ]; then
     COMPOSE_FILES+=(-f deploy/docker-compose.proxy.yml)
 fi
 
@@ -36,7 +38,7 @@ compose() {
 
 # Caddy keeps running across deploys, so a changed Caddyfile only arrives through a reload.
 proxy_reload() {
-    if [ "$PROXY" = "true" ]; then
+    if [ "$AUTO_HTTPS" = "true" ]; then
         compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile
     fi
 }

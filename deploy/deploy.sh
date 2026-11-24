@@ -84,7 +84,7 @@ main() {
 
     # With the bundled proxy the check goes through Caddy and its certificate, otherwise straight to the frontend.
     local url="http://127.0.0.1:3000/" host="" code=000
-    if [ "$PROXY" = "true" ]; then
+    if [ "$AUTO_HTTPS" = "true" ]; then
         host=$(env_get DOMAIN)
         host=${host%%,*}
         host=${host//[[:space:]]/}

@@ -1,4 +1,4 @@
-# Bundled Caddy with automatic HTTPS, loaded by deploy/common.sh when PROXY=true is in the .env.
+# Bundled Caddy with automatic HTTPS, loaded by deploy/common.sh when AUTO_HTTPS=true is in the .env.
 # Paths are relative to the repo root, because docker-compose.yml is the first file.
 
 services:

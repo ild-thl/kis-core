@@ -95,71 +95,27 @@ Plus one of the two ways to reach it over HTTPS, the login only works over HTTPS
 
 ```dotenv
 # Rented server: KIS runs Caddy, which fetches and renews the certificates itself.
-PROXY=true
+AUTO_HTTPS=true
 DOMAIN=kis.example.org
 # Or behind the proxy of your data centre, which forwards to 127.0.0.1:3000 (default).
-PROXY=false
+AUTO_HTTPS=false
 ```
 
 Then start, and after every `git pull` restart:
 
 ```bash
-bash deploy/start.sh            # also: restart, down
+bash deploy/start.sh
 ```
 
-### Rented server (`PROXY=true`)
+### Server requirements
 
-- An A record (and AAAA with IPv6) for every name in `DOMAIN` points to the server.
-  Several names are separated by commas: `DOMAIN="example.org, www.example.org"`.
-- Ports 80 and 443 are open (TCP, and UDP for 443), no other web server runs on the host.
-
-### Behind your own proxy (`PROXY=false`)
-
-What the data centre's proxy needs:
-
-- Forward everything to `http://127.0.0.1:3000`, never straight to the backend.
-- Pass on the `Host` header and set `X-Forwarded-Host`, `X-Forwarded-Proto` and `X-Forwarded-For`,
-  otherwise uploads fail.
-- Turn buffering off for responses, otherwise the chat answer arrives in one piece at the end.
-- A body limit of 32 MB and a timeout of 60 s are enough, large files go to the bucket in parts.
-
-### Both ways
-
-- The bucket has to be reachable from outside, browsers upload large files straight to it
-  in parts of 5 MB. A proxy in front of your own S3 (e.g. nginx before MinIO) has to accept
-  requests of at least 5 MB, nginx allows only 1 MB without a setting.
-- KIS adds the CORS rule for your domain to the bucket by itself, so the S3 key needs the
-  right to change the bucket's CORS.
-- The server needs internet access for AI providers, images and packages.
-
-### Deploy button (optional)
-
-The workflow **Deploy** in the Actions tab runs `deploy/deploy.sh` on the server: it checks free disk
-and running jobs, pulls `main`, builds while the site keeps running, restarts the app and waits for
-an answer with status 200. The repository on the server has to be on `main` and able to `git pull`.
-
-1. Create a key pair only for this and add the public key to `~/.ssh/authorized_keys` of the
-   server user, locked to the script:
-   `command="/path/to/repo/deploy/deploy.sh",restrict ssh-ed25519 AAAA… deploy`
-2. Under **Settings → Secrets and variables → Actions** of the repository:
-
-| Name | Kind | Value |
-|---|---|---|
-| `DEPLOY_SSH_KEY` | secret | the private key |
-| `DEPLOY_TARGET` | variable | `user@host` of the server |
-| `DEPLOY_KNOWN_HOSTS` | variable | output of `ssh-keyscan host` |
-| `DEPLOY_ACTORS` | variable | GitHub logins allowed to start it, comma separated without spaces |
-
-Without `DEPLOY_TARGET` the workflow is skipped.
-
-## Further settings
-
-Everything below has a default and goes into `.env` only to change it.
-
-| Setting | Default | Purpose |
-|---|---|---|
-| `ADMIN_USERNAME` | part of `ADMIN_EMAIL` before the @ | login name of the admin |
-| `MODULES` | `aia,tools` | modules this installation runs, needs a restart, locally the workers of both start anyway |
+- `AUTO_HTTPS=true`: every name in `DOMAIN` (comma separated) points to the server, ports 80 and 443
+  (TCP, UDP for 443) are free.
+- `AUTO_HTTPS=false`: the proxy forwards everything to `http://127.0.0.1:3000`, passes `Host`, sets
+  `X-Forwarded-Host`, `-Proto` and `-For`, turns response buffering off and allows 32 MB.
+- The bucket is reachable from outside and accepts requests of 5 MB (nginx allows only 1 MB by
+  default). KIS sets the bucket's CORS rule itself, so the S3 key needs that right.
+- The server has internet access.
 
 ## AI providers
 
