@@ -41,7 +41,6 @@ const FALLBACKS = {
   de: {
     limitReached: "Limit erreicht",
     unknownError: "Unbekannter Fehler",
-    translationError: "Übersetzungsfehler",
     jobStatusError: "Fehler beim Abrufen des Job-Status",
     // Shown whenever the backend gives no usable detail - never the raw status code.
     genericError: "Da ist etwas schiefgelaufen. Bitte versuche es erneut oder wende dich an den Support, falls es weiter nicht klappt.",
@@ -51,7 +50,6 @@ const FALLBACKS = {
   en: {
     limitReached: "Limit reached",
     unknownError: "Unknown error",
-    translationError: "Translation error",
     jobStatusError: "Failed to load job status",
     genericError: "Something went wrong. Please try again, or contact support if it keeps happening.",
     jobFailed: "Job failed",
@@ -131,9 +129,9 @@ function _parseErrorResponse(errorBody: { detail?: unknown }, fallbackStatus: nu
 }
 
 /** Turns a failed response into the error the callers show. */
-async function throwIfFailed(response: Response, fallbackKey: "unknownError" | "translationError" = "unknownError"): Promise<void> {
+async function throwIfFailed(response: Response): Promise<void> {
   if (response.ok) return;
-  const error = await response.json().catch(() => ({ detail: fallback(fallbackKey) }));
+  const error = await response.json().catch(() => ({ detail: fallback("unknownError") }));
   throw _parseErrorResponse(error, response.status);
 }
 
@@ -229,51 +227,6 @@ class ApiClient {
     return response.json();
   }
 
-  async uploadFileWithFields(
-    path: string,
-    file: File,
-    fields: Record<string, string>,
-    fileFieldName: string = "file",
-    signal?: AbortSignal,
-  ): Promise<{ blob: Blob; filename: string }> {
-    const formData = new FormData();
-    formData.append(fileFieldName, file);
-    for (const [key, value] of Object.entries(fields)) {
-      formData.append(key, value);
-    }
-
-    const response = await this.fetch(path, {
-      method: "POST",
-      body: formData,
-      signal,
-    });
-
-    await throwIfFailed(response);
-
-    return blobWithName(response, file.name);
-  }
-
-  async uploadFile(
-    path: string,
-    file: File,
-    glossary?: Record<string, string>,
-  ): Promise<{ blob: Blob; filename: string }> {
-    const formData = new FormData();
-    formData.append("file", file);
-    if (glossary && Object.keys(glossary).length > 0) {
-      formData.append("glossary", JSON.stringify(glossary));
-    }
-
-    const response = await this.fetch(path, {
-      method: "POST",
-      body: formData,
-    });
-
-    await throwIfFailed(response, "translationError");
-
-    return blobWithName(response, file.name);
-  }
-
   async postJsonForBlob(
     path: string,
     body: unknown,
@@ -282,29 +235,6 @@ class ApiClient {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-    });
-
-    await throwIfFailed(response);
-
-    return blobWithName(response, "output");
-  }
-
-  async uploadMultipleFiles(
-    path: string,
-    files: Record<string, File>,
-    fields: Record<string, string> = {},
-  ): Promise<{ blob: Blob; filename: string }> {
-    const formData = new FormData();
-    for (const [key, file] of Object.entries(files)) {
-      formData.append(key, file);
-    }
-    for (const [key, value] of Object.entries(fields)) {
-      formData.append(key, value);
-    }
-
-    const response = await this.fetch(path, {
-      method: "POST",
-      body: formData,
     });
 
     await throwIfFailed(response);

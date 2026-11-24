@@ -128,10 +128,18 @@ def test_start_legt_die_datei_im_zwischenordner_ab(bucket):
     assert bucket["cors"] == ["https://kis.example"]
 
 
-def test_start_ohne_s3_oder_fremde_endung_nimmt_den_klassischen_weg(bucket, monkeypatch):
-    assert _start(name="notiz.txt") == {"direct": False}
+def test_start_ohne_s3_nimmt_den_klassischen_weg(bucket, monkeypatch):
     monkeypatch.setattr(du, "USE_S3", False)
     assert _start() == {"direct": False}
+    assert _start(name="notiz.txt") == {"direct": False}
+
+
+def test_start_lehnt_fremde_endung_ab_statt_auszuweichen(bucket):
+    with pytest.raises(HTTPException) as foreign:
+        _start(name="notiz.txt")
+    assert foreign.value.status_code == 400
+    assert ".mp3" in foreign.value.detail
+    assert bucket["started"] == []
 
 
 def test_start_lehnt_leere_und_zu_grosse_dateien_ab(bucket):

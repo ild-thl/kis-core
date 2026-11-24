@@ -193,14 +193,26 @@ def test_content_not_matching_the_extension_is_refused(client):
     anlegen.assert_not_called()
 
 
-def test_more_than_ten_files_is_refused(client):
-    dateien = [("files", (f"s{i}.png", _PNG_BYTES, "image/png")) for i in range(11)]
+def test_more_than_five_files_is_refused(client):
+    dateien = [("files", (f"s{i}.png", _PNG_BYTES, "image/png")) for i in range(6)]
     with patch("src.routes.feedback.repo.create_feedback") as anlegen:
         r = client.post(
             "/feedback", data={"category": "bug", "message": "Test"}, files=dateien,
         )
 
     assert r.status_code == 400
+    anlegen.assert_not_called()
+
+
+def test_a_file_over_five_mib_is_refused(client):
+    gross = _PNG_BYTES + b"\0" * (5 * 1024 * 1024)
+    with patch("src.routes.feedback.repo.create_feedback") as anlegen:
+        r = client.post(
+            "/feedback", data={"category": "bug", "message": "Test"},
+            files=[("files", ("gross.png", gross, "image/png"))],
+        )
+
+    assert r.status_code == 413
     anlegen.assert_not_called()
 
 

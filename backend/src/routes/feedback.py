@@ -24,8 +24,9 @@ CATEGORIES = ("bug", "idea", "other")
 MAX_MESSAGE_CHARS = 2000
 MAX_CONTACT_CHARS = 200
 MAX_PATH_CHARS = 300
-MAX_FILES = 10
-MAX_FILE_BYTES = 15 * 1024 * 1024
+# Five screenshots of 5 MiB stay under the 32 MB proxy limit together with the form.
+MAX_FILES = 5
+MAX_FILE_BYTES = 5 * 1024 * 1024
 ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".pdf"}
 
 

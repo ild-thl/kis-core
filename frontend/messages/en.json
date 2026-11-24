@@ -294,7 +294,7 @@
     "messageRequired": "Please enter some text",
     "attachLabel": "Attachments (optional)",
     "attachButton": "Attach a file",
-    "attachHint": "Up to {max} files, PNG, JPG or PDF, up to 15 MB each.",
+    "attachHint": "Up to {max} files, PNG, JPG or PDF, up to {mb} MB each.",
     "tooManyFiles": "At most {max} files",
     "fileTooLarge": "{name} is larger than {max} MB",
     "removeFile": "Remove file",
