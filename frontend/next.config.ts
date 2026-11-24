@@ -23,7 +23,8 @@ const nextConfig: NextConfig = {
     return config;
   },
   experimental: {
-    middlewareClientMaxBodySize: "500mb",
+    // Matches the 32 MB proxy limit, larger files go to the bucket in parts.
+    middlewareClientMaxBodySize: "32mb",
     proxyTimeout: 600000, // 10 min for local Ollama generation
     optimizePackageImports: ["@phosphor-icons/react"],
   },
