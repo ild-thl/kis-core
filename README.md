@@ -104,7 +104,7 @@ DOMAIN=kis.example.org
 AUTO_HTTPS=false
 ```
 
-Start, and again after every `git pull`:
+Start or update:
 
 ```bash
 bash deploy/start.sh
