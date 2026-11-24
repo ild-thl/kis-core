@@ -91,31 +91,24 @@ S3_SECRET_KEY=<secret>
 S3_BUCKET=<bucket>
 ```
 
-Plus one of the two ways to reach it over HTTPS, the login only works over HTTPS:
+HTTPS, pick one:
 
 ```dotenv
-# Rented server: KIS runs Caddy, which fetches and renews the certificates itself.
+# 1. KIS gets the certificate itself, the domain must point to this server.
 AUTO_HTTPS=true
 DOMAIN=kis.example.org
-# Or behind the proxy of your data centre, which forwards to 127.0.0.1:3000 (default).
+```
+
+```dotenv
+# 2. Your own proxy in front of KIS, forwarding to 127.0.0.1:3000.
 AUTO_HTTPS=false
 ```
 
-Then start, and after every `git pull` restart:
+Start, and again after every `git pull`:
 
 ```bash
 bash deploy/start.sh
 ```
-
-### Server requirements
-
-- `AUTO_HTTPS=true`: every name in `DOMAIN` (comma separated) points to the server, ports 80 and 443
-  (TCP, UDP for 443) are free.
-- `AUTO_HTTPS=false`: the proxy forwards everything to `http://127.0.0.1:3000`, passes `Host`, sets
-  `X-Forwarded-Host`, `-Proto` and `-For`, turns response buffering off and allows 32 MB.
-- The bucket is reachable from outside and accepts requests of 5 MB (nginx allows only 1 MB by
-  default). KIS sets the bucket's CORS rule itself, so the S3 key needs that right.
-- The server has internet access.
 
 ## AI providers
 
