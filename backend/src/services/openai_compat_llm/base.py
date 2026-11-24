@@ -35,6 +35,14 @@ def load_prompt(key: str, default: str) -> str:
 def clean_whisper_response(raw: str) -> str:
     """Clean Whisper API response that may be JSON-encoded (wrapped in quotes with escaped newlines)."""
     text = raw.strip()
+    # Some providers ignore response_format=text and answer with the JSON object instead.
+    if text.startswith("{") and text.endswith("}"):
+        try:
+            parsed = json.loads(text)
+        except (json.JSONDecodeError, ValueError):
+            parsed = None
+        if isinstance(parsed, dict) and isinstance(parsed.get("text"), str):
+            return parsed["text"].strip()
     if text.startswith('"') and text.endswith('"'):
         try:
             text = json.loads(text)

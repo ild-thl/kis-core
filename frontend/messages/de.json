@@ -2098,7 +2098,7 @@
       },
       "campus": {
         "label": "Infoassistent",
-        "sub": "Welche Webseiten nachts abgeglichen werden, der Link zur Campus Map, zusätzliche Dokumente und wie lange Chats bleiben.",
+        "sub": "Welche Webseiten nachts abgeglichen werden, zusätzliche Dokumente und wie lange Chats bleiben.",
         "sitemapUrl": "Sitemap-Adressen",
         "sitemapHint": "Die Sitemaps der Hochschulseiten, eine Adresse je Zeile. Bleiben Sitemaps und Startseiten leer, werden keine Webseiten geholt.",
         "startUrls": "Startseiten ohne Sitemap",
