@@ -29,7 +29,7 @@ browser remembers that, on another device the date is back.
 ## Without a fixed day
 
 If the material names only a month, the date sits in no cell but under **No fixed day**. If the
-source gives no year, KIS takes the year that puts the date closest to today and marks that with a
+source gives no year, askFrancis takes the year that puts the date closest to today and marks that with a
 small question mark at the year.
 
 ## Your own dates

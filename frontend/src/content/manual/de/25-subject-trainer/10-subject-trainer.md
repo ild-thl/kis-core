@@ -26,12 +26,12 @@ Für die Zahl der angehakten Materialien gibt es keine Grenze. Wie viel davon ge
 hängt vom Tool ab:
 
 - **Karteikarten und Quiz** lesen je Aufgabe ein festes Stück Text, ein Satz aus 15 Aufgaben
-  rund 100.000 Zeichen. Passt nicht alles hinein, merkt sich KIS je Material, wo es aufgehört
+  rund 100.000 Zeichen. Passt nicht alles hinein, merkt sich askFrancis je Material, wo es aufgehört
   hat, und liest beim nächsten Satz dort weiter. Über mehrere Sätze kommt so jede Datei an die
   Reihe. Die Merkposition gehört zum Workspace, nicht zur Person
 - **Mindmap und Datentabelle** lesen alles, was in einen Aufruf passt, in der Grundeinstellung
   500.000 Zeichen. Ist das Material größer, arbeiten sie über die Zusammenfassungen weiter, die
-  KIS zu jedem Material angelegt hat
+  askFrancis zu jedem Material angelegt hat
 
 In der Legende unter Mindmap und Datentabelle stehen Materialien, aus denen nichts verwendet
 wurde, ausgegraut.
@@ -39,9 +39,9 @@ wurde, ausgegraut.
 ## Die Anweisung
 
 Beim Erstellen lässt sich eine Anweisung mitgeben, höchstens 500 Zeichen. Bei Karteikarten und
-Quiz nur auf dem Weg über die Materialien, nicht aus dem Glossar. KIS ordnet sie vorher ein:
+Quiz nur auf dem Weg über die Materialien, nicht aus dem Glossar. askFrancis ordnet sie vorher ein:
 
-- **Ein Thema**, etwa „nur Kapitel 3": KIS sucht die passenden Stellen im Material und nutzt
+- **Ein Thema**, etwa „nur Kapitel 3": askFrancis sucht die passenden Stellen im Material und nutzt
   nur diese
 - **Ein Wunsch zur Art**, etwa „leichte Fragen" oder „Spalten: Begriff, Frist, Folge": das
   Material bleibt, wie es ist, der Wunsch geht in die Aufgabenstellung
@@ -53,7 +53,7 @@ Am fertigen Ergebnis steht die Anweisung, mit der es entstanden ist.
 
 ## Der Aufgaben-Vorrat
 
-Karteikarten und Quiz aus Materialien sammelt KIS in einem Vorrat, getrennt je Material, Tool
+Karteikarten und Quiz aus Materialien sammelt askFrancis in einem Vorrat, getrennt je Material, Tool
 und Sprachniveau. Dasselbe gilt für Lernkarten, Wortschatz- und Grammatikübungen im
 Sprachtrainer, nicht aber für Mindmap und Datentabelle.
 

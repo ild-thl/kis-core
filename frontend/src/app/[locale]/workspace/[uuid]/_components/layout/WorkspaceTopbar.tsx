@@ -167,7 +167,7 @@ export function WorkspaceTopbar(props: WorkspaceTopbarProps) {
       title={tHeader("homeAria")}
       className="flex items-center gap-1.5 flex-shrink-0 no-underline logo-link"
     >
-      <Wordmark size="sm" birdOnly={isMobile} />
+      <Wordmark size="sm" iconOnly={isMobile} />
     </Link>
   );
 

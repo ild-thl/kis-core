@@ -1,19 +1,22 @@
+# Fixed project name, so volume names do not depend on the folder name.
+name: askfrancis
+
 # Backend defaults, the .env overrides them.
 x-backend-env: &backend-env
-  DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-kis}:${POSTGRES_PASSWORD:-kis-local-dev}@postgres:5432/${POSTGRES_DB:-kis}}
+  DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-askf}:${POSTGRES_PASSWORD:-askf-local-dev}@postgres:5432/${POSTGRES_DB:-askf}}
   S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
   # The browser cannot resolve minio.
   S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-${S3_ENDPOINT:-http://localhost:9000}}
   S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
   S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
-  S3_BUCKET: ${S3_BUCKET:-kis}
+  S3_BUCKET: ${S3_BUCKET:-askfrancis}
   # The server scripts set it, it hides /docs, marks the session cookie secure and enables the start checks.
   PRODUCTION: ${PRODUCTION:-false}
 
 services:
   redis:
     image: redis:alpine
-    container_name: kis-redis
+    container_name: askf-redis
     restart: unless-stopped
     # Holds every waiting job. When memory runs out the kernel takes a worker first,
     # whose job the watchdog brings back, never the queue itself.
@@ -22,13 +25,13 @@ services:
 
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: kis-postgres
+    container_name: askf-postgres
     env_file:
       - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-kis}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kis-local-dev}
-      POSTGRES_DB: ${POSTGRES_DB:-kis}
+      POSTGRES_USER: ${POSTGRES_USER:-askf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-askf-local-dev}
+      POSTGRES_DB: ${POSTGRES_DB:-askf}
     # Compute the memory values from the available RAM instead of hard-coding them.
     # Without a value Postgres takes 128 MB shared_buffers no matter how big the
     # server is. That is a starting value for tiny systems, not an operating value.
@@ -68,7 +71,7 @@ services:
       CACHE=$$(( RAM_MB / 2 ));
       MAINT=$$(( RAM_MB / 16 )); [ "$$MAINT" -lt 64 ] && MAINT=64; [ "$$MAINT" -gt 512 ] && MAINT=512;
       CONNS=$$(( RAM_MB / 40 )); [ "$$CONNS" -lt 100 ] && CONNS=100; [ "$$CONNS" -gt 300 ] && CONNS=300;
-      echo "kis-postgres: $${RAM_MB}MB RAM erkannt, shared_buffers=$${SHARED}MB, maintenance_work_mem=$${MAINT}MB, max_connections=$${CONNS}";
+      echo "askf-postgres: $${RAM_MB}MB RAM erkannt, shared_buffers=$${SHARED}MB, maintenance_work_mem=$${MAINT}MB, max_connections=$${CONNS}";
       exec docker-entrypoint.sh postgres
       -c shared_buffers=$${SHARED}MB
       -c effective_cache_size=$${CACHE}MB
@@ -86,10 +89,10 @@ services:
     # the watchdog restarts their jobs.
     oom_score_adj: -900
     volumes:
-      - kis-postgres-data:/var/lib/postgresql/data
+      - askf-postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kis} -d ${POSTGRES_DB:-kis}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-askf} -d ${POSTGRES_DB:-askf}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -97,8 +100,8 @@ services:
   backend:
     # One image for all backend containers, only this service builds it.
     build: ./backend
-    image: kis-backend
-    container_name: kis-backend
+    image: askf-backend
+    container_name: askf-backend
     env_file:
       - .env
     environment:
@@ -114,12 +117,12 @@ services:
       - ./backend/tests:/app/tests:ro
       # Evaluation and measurement scripts. They need the real database and the real
       # embeddings, so they run in the container:
-      # docker exec kis-backend python scripts/rag_retrieval_eval.py
+      # docker exec askf-backend python scripts/rag_retrieval_eval.py
       - ./backend/scripts:/app/scripts:ro
       # pytest config (testpaths + asyncio_mode). Without it, in-container test
       # runs need `-o asyncio_mode=auto` and 18 async tests fail as "not supported".
       - ./backend/pytest.ini:/app/pytest.ini:ro
-      - kis-storage:/app/storage
+      - askf-storage:/app/storage
     ports:
       # Bind to localhost only, not to the public interface. The reverse proxy and the frontend
       # container reach the backend internally over the Docker network (backend:8000);
@@ -161,8 +164,8 @@ services:
         max-file: "7"
 
   celery-worker-screencast:
-    image: kis-backend
-    container_name: kis-celery-screencast
+    image: askf-backend
+    container_name: askf-celery-screencast
     # Ceiling from the cores instead of fixed. On today's 4-core box the formula
     # gives exactly the previous 2, but it grows with a bigger server. Screencast
     # stays the most frugal worker on purpose: rendering and PPTX conversion keep
@@ -170,7 +173,7 @@ services:
     command: >
       sh -c 'K=$$(nproc 2>/dev/null || echo 2);
       C=$$(( K / 2 )); [ "$$C" -lt 2 ] && C=2; [ "$$C" -gt 4 ] && C=4;
-      echo "kis-celery-screencast: $${K} Kern(e), concurrency=$${C}";
+      echo "askf-celery-screencast: $${K} Kern(e), concurrency=$${C}";
       exec celery -A src.celery_app worker --queues=screencast --concurrency=$$C --loglevel=info'
     # Cap so that too many ffmpeg clips at once only hit this worker, never Postgres or
     # the backend. The render threads read this limit and stay below it.
@@ -184,7 +187,7 @@ services:
     volumes:
       - ./backend/src:/app/src:ro
       - ./backend/demo:/app/demo:ro
-      - kis-storage:/app/storage
+      - askf-storage:/app/storage
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -200,8 +203,8 @@ services:
         max-file: "7"
 
   celery-worker-general:
-    image: kis-backend
-    container_name: kis-celery-general
+    image: askf-backend
+    container_name: askf-celery-general
     # Short services: translation, transcription, images. They take seconds
     # to a few minutes and never wait behind a summary, presentation or podcast script, those
     # run in celery-worker-long. Mostly waiting on other servers, except the ffmpeg
@@ -211,7 +214,7 @@ services:
     command: >
       sh -c 'K=$$(nproc 2>/dev/null || echo 4);
       M=$$K; [ "$$M" -lt 2 ] && M=2; [ "$$M" -gt 8 ] && M=8; M=$${CELERY_GENERAL_PROCESSES:-$$M};
-      echo "kis-celery-general: $${K} Kern(e), autoscale=$${M},1";
+      echo "askf-celery-general: $${K} Kern(e), autoscale=$${M},1";
       exec celery -A src.celery_app worker --queues=general --autoscale=$$M,1 --loglevel=info'
     mem_limit: ${CELERY_GENERAL_MEM_LIMIT:-1.5g}
     # TERM starts the soft shutdown (worker_soft_shutdown_timeout), unfinished tasks go
@@ -224,7 +227,7 @@ services:
       - .env
     volumes:
       - ./backend/src:/app/src:ro
-      - kis-storage:/app/storage
+      - askf-storage:/app/storage
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -240,8 +243,8 @@ services:
         max-file: "7"
 
   celery-worker-long:
-    image: kis-backend
-    container_name: kis-celery-long
+    image: askf-backend
+    container_name: askf-celery-long
     # Long services: summary, presentation outline and build, podcast script, the nightly backup.
     # One of them holds a process for minutes, mostly waiting on the language and image
     # models, so they get their own worker and short services pass by. Two processes per core
@@ -251,7 +254,7 @@ services:
     command: >
       sh -c 'K=$$(nproc 2>/dev/null || echo 4);
       M=$$(( K * 2 - 2 )); [ "$$M" -lt 2 ] && M=2; [ "$$M" -gt 6 ] && M=6; M=$${CELERY_LONG_PROCESSES:-$$M};
-      echo "kis-celery-long: $${K} Kern(e), autoscale=$${M},1";
+      echo "askf-celery-long: $${K} Kern(e), autoscale=$${M},1";
       exec celery -A src.celery_app worker --queues=long --autoscale=$$M,1 --loglevel=info'
     mem_limit: ${CELERY_LONG_MEM_LIMIT:-2g}
     environment:
@@ -262,7 +265,7 @@ services:
       - .env
     volumes:
       - ./backend/src:/app/src:ro
-      - kis-storage:/app/storage
+      - askf-storage:/app/storage
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -278,13 +281,13 @@ services:
         max-file: "7"
 
   celery-worker-voice:
-    image: kis-backend
-    container_name: kis-celery-voice
+    image: askf-backend
+    container_name: askf-celery-voice
     # Read aloud and podcast voicing. The voice provider manages only a few requests at
     # once (measured 2026-09-26 at myLab: 4), every tool shares those seats. More
     # processes than seats would only wait, so four are enough on any server size.
     command: >
-      sh -c 'echo "kis-celery-voice: concurrency=4";
+      sh -c 'echo "askf-celery-voice: concurrency=4";
       exec celery -A src.celery_app worker --queues=tts --concurrency=4 --loglevel=info'
     mem_limit: ${CELERY_VOICE_MEM_LIMIT:-1.25g}
     environment:
@@ -295,7 +298,7 @@ services:
       - .env
     volumes:
       - ./backend/src:/app/src:ro
-      - kis-storage:/app/storage
+      - askf-storage:/app/storage
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -311,8 +314,8 @@ services:
         max-file: "7"
 
   celery-worker-control:
-    image: kis-backend
-    container_name: kis-celery-control
+    image: askf-backend
+    container_name: askf-celery-control
     # Only the watchdog, in a single process. It has to run exactly when every other
     # worker is busy, it restarts their jobs and frees their slots.
     command: celery -A src.celery_app worker --queues=control --pool=solo --loglevel=info
@@ -325,7 +328,7 @@ services:
       - .env
     volumes:
       - ./backend/src:/app/src:ro
-      - kis-storage:/app/storage
+      - askf-storage:/app/storage
     depends_on:
       redis:
         condition: service_started
@@ -339,14 +342,14 @@ services:
         max-file: "7"
 
   celery-worker-aia:
-    image: kis-backend
-    container_name: kis-celery-aia
+    image: askf-backend
+    container_name: askf-celery-aia
     # One process per slot of the Francis pool (AIA_PARALLEL_SLOTS = 28), the pool
     # decides what runs, so no job waits here behind another. Tools mostly wait on
     # the language model, sources are capped at 3 (AIA_AREA_CAPS) because a
     # 155-page PDF takes a process to 365 MB.
     command: >
-      sh -c 'echo "kis-celery-aia: autoscale=28,1";
+      sh -c 'echo "askf-celery-aia: autoscale=28,1";
       exec celery -A src.celery_app worker --queues=aia,aia_ingest --autoscale=28,1 --loglevel=info'
     # Cap against a single outlier so a large document does not push Postgres out of
     # memory. 3 sources of up to 365 MB, 25 tools and the main process fit in 3g.
@@ -360,7 +363,7 @@ services:
       - .env
     volumes:
       - ./backend/src:/app/src:ro
-      - kis-storage:/app/storage
+      - askf-storage:/app/storage
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -376,8 +379,8 @@ services:
         max-file: "7"
 
   celery-beat:
-    image: kis-backend
-    container_name: kis-celery-beat
+    image: askf-backend
+    container_name: askf-celery-beat
     command: celery -A src.celery_app beat --loglevel=info --schedule=/app/data/celerybeat-schedule
     env_file:
       - .env
@@ -385,7 +388,7 @@ services:
       <<: *backend-env
     volumes:
       - ./backend/src:/app/src:ro
-      - kis-celerybeat:/app/data
+      - askf-celerybeat:/app/data
     depends_on:
       redis:
         condition: service_started
@@ -403,7 +406,7 @@ services:
       context: ./frontend
       args:
         BACKEND_URL: http://backend:8000
-    container_name: kis-frontend
+    container_name: askf-frontend
     # Serves every page, when memory runs out the kernel takes a worker before this.
     oom_score_adj: -500
     environment:
@@ -418,7 +421,7 @@ services:
   # Local only, servers use external S3.
   minio:
     image: minio/minio
-    container_name: kis-minio
+    container_name: askf-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
@@ -428,11 +431,11 @@ services:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     volumes:
-      - kis-minio-data:/data
+      - askf-minio-data:/data
     restart: unless-stopped
 
 volumes:
-  kis-postgres-data:
-  kis-celerybeat:
-  kis-storage:
-  kis-minio-data:
+  askf-postgres-data:
+  askf-celerybeat:
+  askf-storage:
+  askf-minio-data:

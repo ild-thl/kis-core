@@ -4,7 +4,7 @@
 
 ## Noch kein eigenes Konto anlegen
 
-Ihre Hochschulkennung funktioniert aktuell noch nicht, KIS hat vorübergehend eine eigene
+Ihre Hochschulkennung funktioniert aktuell noch nicht, askFrancis hat vorübergehend eine eigene
 Benutzerverwaltung. Bis zur Anbindung an die Hochschule bekommen Sie ein Konto nur über eine
 Einladung, auf einem von zwei Wegen:
 

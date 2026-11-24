@@ -38,7 +38,7 @@ def test_ohne_redis_ist_niemand_online_statt_geraten():
 
 def test_die_online_liste_kommt_aus_den_schluesseln():
     r = MagicMock()
-    r.keys.return_value = [b"kis:seen:9", b"kis:seen:3"]
+    r.keys.return_value = [b"askf:seen:9", b"askf:seen:3"]
     r.mget.return_value = [b"1750000000", b"1750000000"]
     with patch.object(presence, "_redis", return_value=r):
         assert sorted(presence.online_since()) == [3, 9]
@@ -58,7 +58,7 @@ def test_ohne_gueltige_nutzernummer_keine_stunde():
 def test_ein_alter_schluessel_ergibt_keine_millionen_minuten():
     """An old placeholder value must not yield millions of minutes."""
     r = MagicMock()
-    r.keys.return_value = [b"kis:seen:7"]
+    r.keys.return_value = [b"askf:seen:7"]
     r.mget.return_value = [b"1"]
     with patch.object(presence, "_redis", return_value=r):
         seit = presence.online_since()
@@ -68,7 +68,7 @@ def test_ein_alter_schluessel_ergibt_keine_millionen_minuten():
 
 def test_ein_gueltiger_zeitpunkt_bleibt_stehen():
     r = MagicMock()
-    r.keys.return_value = [b"kis:seen:7"]
+    r.keys.return_value = [b"askf:seen:7"]
     r.mget.return_value = [b"1750000000"]
     with patch.object(presence, "_redis", return_value=r):
         assert presence.online_since()[7] == 1750000000

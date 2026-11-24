@@ -103,7 +103,7 @@ export function clearCitationHighlight(refs: HighlightRefs, reg: unknown) {
     const pages = anno?.getState?.()?.pages as Record<number, string[]> | undefined;
     for (const [pi, uids] of Object.entries(pages ?? {})) {
       for (const uid of [...uids]) {
-        if (uid.startsWith("kis-cite-") || uid.startsWith("kis-pageborder-")) anno.purgeAnnotation(Number(pi), uid);
+        if (uid.startsWith("askf-cite-") || uid.startsWith("askf-pageborder-")) anno.purgeAnnotation(Number(pi), uid);
       }
     }
   } catch { /* ignore */ }
@@ -132,7 +132,7 @@ function flashPageBorder(refs: HighlightRefs, reg: unknown, page: number) {
   clearCitationHighlight(refs, r);   // one marker at a time
 
   // The frame sits on the page edge, a gap would depend on the zoom.
-  const id = `kis-pageborder-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const id = `askf-pageborder-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   try {
     anno.createAnnotation(pageIndex, {
       type: SQUARE_SUBTYPE,
@@ -266,7 +266,7 @@ export function drawCitationHighlight(
   const cur = refs.citationHighlightRef.current;
   const keep = opts.append && cur?.pageIndex === targetPageIndex;
   if (!keep) clearCitationHighlight(refs, r);   // one highlight at a time
-  const id = `kis-cite-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const id = `askf-cite-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   try {
     anno.createAnnotation(targetPageIndex, {
       type: HIGHLIGHT_SUBTYPE,

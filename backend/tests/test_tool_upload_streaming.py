@@ -130,7 +130,7 @@ def test_save_queue_file_from_path_hands_s3_a_path_not_bytes(tmp_path, monkeypat
             raise AssertionError("put_object buffers the whole body in RAM")
 
     monkeypatch.setattr(storage, "USE_S3", True)
-    monkeypatch.setattr(storage, "_S3_BUCKET", "kis")
+    monkeypatch.setattr(storage, "_S3_BUCKET", "askfrancis")
     monkeypatch.setattr(storage, "_s3", lambda: _FakeS3())
 
     src = tmp_path / "upload.mp4"
@@ -139,4 +139,4 @@ def test_save_queue_file_from_path_hands_s3_a_path_not_bytes(tmp_path, monkeypat
     key = storage.save_queue_file_from_path(3, "job-xyz", ".mp4", str(src))
 
     assert key == "users/3/jobs/job-xyz/input.mp4"
-    assert calls == [(str(src), "kis", "users/3/jobs/job-xyz/input.mp4")]
+    assert calls == [(str(src), "askfrancis", "users/3/jobs/job-xyz/input.mp4")]

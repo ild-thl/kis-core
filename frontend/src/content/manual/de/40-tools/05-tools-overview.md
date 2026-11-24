@@ -18,7 +18,7 @@ Marke Lehrende, sie richtet sich an Lehrende.
 - **Glossar** pflegt Begriffslisten für Übersetzungen
 
 Wer nur ein einziges Ziel hat, etwa Studierende mit dem Lernassistenten allein, landet direkt dort
-und sieht die Kachelseite nicht. Zurück zur Startseite führt immer das KIS-Logo oben links.
+und sieht die Kachelseite nicht. Zurück zur Startseite führt immer das askFrancis-Logo oben links.
 
 ## Wer welche Dienste sieht
 

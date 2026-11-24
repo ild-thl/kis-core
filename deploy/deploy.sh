@@ -28,7 +28,7 @@ main() {
         local db_user db_name active
         db_user=$(env_get POSTGRES_USER)
         db_name=$(env_get POSTGRES_DB)
-        active=$(docker exec kis-postgres psql -U "${db_user:-kis}" -d "${db_name:-kis}" -tAc \
+        active=$(docker exec askf-postgres psql -U "${db_user:-askf}" -d "${db_name:-askf}" -tAc \
             "SELECT (SELECT count(*) FROM jobs WHERE status IN ('pending','queued','running'))
                   + (SELECT count(*) FROM aia_jobs WHERE status IN ('queued','running'))")
         if [ "$active" -gt 0 ]; then

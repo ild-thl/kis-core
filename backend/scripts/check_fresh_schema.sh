@@ -22,7 +22,7 @@
 # Call from the project root:  backend/scripts/check_fresh_schema.sh
 set -euo pipefail
 
-DB="${FRESH_SCHEMA_DB:-kis_schematest}"
+DB="${FRESH_SCHEMA_DB:-askf_schematest}"
 PW=$(grep -m1 '^POSTGRES_PASSWORD=' .env | cut -d= -f2-)
 
 if [ -z "$PW" ]; then
@@ -31,13 +31,13 @@ if [ -z "$PW" ]; then
 fi
 
 echo "Lege $DB neu an..."
-docker exec kis-postgres psql -U kis -d postgres -q \
+docker exec askf-postgres psql -U askf -d postgres -q \
     -c "DROP DATABASE IF EXISTS $DB" \
     -c "CREATE DATABASE $DB" >/dev/null
 
 echo "Baue das Schema von null auf..."
 docker compose run --rm --no-deps \
-    -e DATABASE_URL="postgresql://kis:${PW}@postgres:5432/${DB}" \
+    -e DATABASE_URL="postgresql://askf:${PW}@postgres:5432/${DB}" \
     backend python -c "from src.core.db.schema import init_db; init_db(); print('SCHEMA OK auf leerer Datenbank')" \
     2>&1 | grep -vE '^time=|Maschine erkannt|orphan containers'
 
@@ -48,4 +48,4 @@ docker compose run --rm --no-deps \
 
 echo
 echo "Raeume $DB wieder ab."
-docker exec kis-postgres psql -U kis -d postgres -q -c "DROP DATABASE IF EXISTS $DB" >/dev/null
+docker exec askf-postgres psql -U askf -d postgres -q -c "DROP DATABASE IF EXISTS $DB" >/dev/null

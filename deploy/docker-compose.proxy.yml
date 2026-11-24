@@ -4,7 +4,7 @@
 services:
   caddy:
     image: caddy:2-alpine
-    container_name: kis-caddy
+    container_name: askf-caddy
     oom_score_adj: -500
     ports:
       - "80:80"
@@ -14,8 +14,8 @@ services:
       DOMAIN: ${DOMAIN:?DOMAIN missing}
     volumes:
       - ./deploy/caddy:/etc/caddy:ro
-      - kis-caddy-data:/data
-      - kis-caddy-config:/config
+      - askf-caddy-data:/data
+      - askf-caddy-config:/config
     restart: unless-stopped
     logging:
       driver: json-file
@@ -24,5 +24,5 @@ services:
         max-file: "7"
 
 volumes:
-  kis-caddy-data:
-  kis-caddy-config:
+  askf-caddy-data:
+  askf-caddy-config:

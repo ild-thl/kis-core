@@ -17,7 +17,7 @@ from src.features.event.service import (
 
 KARTE = {
     "enabled": True, "ignoreWindow": False, "from": "2026-11-13", "until": "2026-11-13",
-    "accessCode": "KIS-DEMO-0000", "workspace": "ws-uuid",
+    "accessCode": "ASKF-DEMO-0000", "workspace": "ws-uuid",
 }
 TAG = date(2026, 11, 13)
 
@@ -25,22 +25,22 @@ TAG = date(2026, 11, 13)
 # --- pure rules ---------------------------------------------------------------
 
 def test_karte_nur_fuer_konten_aus_dem_code():
-    assert task_card_for(KARTE, TAG, "KIS-DEMO-0000")
-    assert task_card_for(KARTE, TAG, " kis-demo-0000 ")
-    assert not task_card_for(KARTE, TAG, "KIS-ANDERS-1111")
+    assert task_card_for(KARTE, TAG, "ASKF-DEMO-0000")
+    assert task_card_for(KARTE, TAG, " askf-demo-0000 ")
+    assert not task_card_for(KARTE, TAG, "ASKF-ANDERS-1111")
     assert not task_card_for(KARTE, TAG, None)
 
 
 def test_karte_nur_im_zeitfenster_und_eingeschaltet():
-    assert not task_card_for(KARTE, date(2026, 11, 12), "KIS-DEMO-0000")
-    assert not task_card_for({**KARTE, "enabled": False}, TAG, "KIS-DEMO-0000")
-    assert task_card_for({**KARTE, "ignoreWindow": True}, date(2026, 10, 1), "KIS-DEMO-0000")
+    assert not task_card_for(KARTE, date(2026, 11, 12), "ASKF-DEMO-0000")
+    assert not task_card_for({**KARTE, "enabled": False}, TAG, "ASKF-DEMO-0000")
+    assert task_card_for({**KARTE, "ignoreWindow": True}, date(2026, 10, 1), "ASKF-DEMO-0000")
 
 
 def test_fuer_alle_unabhaengig_vom_code():
     alle = {**KARTE, "forEveryone": True}
     assert task_card_for(alle, TAG, None)
-    assert task_card_for(alle, TAG, "KIS-ANDERS-1111")
+    assert task_card_for(alle, TAG, "ASKF-ANDERS-1111")
     assert not task_card_for(alle, date(2026, 11, 12), None)
 
 
@@ -84,7 +84,7 @@ def client(monkeypatch):
     monkeypatch.setattr(tasks, "workspace_title", lambda workspace_uuid: "Projektmanagement")
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "demo@kis.local", "role": "staff"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "demo@askfrancis.local", "role": "staff"}
     yield TestClient(app), gesetzt
     app.dependency_overrides.clear()
     get_settings.cache_clear()
@@ -158,7 +158,7 @@ def konto_am_code():
 
     init_db()
     kennung = uuid_modul.uuid4().hex[:8]
-    code = f"KIS-TASK-{kennung.upper()}"
+    code = f"ASKF-TASK-{kennung.upper()}"
     code_id = codes.create_code(
         code=code, label="Aufgabenkarte Test", role="staff", custom_role_id=None, max_uses=5,
         valid_until=datetime.now() + timedelta(days=1), access_hours=24, show_credentials=False,
@@ -169,7 +169,7 @@ def konto_am_code():
             cur.execute(
                 "INSERT INTO users (username, display_name, email, active, role, access_code_id) "
                 "VALUES (%s, 'Test Aufgaben', %s, 1, 'staff', %s) RETURNING id",
-                (f"test.aufgaben.{kennung}", f"test.aufgaben.{kennung}@demo.kis.local", code_id),
+                (f"test.aufgaben.{kennung}", f"test.aufgaben.{kennung}@demo.askfrancis.local", code_id),
             )
             user_id = cur.fetchone()[0]
             cur.execute(
@@ -219,7 +219,7 @@ def test_frage_zaehlt_auch_ohne_anbieter(monkeypatch):
 
     get_settings.cache_clear()
     app.dependency_overrides[verify_auth] = lambda: None
-    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "demo@kis.local", "role": "staff"}
+    app.dependency_overrides[get_current_user] = lambda: {"user_id": 7, "email": "demo@askfrancis.local", "role": "staff"}
     app.dependency_overrides[get_llm_client] = kein_anbieter
     try:
         antwort = TestClient(app).post("/ai-assistant/workspaces/ws-uuid/chat", json={"message": "Was ist ein Meilenstein?"})
@@ -251,8 +251,8 @@ def admin_client(monkeypatch):
 
 def test_auswahl_nur_fuer_den_gespeicherten_code(admin_client):
     http, _ = admin_client
-    antwort = http.get("/admin/event/task-workspaces", params={"code": "KIS-FREMD-9999"})
-    assert antwort.json() == {"workspaces": [{"uuid": "ws-uuid", "title": "von KIS-DEMO-0000"}]}
+    antwort = http.get("/admin/event/task-workspaces", params={"code": "ASKF-FREMD-9999"})
+    assert antwort.json() == {"workspaces": [{"uuid": "ws-uuid", "title": "von ASKF-DEMO-0000"}]}
 
 
 def test_fremder_workspace_wird_beim_speichern_geleert(admin_client):

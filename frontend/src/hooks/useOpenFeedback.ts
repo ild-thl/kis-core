@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
-const CHANGE_EVENT = "kis-feedback:change";
+const CHANGE_EVENT = "askf-feedback:change";
 
 /** Tells every dot that a feedback status changed, so they ask again. */
 export function announceFeedbackChange() {

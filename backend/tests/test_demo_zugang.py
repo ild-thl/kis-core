@@ -521,7 +521,7 @@ def test_route_chat_beispiel_fremder_kurs_gibt_vierhundertvier(client):
     assert r.status_code == 404
 
 
-# ─── First assignment: the first time in KIS ──────────────────────────────────────
+# ─── First assignment: the first time in askFrancis ──────────────────────────────────────
 
 from unittest.mock import MagicMock
 
@@ -620,7 +620,7 @@ def test_die_anmeldung_weist_das_demo_modul_zu(monkeypatch):
         with patch("src.routes.auth.authenticate",
                    return_value={"id": 42, "username": "max.mustermann",
                                  "display_name": "Max Mustermann",
-                                 "email": "max.mustermann@demo.kis.local", "active": 1,
+                                 "email": "max.mustermann@demo.askfrancis.local", "active": 1,
                                  "role": "staff", "custom_role_id": None,
                                  "access_expires_at": None}), \
              patch("src.routes.auth.database.get_setting", return_value="false"), \

@@ -4,7 +4,7 @@ import Link from "next/link";
 import LinkBusy from "@/components/ui/LinkBusy";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CalendarBlank, SignIn, SquaresFour } from "@phosphor-icons/react";
+import { CalendarBlank, Folders, SignIn, SquaresFour } from "@phosphor-icons/react";
 import { Link as LocaleLink, usePathname } from "@/i18n/navigation";
 import { checkAuthStatus, logout } from "@/lib/auth";
 import { api } from "@/lib/api";
@@ -14,6 +14,7 @@ import JobsPanel from "@/components/jobs/JobsPanel";
 import HeaderMobileMenu from "@/components/layout/HeaderMobileMenu";
 import HeaderPublicControls from "@/components/layout/HeaderPublicControls";
 import HeaderSettingsMenu from "@/components/layout/HeaderSettingsMenu";
+import type { HeaderAccount } from "@/components/layout/HeaderAccountRow";
 import Wordmark from "@/components/layout/Wordmark";
 import { useTourStart } from "@/app/[locale]/workspace/_components/useTourStart";
 import { useOpenFeedback } from "@/hooks/useOpenFeedback";
@@ -32,6 +33,7 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
   const onCalendar = pathname === "/calendar" || pathname.startsWith("/calendar/");
   // The services page and every tool below it count as being on Dienste.
   const onTools = pathname === "/services" || pathname.startsWith("/tools/");
+  const onWorkspaces = pathname === "/workspace" || pathname.startsWith("/workspace/");
   const [isAdmin, setIsAdmin] = useState(false);
   const [canViewManual, setCanViewManual] = useState(false);
   // Admin only for whoever may do everything, everyone else goes to their settings.
@@ -40,6 +42,7 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
   const [hasTools, setHasTools] = useState(false);
   // A missing modules field means an older server, which always has both.
   const [hasAia, setHasAia] = useState(true);
+  const [account, setAccount] = useState<HeaderAccount | null>(null);
   // The language level page hangs off its own permission, not off the role.
   const [mayLanguageLevel, setMayLanguageLevel] = useState(false);
   const [mayInterfaces, setMayInterfaces] = useState(false);
@@ -65,6 +68,7 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
       setMayLanguageLevel(hasPerm(s.permissions, PERM.aiaLanguageLevel));
       setMayInterfaces(hasPerm(s.permissions, PERM.interfaces));
       setMayFeedback(hasPerm(s.permissions, PERM.usersFeedback));
+      setAccount({ name: s.display_name || s.username || "", email: s.email ?? "", expiresAt: s.access_expires_at ?? null });
     });
   }, [showLogout, hasSession]);
 
@@ -123,6 +127,20 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
             )}
             {hasSession && (
               <div className="hidden sm:flex items-center gap-1.5">
+                {hasAia && (
+                  <Link
+                    href="/workspace"
+                    aria-label={t("workspaces")}
+                    title={t("workspaces")}
+                    aria-current={onWorkspaces ? "page" : undefined}
+                    className={`flex items-center justify-center h-9 px-3 gap-1.5 rounded-full btn-on-dark${onWorkspaces ? " is-active" : ""}`}
+                  >
+                    <LinkBusy size="sm">
+                      <Folders size={17} weight="bold" />
+                    </LinkBusy>
+                    <span className="text-sm font-medium">{t("workspaces")}</span>
+                  </Link>
+                )}
                 {hasTools && (
                   <Link
                     href="/services"
@@ -137,6 +155,7 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
                     <span className="text-sm font-medium">{t("tools")}</span>
                   </Link>
                 )}
+                {hasTools && <JobsPanel />}
                 {hasAia && (
                   <Link
                     href="/calendar"
@@ -151,8 +170,8 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
                     <span className="text-sm font-medium">{t("calendar")}</span>
                   </Link>
                 )}
-                {hasTools && <JobsPanel />}
                 <HeaderSettingsMenu
+                  account={account}
                   isAdmin={isAdmin}
                   canViewManual={canViewManual}
                   showLanguageLevel={mayLanguageLevel}
@@ -172,6 +191,7 @@ export default function Header({ hasSession = true, showLogout = false, hideLogi
             {hasSession && (
               <HeaderMobileMenu
                 hasSession={hasSession}
+                account={account}
                 isAdmin={isAdmin}
                 canViewManual={canViewManual}
                 showLanguageLevel={mayLanguageLevel}

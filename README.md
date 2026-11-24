@@ -1,9 +1,9 @@
-# KIS
+# askFrancis
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 A self hosted teaching platform with AI assisted tools for course material and study support.
-Developed at Institut für Interaktive Systeme (ISy), Technische Hochschule Lübeck.
+Developed in the KIS project at Institut für Interaktive Systeme (ISy), Technische Hochschule Lübeck.
 Website with screenshots: [kis-thl.de](https://kis-thl.de)
 
 Runs entirely on your own infrastructure. No data leaves it unless you configure an external
@@ -70,10 +70,10 @@ The backend reloads on every change.
 
 | What | Address | Login |
 |---|---|---|
-| KIS | `http://localhost:3000` | `admin` / `adminpw` |
+| askFrancis | `http://localhost:3000` | `admin` / `adminpw` |
 | API docs | `http://localhost:8000/docs` | |
 | Langfuse | `http://localhost:3001` | `admin@example.org` / `admin123` |
-| Adminer | `http://localhost:8081` | PostgreSQL, server `postgres`, user `kis`, password `kis-local-dev` |
+| Adminer | `http://localhost:8081` | PostgreSQL, server `postgres`, user `askf`, password `askf-local-dev` |
 | MinIO | `http://localhost:9001` | `minioadmin` / `minioadmin` |
 
 ## Production
@@ -83,7 +83,7 @@ The backend reloads on every change.
 ```dotenv
 ADMIN_EMAIL=admin@your-domain.org
 ADMIN_PASSWORD=<own password>
-KIS_SECRETS_KEY=<long random string, set once, never change>
+ASKF_SECRETS_KEY=<long random string, set once, never change>
 POSTGRES_PASSWORD=<own password>
 S3_ENDPOINT=https://<your S3>
 S3_ACCESS_KEY=<key>
@@ -94,13 +94,13 @@ S3_BUCKET=<bucket>
 HTTPS, pick one:
 
 ```dotenv
-# 1. KIS gets the certificate itself, the domain must point to this server.
+# 1. askFrancis gets the certificate itself, the domain must point to this server.
 AUTO_HTTPS=true
-DOMAIN=kis.example.org
+DOMAIN=askfrancis.example.org
 ```
 
 ```dotenv
-# 2. Your own proxy in front of KIS, forwarding to 127.0.0.1:3000.
+# 2. Your own proxy in front of askFrancis, forwarding to 127.0.0.1:3000.
 AUTO_HTTPS=false
 ```
 

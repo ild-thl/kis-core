@@ -40,7 +40,7 @@ def test_ein_job_mit_eintrag_gilt_als_in_ordnung():
 
 def test_andere_bereiche_werden_gar_nicht_erst_angefasst():
     """``tmp/`` and ``backups/`` are cleaned by storage itself over time."""
-    keys = ["tmp/pptx/abc.pptx", "backups/daily/kis-2026-07-30.dump"]
+    keys = ["tmp/pptx/abc.pptx", "backups/daily/askfrancis-2026-07-30.dump"]
 
     assert audit.finde_verwaiste(keys, _bestand()) == {}
 

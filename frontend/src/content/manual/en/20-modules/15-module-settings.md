@@ -3,7 +3,7 @@
 ![The settings inside a workspace](/manual/{lang}/module-settings.png)
 
 The gear inside an opened workspace applies to you alone, others in the workspace see nothing of
-it. KIS remembers the choice per person, so it holds in another browser too.
+it. askFrancis remembers the choice per person, so it holds in another browser too.
 
 - **Studio**: whether the panel on the right is shown
 - **Student view**: owners and tutors only, see below

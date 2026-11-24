@@ -41,7 +41,7 @@ def _anmelden(client, konto):
 
 def test_an_expired_test_access_cannot_log_in(client):
     konto = {"id": 42, "username": "max.mustermann",
-             "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
+             "display_name": "Max Mustermann", "email": "max.mustermann@demo.askfrancis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     antwort, anlegen = _anmelden(client, konto)
@@ -53,7 +53,7 @@ def test_an_expired_test_access_cannot_log_in(client):
 
 def test_a_blocked_login_takes_the_dead_cookie_with_it(client):
     konto = {"id": 42, "username": "max.mustermann",
-             "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
+             "display_name": "Max Mustermann", "email": "max.mustermann@demo.askfrancis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     antwort, _ = _anmelden(client, konto)
@@ -65,7 +65,7 @@ def test_a_blocked_login_takes_the_dead_cookie_with_it(client):
 
 def test_a_running_test_access_carries_its_deadline_into_the_session(client):
     konto = {"id": 42, "username": "max.mustermann",
-             "display_name": "Max Mustermann", "email": "max.mustermann@demo.kis.local",
+             "display_name": "Max Mustermann", "email": "max.mustermann@demo.askfrancis.local",
              "active": 1, "role": "staff", "custom_role_id": None,
              "access_expires_at": MORGEN}
     antwort, anlegen = _anmelden(client, konto)
@@ -151,7 +151,7 @@ async def test_the_gate_lets_a_session_through_when_the_deadline_is_unparseable(
 
 def test_login_lets_an_account_through_when_the_deadline_is_unparseable(client):
     konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "active": 1,
+             "email": "max.mustermann@demo.askfrancis.local", "active": 1,
              "role": "staff", "custom_role_id": None, "access_expires_at": "kaputt"}
     antwort, anlegen = _anmelden(client, konto)
 
@@ -208,3 +208,20 @@ def test_status_still_reports_a_normal_account_as_authenticated(client):
 
     assert antwort.status_code == 200
     assert antwort.json()["authenticated"] is True
+
+
+def test_status_reports_the_deadline_from_the_account(client):
+    sitzungsdaten = {"user_id": 42, "email": "", "role": "staff", "custom_role_id": None,
+                     "access_expires_at": GESTERN.isoformat()}
+    konto = {"id": 42, "role": "staff", "custom_role_id": None, "access_expires_at": MORGEN}
+    antwort = _status(client, sitzungsdaten, konto)
+
+    assert antwort.json()["access_expires_at"] == MORGEN.isoformat()
+
+
+def test_status_reports_no_deadline_for_a_normal_account(client):
+    sitzungsdaten = {"user_id": 5, "email": "", "role": "admin", "custom_role_id": None}
+    konto = {"id": 5, "role": "admin", "custom_role_id": None, "access_expires_at": None}
+    antwort = _status(client, sitzungsdaten, konto)
+
+    assert antwort.json()["access_expires_at"] is None

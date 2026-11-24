@@ -222,5 +222,5 @@ def same_embedding_space(a: str, b: str) -> bool:
 
 def compute_fingerprint(provider: EmbeddingProvider) -> str:
     """The fingerprint of the embedding space from model name and size."""
-    dim = len(provider.embed_one("KIS Tutor Embedding Fingerprint v1"))
+    dim = len(provider.embed_one("askFrancis Embedding Fingerprint v1"))
     return fingerprint_from_dim(provider, dim)

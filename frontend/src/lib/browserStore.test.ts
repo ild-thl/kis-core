@@ -125,4 +125,15 @@ describe("migrateLegacyKeys", () => {
     stubStorage({ [PREFS_KEY]: '{"theme":"light"}', "kis.theme": "dark" });
     expect(readPrefs().theme).toBe("light");
   });
+
+  it("takes over the bundle keys from before the rename", () => {
+    const store = stubStorage({
+      "kis.prefs": '{"theme":"dark","jobsLastSeen":5}',
+      "kis.workspaces": '{"abc":{"at":1,"closedChapters":["k1"]}}',
+      [PREFS_KEY]: '{"jobsLastSeen":9}',
+    });
+    expect(readPrefs()).toMatchObject({ theme: "dark", jobsLastSeen: 9 });
+    expect(readWorkspaceUi("abc").closedChapters).toEqual(["k1"]);
+    expect(store.has("kis.prefs")).toBe(false);
+  });
 });

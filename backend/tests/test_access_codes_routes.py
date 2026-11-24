@@ -15,7 +15,7 @@ GESTERN = datetime.now() - timedelta(days=1)
 def _code(**abweichungen):
     eintrag = {
         "id": 7,
-        "code": "KIS-4K2P-7RXM",
+        "code": "ASKF-4K2P-7RXM",
         "label": "Kollegen August",
         "role": "staff",
         "custom_role_id": None,
@@ -68,7 +68,7 @@ def _sitzung():
     return patch("src.routes.access_codes.get_session_store")
 
 
-GUELTIG = {"code": "kis-4k2p-7rxm"}
+GUELTIG = {"code": "askf-4k2p-7rxm"}
 
 
 def test_redeeming_creates_the_account_and_sets_the_deadline(client):
@@ -91,7 +91,7 @@ def test_redeeming_creates_the_account_and_sets_the_deadline(client):
     assert r.json()["username"] == "ab234567"
     assert r.json()["password"] == "s3cr3t-pw"
     # Sloppy typing gets repaired before the lookup.
-    suchen.assert_called_once_with("KIS-4K2P-7RXM")
+    suchen.assert_called_once_with("ASKF-4K2P-7RXM")
     assert anlegen.call_args.kwargs["email"] is None
     assert anlegen.call_args.kwargs["given_name"] == ""
     assert anlegen.call_args.kwargs["surname"] == ""
@@ -124,7 +124,7 @@ def test_redeeming_with_an_unlimited_code_sets_no_deadline(client):
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
          patch("src.routes.access_codes.provision_account", return_value={
              "user_id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
          }), \
          patch("src.routes.access_codes.repo.set_user_access") as frist, \
          patch("src.routes.access_codes.demo_module_zuweisen"), \
@@ -146,7 +146,7 @@ def test_redeeming_sets_a_deadline_in_hours_not_days(client):
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
          patch("src.routes.access_codes.provision_account", return_value={
              "user_id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
          }), \
          patch("src.routes.access_codes.repo.set_user_access") as frist, \
          patch("src.routes.access_codes.demo_module_zuweisen"), \
@@ -167,7 +167,7 @@ def test_redeeming_reports_whether_credentials_should_be_shown(client):
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
          patch("src.routes.access_codes.provision_account", return_value={
              "user_id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
          }), \
          patch("src.routes.access_codes.repo.set_user_access"), \
          patch("src.routes.access_codes.demo_module_zuweisen"), \
@@ -187,7 +187,7 @@ def test_redeeming_picks_a_free_user_name(client):
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
          patch("src.routes.access_codes.provision_account", return_value={
              "user_id": 42, "username": "ab2345672", "display_name": "ab2345672",
-             "email": "ab2345672@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "ab2345672@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
          }) as anlegen, \
          patch("src.routes.access_codes.repo.set_user_access"), \
          patch("src.routes.access_codes.demo_module_zuweisen"), \
@@ -247,7 +247,7 @@ def test_a_failing_deadline_write_deactivates_the_fresh_account(client):
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
          patch("src.routes.access_codes.provision_account", return_value={
              "user_id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
          }), \
          patch("src.routes.access_codes.repo.set_user_access", side_effect=RuntimeError("db down")), \
          patch("src.routes.access_codes.database.remove_from_whitelist"), \
@@ -266,7 +266,7 @@ def test_a_failing_deadline_write_also_drops_the_whitelist_entry(client):
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
          patch("src.routes.access_codes.provision_account", return_value={
              "user_id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
          }), \
          patch("src.routes.access_codes.repo.set_user_access", side_effect=RuntimeError("db down")), \
          patch("src.routes.access_codes.database.update_user"), \
@@ -274,7 +274,7 @@ def test_a_failing_deadline_write_also_drops_the_whitelist_entry(client):
         r = client.post("/access-codes/redeem", json=GUELTIG)
 
     assert r.status_code == 500
-    streichen.assert_called_once_with("max.mustermann@demo.kis.local")
+    streichen.assert_called_once_with("max.mustermann@demo.askfrancis.local")
 
 
 def test_a_code_whose_custom_role_is_gone_creates_nothing(client):
@@ -301,7 +301,7 @@ def test_a_code_with_a_living_custom_role_still_works(client):
          patch("src.routes.access_codes.repo.claim_use", return_value=True), \
          patch("src.routes.access_codes.provision_account", return_value={
              "user_id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "custom", "custom_role_id": 9,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "custom", "custom_role_id": 9,
          }) as anlegen, \
          patch("src.routes.access_codes.repo.set_user_access"), \
          patch("src.routes.access_codes.demo_module_zuweisen"), \
@@ -312,12 +312,12 @@ def test_a_code_with_a_living_custom_role_still_works(client):
     assert anlegen.call_args.kwargs["custom_role_id"] == 9
 
 
-VERLAENGERN = {"username": "max.mustermann", "password": "geheim123", "code": "KIS-4K2P-7RXM"}
+VERLAENGERN = {"username": "max.mustermann", "password": "geheim123", "code": "ASKF-4K2P-7RXM"}
 
 
 def test_renewing_moves_the_deadline_and_logs_in(client):
     konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
          patch("src.routes.access_codes.repo.get_code_by_code", return_value=_code()), \
@@ -333,7 +333,7 @@ def test_renewing_moves_the_deadline_and_logs_in(client):
 
 def test_renewing_with_an_unlimited_code_sets_no_deadline(client):
     konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
          patch("src.routes.access_codes.repo.get_code_by_code", return_value=_code(access_hours=None)), \
@@ -349,7 +349,7 @@ def test_renewing_with_an_unlimited_code_sets_no_deadline(client):
 
 def test_renewing_works_even_when_every_seat_is_taken(client):
     konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
          patch("src.routes.access_codes.repo.get_code_by_code", return_value=_code(used_count=50)), \
@@ -474,7 +474,7 @@ def test_a_failed_enrollment_never_blocks_redeeming(client):
 
 def test_renewing_enrolls_into_the_workspaces_of_the_code_used(client):
     konto = {"id": 42, "username": "max.mustermann", "display_name": "Max Mustermann",
-             "email": "max.mustermann@demo.kis.local", "role": "staff", "custom_role_id": None,
+             "email": "max.mustermann@demo.askfrancis.local", "role": "staff", "custom_role_id": None,
              "access_expires_at": GESTERN}
     with patch("src.routes.access_codes.authenticate", return_value=konto), \
          patch("src.routes.access_codes.repo.get_code_by_code", return_value=_code(id=9)), \

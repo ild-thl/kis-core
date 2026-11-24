@@ -56,7 +56,7 @@ appear there.
 
 Every page starts private. The switch on the card or the share icon in the editor makes it
 shareable, you get a link. Whoever opens it sees the preview and cannot change anything. In the
-share window you set who the link is for: With KIS account means only people who are logged in
+share window you set who the link is for: With askFrancis account means only people who are logged in
 open it. Anyone with the link means people without an account too, such as guests of an event.
 Even then the page is not listed anywhere and asks search engines to leave it out. That is a
 request, not protection: whoever has the link can pass it on. Switch back

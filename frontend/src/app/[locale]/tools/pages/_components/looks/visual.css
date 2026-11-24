@@ -1,30 +1,30 @@
-/* The looks of pictures. Every rule starts with .kis-page and beats the page's element rules. */
-.kis-page .v-vi { container-type: inline-size; }
+/* The looks of pictures. Every rule starts with .askf-page and beats the page's element rules. */
+.askf-page .v-vi { container-type: inline-size; }
 
 /* ---------- image ---------- */
-.kis-page figure.v-im-banner .pic img { aspect-ratio: 21 / 9; object-fit: cover; border-radius: 8px; max-height: none; }
-.kis-page figure.v-im-banner .pic-empty { aspect-ratio: 21 / 9; border-radius: 8px; }
-.kis-page figure.v-im-banner figcaption { max-width: 320px; margin-top: 18px; padding-top: 10px; border-top: 2px solid var(--pg-accent); }
+.askf-page figure.v-im-banner .pic img { aspect-ratio: 21 / 9; object-fit: cover; border-radius: 8px; max-height: none; }
+.askf-page figure.v-im-banner .pic-empty { aspect-ratio: 21 / 9; border-radius: 8px; }
+.askf-page figure.v-im-banner figcaption { max-width: 320px; margin-top: 18px; padding-top: 10px; border-top: 2px solid var(--pg-accent); }
 /* The title picture keeps the page's own rounding. */
-.kis-page section.cover figure.v-im-banner .pic img { border-radius: 20px; }
+.askf-page section.cover figure.v-im-banner .pic img { border-radius: 20px; }
 
-.kis-page figure.v-im-offset .v-im-offset-in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px 36px; align-items: end; }
-.kis-page figure.v-im-offset .pic { grid-column: 2; grid-row: 1; }
-.kis-page figure.v-im-offset .pic img { aspect-ratio: 3 / 2; object-fit: cover; border-radius: 8px; max-height: none; }
-.kis-page figure.v-im-offset .pic-empty { aspect-ratio: 3 / 2; }
-.kis-page figure.v-im-offset figcaption { grid-column: 1; grid-row: 1; align-self: end; margin: 0; text-align: right; }
-.kis-page figure.v-im-offset figcaption::after { content: ""; display: inline-block; width: 36px; height: 2px; background: var(--pg-accent); margin-left: 12px; vertical-align: middle; }
+.askf-page figure.v-im-offset .v-im-offset-in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px 36px; align-items: end; }
+.askf-page figure.v-im-offset .pic { grid-column: 2; grid-row: 1; }
+.askf-page figure.v-im-offset .pic img { aspect-ratio: 3 / 2; object-fit: cover; border-radius: 8px; max-height: none; }
+.askf-page figure.v-im-offset .pic-empty { aspect-ratio: 3 / 2; }
+.askf-page figure.v-im-offset figcaption { grid-column: 1; grid-row: 1; align-self: end; margin: 0; text-align: right; }
+.askf-page figure.v-im-offset figcaption::after { content: ""; display: inline-block; width: 36px; height: 2px; background: var(--pg-accent); margin-left: 12px; vertical-align: middle; }
 
-.kis-page figure.v-im-side .v-im-side-in { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 14px 36px; align-items: start; }
-.kis-page figure.v-im-side .pic img { aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; max-height: none; }
-.kis-page figure.v-im-side .pic-empty { aspect-ratio: 4 / 3; }
-.kis-page figure.v-im-side figcaption { margin: 0; padding-top: 18px; border-top: 2px solid var(--pg-line); font-size: 16px; line-height: 1.5; }
-.kis-page figure.v-im-side figcaption b { display: block; margin-bottom: 4px; }
+.askf-page figure.v-im-side .v-im-side-in { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 14px 36px; align-items: start; }
+.askf-page figure.v-im-side .pic img { aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; max-height: none; }
+.askf-page figure.v-im-side .pic-empty { aspect-ratio: 4 / 3; }
+.askf-page figure.v-im-side figcaption { margin: 0; padding-top: 18px; border-top: 2px solid var(--pg-line); font-size: 16px; line-height: 1.5; }
+.askf-page figure.v-im-side figcaption b { display: block; margin-bottom: 4px; }
 
 @container (max-width: 600px) {
-  .kis-page figure.v-im-offset .v-im-offset-in, .kis-page figure.v-im-side .v-im-side-in { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .kis-page figure.v-im-offset .pic { grid-column: 1; }
-  .kis-page figure.v-im-offset figcaption { grid-column: 1; grid-row: 2; text-align: left; }
-  .kis-page figure.v-im-side figcaption { padding-top: 0; border-top: 0; font-size: 14px; }
-  .kis-page figure.v-im-side figcaption b { display: inline; }
+  .askf-page figure.v-im-offset .v-im-offset-in, .askf-page figure.v-im-side .v-im-side-in { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .askf-page figure.v-im-offset .pic { grid-column: 1; }
+  .askf-page figure.v-im-offset figcaption { grid-column: 1; grid-row: 2; text-align: left; }
+  .askf-page figure.v-im-side figcaption { padding-top: 0; border-top: 0; font-size: 14px; }
+  .askf-page figure.v-im-side figcaption b { display: inline; }
 }

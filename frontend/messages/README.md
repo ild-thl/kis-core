@@ -1,6 +1,6 @@
 # i18n Messages
 
-KIS uses [`next-intl`](https://next-intl.dev) for German/English UI translations. German is the default locale, English is opt-in via the header language switch or by visiting `/en/...`.
+askFrancis uses [`next-intl`](https://next-intl.dev) for German/English UI translations. German is the default locale, English is opt-in via the header language switch or by visiting `/en/...`.
 
 ## Files
 

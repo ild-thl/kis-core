@@ -11,7 +11,7 @@ opens the question in the chat.
 - **Changing a rating**: going back shows the card on its answer side, just click the other
   button
 - **Back and Next always work**: a card can be skipped and rated later
-- **Open cards**: if cards are still unrated at the end, KIS asks. View open jumps to the first of
+- **Open cards**: if cards are still unrated at the end, askFrancis asks. View open jumps to the first of
   them, Finish anyway counts only the rated ones
 
 At the end it says how many you knew, plus the number of wrong and open ones.

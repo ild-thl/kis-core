@@ -156,9 +156,9 @@ def test_destroy_for_users_removes_only_matching_sessions():
     class _Redis:
         def __init__(self):
             self.daten = {
-                b"kis:session:a": json.dumps({"user_id": 7}),
-                b"kis:session:b": json.dumps({"user_id": 8}),
-                b"kis:session:c": "kaputt",
+                b"askf:session:a": json.dumps({"user_id": 7}),
+                b"askf:session:b": json.dumps({"user_id": 8}),
+                b"askf:session:c": "kaputt",
             }
 
         def scan_iter(self, match, count):
@@ -173,4 +173,4 @@ def test_destroy_for_users_removes_only_matching_sessions():
     store = SessionStore(secret="x")
     store._client = _Redis()
     assert store.destroy_for_users([7]) == 1
-    assert list(store._client.daten) == [b"kis:session:b", b"kis:session:c"]
+    assert list(store._client.daten) == [b"askf:session:b", b"askf:session:c"]

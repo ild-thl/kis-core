@@ -26,7 +26,7 @@ def client(monkeypatch):
 
 def _payload(**abweichungen):
     daten = {"uid": "max.mustermann", "given_name": "Max", "surname": "Mustermann",
-             "kis_role": "staff"}
+             "askf_role": "staff"}
     daten.update(abweichungen)
     return daten
 
@@ -91,14 +91,14 @@ def test_a_mail_address_that_is_taken_reports_a_conflict(client):
 
 
 def test_a_custom_role_without_an_id_is_refused_by_the_model(client):
-    r = client.post("/admin/accounts", json=_payload(kis_role="custom"))
+    r = client.post("/admin/accounts", json=_payload(askf_role="custom"))
     assert r.status_code == 422
 
 
 def test_an_unknown_custom_role_is_refused(client):
     with patch("src.routes.admin.accounts.database.get_custom_role", return_value=None), \
          patch("src.routes.admin.accounts.provision_account") as anlegen:
-        r = client.post("/admin/accounts", json=_payload(kis_role="custom", custom_role_id=9))
+        r = client.post("/admin/accounts", json=_payload(askf_role="custom", custom_role_id=9))
 
     assert r.status_code == 400
     anlegen.assert_not_called()

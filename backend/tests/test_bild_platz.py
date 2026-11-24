@@ -53,7 +53,7 @@ class _Redis:
 def voll(monkeypatch):
     """The only image seat at myLab is taken, no waiting."""
     r = _Redis()
-    r.zadd("kis:provider-slots:21:image", {"besetzt": 1.0})
+    r.zadd("askf:provider-slots:21:image", {"besetzt": 1.0})
     monkeypatch.setattr(provider_slots, "_redis", lambda: r)
     monkeypatch.setattr(pt, "_redis", lambda: r)
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
@@ -87,7 +87,7 @@ def test_ein_praesentationsbild_malt_mit_freiem_platz(monkeypatch):
 
     assert bild.erzeuge("a lab", "1024x576") == b"png"
     assert protokoll == ["post"]
-    assert r.zcard("kis:provider-slots:21:image") == 0
+    assert r.zcard("askf:provider-slots:21:image") == 0
 
 
 def test_ohne_platz_geht_keine_anfrage_raus(monkeypatch, voll):

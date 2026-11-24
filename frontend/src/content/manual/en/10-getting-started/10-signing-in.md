@@ -4,7 +4,7 @@
 
 ## No self-registration yet
 
-Your university credentials do not work yet, KIS currently has its own user management. Until it
+Your university credentials do not work yet, askFrancis currently has its own user management. Until it
 is connected to the university, you only get an account through an invitation, in one of two ways:
 
 - **Invitation link**: you set your own password, the account stays

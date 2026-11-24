@@ -11,7 +11,7 @@ from src.core.redis_url import CELERY_RESULT_URL, REDIS_URL
 # A task whose worker dies goes back in line (task_reject_on_worker_lost), but a task that
 # kills its worker every time must not circle forever: after this many starts it gives up.
 MAX_STARTS = 4
-_START_KEY = "kis:task-starts:{}:{}"
+_START_KEY = "askf:task-starts:{}:{}"
 
 
 def start_allowed(task_id: str, retries: int, r=None) -> bool:
@@ -43,7 +43,7 @@ class _GuardedTask(Task):
 
 
 celery_app = Celery(
-    "kis",
+    "askf",
     task_cls=_GuardedTask,
     broker=REDIS_URL,
     backend=CELERY_RESULT_URL,

@@ -16,7 +16,7 @@ CURRENT_ALG = ENVELOPE_ALG_V2
 
 
 def _secret() -> str | None:
-    raw = (os.environ.get("KIS_SECRETS_KEY") or "").strip()
+    raw = (os.environ.get("ASKF_SECRETS_KEY") or "").strip()
     return raw or None
 
 
@@ -41,7 +41,7 @@ def wrap_api_key(plain: str, *, provider_name: str) -> dict[str, str]:
     """Encrypts a plaintext and binds it to the provider name."""
     secret = _secret()
     if secret is None:
-        raise RuntimeError("KIS_SECRETS_KEY not configured")
+        raise RuntimeError("ASKF_SECRETS_KEY not configured")
     key = _derive_key(secret)
     nonce = os.urandom(12)
     aad = provider_name.encode("utf-8")

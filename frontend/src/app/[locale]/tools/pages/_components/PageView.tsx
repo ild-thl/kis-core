@@ -107,7 +107,7 @@ export default function PageView({ page, limits, imageBase, edit, back, tools }:
     <PageEdit.Provider value={edit ?? null}>
     <PageLang.Provider value={page.lang}>
     <LookOf.Provider value={looks}>
-    <div className={`kis-page d-${design}${editing ? " editing" : ""}`} lang={page.lang}>
+    <div className={`askf-page d-${design}${editing ? " editing" : ""}`} lang={page.lang}>
       <main className="wrap">
         <div className="top-row">
           {back && <ToolBackLink href={back.href} label={back.label} />}

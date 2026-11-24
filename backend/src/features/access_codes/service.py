@@ -9,12 +9,12 @@ _USERNAME_LENGTH = 8
 
 
 def new_code() -> str:
-    """A code in the shape KIS-XXXX-XXXX."""
+    """A code in the shape ASKF-XXXX-XXXX."""
     bloecke = (
         "".join(secrets.choice(_ALPHABET) for _ in range(_BLOCK_LENGTH))
         for _ in range(2)
     )
-    return "KIS-" + "-".join(bloecke)
+    return "ASKF-" + "-".join(bloecke)
 
 
 def new_username() -> str:

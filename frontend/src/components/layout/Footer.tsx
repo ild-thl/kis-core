@@ -5,9 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-import MapModal from "@/components/campus/MapModal";
 import { campusApi } from "@/lib/campus/api";
-import { mapFile } from "@/lib/campus/mapLink";
 
 // The THL lettering is much heavier than the rest, a narrower cap evens out how much of its tile it fills.
 const PARTNERS = [
@@ -16,17 +14,14 @@ const PARTNERS = [
   { src: "/logos/stiftung-hochschullehre.jpg", alt: "Gefördert durch die Stiftung Innovation in der Hochschullehre", href: "https://stiftung-hochschullehre.de/", width: 1920, height: 942 },
 ];
 
-const TILE_BASE = "flex items-center justify-center bg-white rounded-lg px-4 py-3";
-const TILE = `${TILE_BASE} h-20 sm:h-24`;
+const TILE = "flex items-center justify-center bg-white rounded-lg px-4 py-3 h-20 sm:h-24";
 const LOGO = "max-h-full max-w-full w-auto h-auto object-contain";
 
 export default function Footer({ loggedIn }: { loggedIn?: boolean }) {
   const t = useTranslations("footer");
   const [mapUrl, setMapUrl] = useState("");
-  const [previewOk, setPreviewOk] = useState(true);
-  const [mapOpen, setMapOpen] = useState(false);
 
-  // The map link is an admin setting, without it the map section stays away.
+  // The map link is an admin setting, without it the footer shows no map link.
   useEffect(() => {
     campusApi.map().then((r) => setMapUrl(r.map_url)).catch(() => setMapUrl(""));
   }, []);
@@ -63,36 +58,6 @@ export default function Footer({ loggedIn }: { loggedIn?: boolean }) {
           </div>
         </div>
 
-        {mapUrl && (
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() => setMapOpen(true)}
-              aria-haspopup="dialog"
-              className="logo-link"
-            >
-              <span className={`${TILE_BASE} relative h-32 sm:h-40`}>
-                <span className="absolute left-4 top-2 text-xs font-medium" style={{ color: "rgba(0,0,0,0.45)" }}>
-                  {t("campusMap")}
-                </span>
-                {/* The map brings its own preview, a map without one leaves the tile with its label only. */}
-                {previewOk && (
-                  <Image
-                    src={mapFile(mapUrl, "preview.jpg")}
-                    alt=""
-                    width={1280}
-                    height={720}
-                    unoptimized
-                    onError={() => setPreviewOk(false)}
-                    className={`${LOGO} rounded-md`}
-                  />
-                )}
-              </span>
-            </button>
-            <MapModal open={mapOpen} onClose={() => setMapOpen(false)} mapUrl={mapUrl} />
-          </div>
-        )}
-
         <div className="flex flex-col items-center gap-3 pt-6 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
           <div className="text-sm">
             <Link href="/imprint" className="link-footer">
@@ -102,6 +67,14 @@ export default function Footer({ loggedIn }: { loggedIn?: boolean }) {
             <Link href="/privacy" className="link-footer">
               {t("privacy")}
             </Link>
+            {mapUrl && (
+              <>
+                <span className="mx-2 opacity-40">|</span>
+                <Link href="/campusmap" target="_blank" rel="noopener noreferrer" className="link-footer">
+                  {t("campusMap")}
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -59,7 +59,7 @@ def extract_notes_per_slide(source: bytes | str | Path) -> list[str]:
 def soffice_profile_dir() -> Path:
     """Its own LibreOffice profile per process and thread, otherwise a conversion fails."""
     key = f"{os.getpid()}-{threading.get_ident()}"
-    return Path(tempfile.gettempdir()) / "kis-lo-profiles" / key
+    return Path(tempfile.gettempdir()) / "askf-lo-profiles" / key
 
 
 def build_soffice_cmd(pptx_path: Path, output_dir: Path) -> list[str]:

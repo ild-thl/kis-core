@@ -33,7 +33,7 @@ export const DEFAULT_TRANSLATE_TARGET: (typeof TRANSLATE_LANGUAGES)[number] = "E
 export const SCREENCAST_TARGET_LANGUAGES = ["DE", "EN-US"] as const;
 
 /** Custom event so the header settings menu can re-show a dismissed HomeNotice. */
-export const HOME_NOTICE_SHOW_EVENT = "kis:home-notice-show";
+export const HOME_NOTICE_SHOW_EVENT = "askf:home-notice-show";
 
 /** AI Act transparency notice embedded in generated files, always bilingual regardless of viewer locale. Mirrors backend AI_HINWEIS_TEXT in ai_hinweis.py. */
 export const AI_HINWEIS_TEXT = "Diese Datei wurde mithilfe von KI erstellt. This file was created with AI assistance.";

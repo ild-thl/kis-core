@@ -17,7 +17,7 @@ _DIAGRAM_DATA_RELTYPE = (
 )
 
 # The parsed tree is cached so reading and writing see the same thing.
-_TREE_ATTR = "_kis_diagram_tree"
+_TREE_ATTR = "_askf_diagram_tree"
 
 
 # ── Folien ──────────────────────────────────────────────────────────────────

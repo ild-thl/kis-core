@@ -1,7 +1,7 @@
-# Was ist KIS
+# Was ist askFrancis
 
-KIS steht für KInternationalisierung von Studiengängen und ist ein Pilotprojekt an der TH Lübeck,
-eine KI-Plattform für Lehre und Studium. Sie deckt drei getrennte Bereiche ab: den Lernassistenten
+askFrancis ist eine KI-Plattform für Lehre und Studium an der TH Lübeck. Sie entsteht im
+Pilotprojekt KIS, kurz für KInternationalisierung von Studiengängen. Sie deckt drei getrennte Bereiche ab: den Lernassistenten
 in Workspaces, den Infoassistenten für Fragen zur Hochschule und eigenständige Dienste.
 
 ## Der Lernassistent

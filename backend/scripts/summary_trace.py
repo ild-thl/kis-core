@@ -6,7 +6,7 @@ tagged with the job's uuid as its session id, so this script only has to pull it
 with what the job folder itself holds (sources, facts, outline, the finished text).
 
 Run inside a container that can reach both job storage and Langfuse, for example:
-    docker exec kis-celery-zsf python scripts/summary_trace.py <job_uuid> --out /tmp/trace.md
+    docker exec askf-celery-zsf python scripts/summary_trace.py <job_uuid> --out /tmp/trace.md
 """
 
 import argparse
@@ -43,7 +43,7 @@ def _read_text(user_id: int, job_uuid: str, name: str) -> str | None:
 
 
 def _langfuse_client() -> httpx.Client:
-    host = os.environ.get("LANGFUSE_HOST", "http://kis-langfuse:3000").rstrip("/")
+    host = os.environ.get("LANGFUSE_HOST", "http://askf-langfuse:3000").rstrip("/")
     auth = (os.environ["LANGFUSE_PUBLIC_KEY"], os.environ["LANGFUSE_SECRET_KEY"])
     return httpx.Client(base_url=host, auth=auth, timeout=30.0)
 

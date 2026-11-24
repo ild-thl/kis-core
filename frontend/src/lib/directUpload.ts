@@ -31,7 +31,7 @@ export interface UploadOptions {
 
 function storageKey(tool: string, file: File, context?: Record<string, string>): string {
   const where = context ? JSON.stringify(context) : "";
-  return `kis-upload:${tool}:${where}:${file.name}:${file.size}:${file.lastModified}`;
+  return `askf-upload:${tool}:${where}:${file.name}:${file.size}:${file.lastModified}`;
 }
 
 function readToken(key: string): string | null {

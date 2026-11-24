@@ -1,6 +1,6 @@
 """Puts the demo module's materials into their chapters, safe to run again.
 
-    docker exec kis-backend python scripts/demo_kapitel_anlegen.py [--workspace <uuid>]
+    docker exec askf-backend python scripts/demo_kapitel_anlegen.py [--workspace <uuid>]
 """
 
 import argparse

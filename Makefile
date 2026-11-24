@@ -1,7 +1,7 @@
-# KIS test runner. Run `make` or `make help` for the list of targets.
+# askFrancis test runner. Run `make` or `make help` for the list of targets.
 #
 # Two fast UNIT suites (no live stack needed):
-#   - backend  : pytest INSIDE the kis-backend container (local Python is too old
+#   - backend  : pytest INSIDE the askf-backend container (local Python is too old
 #                — the code needs 3.10+, the container ships 3.11). The default
 #                run passes -m "not e2e", so live RAG-eval tests are skipped.
 #   - frontend : Vitest on the host (pure-logic units, node environment).
@@ -9,7 +9,7 @@
 #   - backend  : live RAG-eval tests marked @e2e — `make test-backend-e2e`.
 #   - frontend : Playwright on the host — `make test-e2e` (frontend :3000, backend :8000).
 
-BACKEND_CONTAINER ?= kis-backend
+BACKEND_CONTAINER ?= askf-backend
 
 .DEFAULT_GOAL := help
 .PHONY: help test test-backend test-backend-e2e test-frontend test-unit test-e2e test-all

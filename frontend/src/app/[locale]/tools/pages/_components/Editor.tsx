@@ -333,7 +333,7 @@ function Loaded({ uuid, data, lang, languages }: LoadedProps) {
   return (
     <EditCtx.Provider value={ctx}>
       {editing && (
-        <div className="kis-page-hint px-4 py-1.5 text-xs" style={{ background: "rgba(var(--kb-rgb),.05)", borderBottom: "2px solid rgba(var(--kb-rgb),.15)", color: "var(--kb-dark)" }}>
+        <div className="askf-page-hint px-4 py-1.5 text-xs" style={{ background: "rgba(var(--kb-rgb),.05)", borderBottom: "2px solid rgba(var(--kb-rgb),.15)", color: "var(--kb-dark)" }}>
           {t("editHint")}
           {lang && ` ${t("editingLanguage", { label: readableOf(languages).find((l) => l.key === lang)?.label ?? lang })}`}
         </div>
@@ -445,9 +445,9 @@ function DeleteOnHover({ onDelete }: { onDelete: (path: string, section: number 
     };
     const move = (e: MouseEvent) => {
       const el = e.target as HTMLElement;
-      if (el.closest(".kis-page-del")) return;
-      if (!el.closest(".kis-page") || el.closest(".ed-tools,.ed-actions,.ed-save,.ed-add,.ed-grow,.ed-over,.fld-pick,.pfoot")) return hide();
-      const hit = el.closest<HTMLElement>("[data-d],[data-p]:not([data-keep]),.kis-page section");
+      if (el.closest(".askf-page-del")) return;
+      if (!el.closest(".askf-page") || el.closest(".ed-tools,.ed-actions,.ed-save,.ed-add,.ed-grow,.ed-over,.fld-pick,.pfoot")) return hide();
+      const hit = el.closest<HTMLElement>("[data-d],[data-p]:not([data-keep]),.askf-page section");
       if (!hit) return hide();
       if (hit === target.current) return;
       target.current?.classList.remove("ed-target");
@@ -468,7 +468,7 @@ function DeleteOnHover({ onDelete }: { onDelete: (path: string, section: number 
     <button
       ref={btn}
       type="button"
-      className="kis-page-del"
+      className="askf-page-del"
       aria-label={t("removeElement")}
       title={t("remove")}
       onMouseEnter={() => target.current?.classList.add("ed-target")}

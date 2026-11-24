@@ -29,7 +29,7 @@ merkt sich allein dieser Browser, an einem anderen Gerät ist er wieder da.
 ## Ohne festen Tag
 
 Nennt das Material nur einen Monat, steht der Termin in keiner Zelle, sondern unter **Ohne festen
-Tag**. Fehlt in der Quelle das Jahr, nimmt KIS das Jahr, mit dem das Datum am nächsten an heute
+Tag**. Fehlt in der Quelle das Jahr, nimmt askFrancis das Jahr, mit dem das Datum am nächsten an heute
 liegt, und markiert das mit einem kleinen Fragezeichen an der Jahreszahl.
 
 ## Eigene Termine

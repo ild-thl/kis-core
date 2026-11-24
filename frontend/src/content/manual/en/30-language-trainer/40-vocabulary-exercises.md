@@ -20,11 +20,11 @@ text is made fresh.
 
 ## What is in the text
 
-- **Inflected forms**: KIS has at least about a third of the gaps built so that the base form does
+- **Inflected forms**: askFrancis has at least about a third of the gaps built so that the base form does
   not fit unchanged, for example because of an ending, a plural or a tense. At least one gap takes
   the word unchanged
 - **Each term once**: No word appears twice as a gap
-- **Fewer gaps than chosen**: KIS fills in unusable gaps itself before showing the text. If fewer
+- **Fewer gaps than chosen**: askFrancis fills in unusable gaps itself before showing the text. If fewer
   than half are left, the exercise fails
 
 ![A vocabulary exercise](/manual/{lang}/vocabulary-exercise.png)
@@ -46,6 +46,6 @@ currently opens the whole text again empty, not just the wrong gaps.
 
 ## How it is checked
 
-KIS compares every entry with exactly one solution, without an AI call. Capitalisation and
+askFrancis compares every entry with exactly one solution, without an AI call. Capitalisation and
 punctuation do not count. Another form that fits just as well is therefore marked almost correct
 or wrong.

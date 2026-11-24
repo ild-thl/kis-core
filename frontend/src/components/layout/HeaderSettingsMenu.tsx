@@ -10,9 +10,12 @@ import { Check, Compass, FileText, Gear, Medal, Moon, PencilSimple, Plugs, Quest
 import { usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { useTheme, type Theme } from "@/hooks/useTheme";
+import HeaderAccountRow, { type HeaderAccount } from "./HeaderAccountRow";
 import { blockStartRows, LOCALES, THEMES, useLocaleSwitch } from "./_headerMenu";
 
 interface HeaderSettingsMenuProps {
+  /** Who is signed in, shown as a plain line at the top. */
+  account?: HeaderAccount | null;
   isAdmin?: boolean;
   canViewManual?: boolean;
   showLanguageLevel?: boolean;
@@ -31,7 +34,7 @@ interface HeaderSettingsMenuProps {
   onLogout?: () => void;
 }
 
-export default function HeaderSettingsMenu({ isAdmin = false, canViewManual = false, showLanguageLevel = false, showInterfaces = false, showTour = false, onStartTour, showEvaluation = false, areaKey = "admin", showLogout = false, showFaq = false, adminNotice = false, onLogout }: HeaderSettingsMenuProps) {
+export default function HeaderSettingsMenu({ account = null, isAdmin = false, canViewManual = false, showLanguageLevel = false, showInterfaces = false, showTour = false, onStartTour, showEvaluation = false, areaKey = "admin", showLogout = false, showFaq = false, adminNotice = false, onLogout }: HeaderSettingsMenuProps) {
   const t = useTranslations("header");
   const tLang = useTranslations("languageSwitch");
   const tManual = useTranslations("manual");
@@ -154,6 +157,7 @@ export default function HeaderSettingsMenu({ isAdmin = false, canViewManual = fa
             boxShadow: "0 8px 24px rgba(0,40,60,0.18)",
           }}
         >
+          {account?.name && <HeaderAccountRow account={account} />}
           <div className={headingClass} style={{ color: "var(--muted)" }}>{tLang("title")}</div>
           {LOCALES.map((loc) => {
             const isSelected = loc === currentLocale;

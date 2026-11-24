@@ -1,4 +1,4 @@
-"""KIS waits for the text model as long as myLab lets a call run. Load test 26.09.: the services allow about 300 s per call but KIS aborted after 120 s, so a 200-page outline could never succeed."""
+"""askFrancis waits for the text model as long as myLab lets a call run. Load test 26.09.: the services allow about 300 s per call but askFrancis aborted after 120 s, so a 200-page outline could never succeed."""
 
 from src.services.openai_compat_llm.base import _LLM_HTTP_TIMEOUT
 

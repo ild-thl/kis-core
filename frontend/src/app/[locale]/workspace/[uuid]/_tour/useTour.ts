@@ -67,7 +67,7 @@ export function useTour() {
     prevBtnText: t("back"),
     doneBtnText: t("done"),
     progressText: t("progress", { current: "{{current}}", total: "{{total}}" }),
-    popoverClass: "kis-tour",
+    popoverClass: "askf-tour",
     onPopoverRender: knoepfeAnpassen,
     // Only the last step counts as done, so breaking off keeps the invitation
     // on the start page. driver.js hands the last step to this hook instead of

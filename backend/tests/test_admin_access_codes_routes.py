@@ -75,11 +75,11 @@ def test_creating_a_code_returns_the_readable_code(client):
     with patch("src.routes.admin.access_codes.repo.create_code", return_value=7) as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Kollegen August", "max_uses": 50,
-            "valid_days": 30, "access_hours": 14, "kis_role": "staff",
+            "valid_days": 30, "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code == 200
-    assert re.fullmatch(r"KIS-[A-Z2-9]{4}-[A-Z2-9]{4}", r.json()["code"])
+    assert re.fullmatch(r"ASKF-[A-Z2-9]{4}-[A-Z2-9]{4}", r.json()["code"])
     assert anlegen.call_args.kwargs["max_uses"] == 50
     assert anlegen.call_args.kwargs["access_hours"] == 14
     assert anlegen.call_args.kwargs["created_by"] == 1
@@ -89,7 +89,7 @@ def test_creating_a_code_with_unlimited_access(client):
     with patch("src.routes.admin.access_codes.repo.create_code", return_value=7) as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Kollegen August", "max_uses": 50,
-            "valid_days": 30, "access_hours": None, "kis_role": "staff",
+            "valid_days": 30, "access_hours": None, "askf_role": "staff",
         })
 
     assert r.status_code == 200
@@ -100,7 +100,7 @@ def test_creating_a_code_with_access_hours_above_the_cap_is_refused(client):
     with patch("src.routes.admin.access_codes.repo.create_code") as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Kollegen August", "max_uses": 50,
-            "valid_days": 30, "access_hours": 721, "kis_role": "staff",
+            "valid_days": 30, "access_hours": 721, "askf_role": "staff",
         })
 
     assert r.status_code in (400, 422)
@@ -111,7 +111,7 @@ def test_creating_a_code_with_a_twelve_hour_lifetime_for_an_event(client):
     with patch("src.routes.admin.access_codes.repo.create_code", return_value=7) as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Tag der Lehre", "max_uses": 500,
-            "valid_days": 1, "access_hours": 12, "kis_role": "user",
+            "valid_days": 1, "access_hours": 12, "askf_role": "user",
             "show_credentials": False,
         })
 
@@ -125,7 +125,7 @@ def test_creating_a_code_defaults_to_showing_credentials(client):
     with patch("src.routes.admin.access_codes.repo.create_code", return_value=7) as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Kollegen August", "max_uses": 50,
-            "valid_days": 30, "access_hours": 14, "kis_role": "staff",
+            "valid_days": 30, "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code == 200
@@ -136,7 +136,7 @@ def test_creating_a_code_with_the_evaluation_switch(client):
     with patch("src.routes.admin.access_codes.repo.create_code", return_value=7) as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Tag der Lehre", "max_uses": 500,
-            "valid_days": 1, "access_hours": 12, "kis_role": "user",
+            "valid_days": 1, "access_hours": 12, "askf_role": "user",
             "show_evaluation": True,
         })
 
@@ -148,7 +148,7 @@ def test_creating_a_code_leaves_the_evaluation_off_by_default(client):
     with patch("src.routes.admin.access_codes.repo.create_code", return_value=7) as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Kollegen August", "max_uses": 50,
-            "valid_days": 30, "access_hours": 14, "kis_role": "staff",
+            "valid_days": 30, "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code == 200
@@ -159,7 +159,7 @@ def test_creating_a_code_with_500_seats_for_a_big_event_is_allowed(client):
     with patch("src.routes.admin.access_codes.repo.create_code", return_value=7) as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Tag der Lehre", "max_uses": 500,
-            "valid_days": 1, "access_hours": 12, "kis_role": "user",
+            "valid_days": 1, "access_hours": 12, "askf_role": "user",
         })
 
     assert r.status_code == 200
@@ -170,7 +170,7 @@ def test_creating_a_code_with_more_than_500_seats_is_refused(client):
     with patch("src.routes.admin.access_codes.repo.create_code") as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Kollegen August", "max_uses": 501,
-            "valid_days": 30, "access_hours": 14, "kis_role": "staff",
+            "valid_days": 30, "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code in (400, 422)
@@ -181,7 +181,7 @@ def test_creating_a_code_without_a_name_is_refused(client):
     with patch("src.routes.admin.access_codes.repo.create_code") as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "   ", "max_uses": 50, "valid_days": 30,
-            "access_hours": 14, "kis_role": "staff",
+            "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code in (400, 422)
@@ -193,7 +193,7 @@ def test_a_custom_role_has_to_exist(client):
          patch("src.routes.admin.access_codes.repo.create_code") as anlegen:
         r = client.post("/admin/access-codes", json={
             "label": "Sprachenzentrum", "max_uses": 10, "valid_days": 30,
-            "access_hours": 21, "kis_role": "custom", "custom_role_id": 99,
+            "access_hours": 21, "askf_role": "custom", "custom_role_id": 99,
         })
 
     assert r.status_code == 400
@@ -202,17 +202,17 @@ def test_a_custom_role_has_to_exist(client):
 
 def test_the_list_carries_the_state_of_every_code(client):
     eintraege = [
-        {"id": 1, "code": "KIS-AAAA-BBBB", "label": "A", "role": "staff",
+        {"id": 1, "code": "ASKF-AAAA-BBBB", "label": "A", "role": "staff",
          "custom_role_id": None, "max_uses": 50, "used_count": 3,
          "valid_until": MORGEN, "access_hours": 14, "show_credentials": True,
          "show_evaluation": True, "active": True,
          "created_at": MORGEN, "created_by": 1},
-        {"id": 2, "code": "KIS-CCCC-DDDD", "label": "B", "role": "user",
+        {"id": 2, "code": "ASKF-CCCC-DDDD", "label": "B", "role": "user",
          "custom_role_id": None, "max_uses": 5, "used_count": 5,
          "valid_until": MORGEN, "access_hours": 14, "show_credentials": True,
          "show_evaluation": False, "active": True,
          "created_at": MORGEN, "created_by": 1},
-        {"id": 3, "code": "KIS-EEEE-FFFF", "label": "C", "role": "user",
+        {"id": 3, "code": "ASKF-EEEE-FFFF", "label": "C", "role": "user",
          "custom_role_id": None, "max_uses": 5, "used_count": 0,
          "valid_until": MORGEN, "access_hours": 14, "show_credentials": True,
          "show_evaluation": False, "active": False,
@@ -242,14 +242,14 @@ def test_switching_an_unknown_code_reports_not_found(client):
 
 
 def test_editing_a_code_updates_every_field_but_the_code(client):
-    bestehend = {"id": 7, "code": "KIS-AAAA-BBBB", "label": "Alt", "role": "user",
+    bestehend = {"id": 7, "code": "ASKF-AAAA-BBBB", "label": "Alt", "role": "user",
                  "custom_role_id": None, "max_uses": 50, "used_count": 3,
                  "valid_until": MORGEN, "access_hours": 14, "active": True}
     with patch("src.routes.admin.access_codes.repo.get_code_by_id", return_value=bestehend), \
          patch("src.routes.admin.access_codes.repo.update_code", return_value=True) as bearbeiten:
         r = client.patch("/admin/access-codes/7", json={
             "label": "Kollegen September", "max_uses": 25,
-            "valid_days": 14, "access_hours": 21, "kis_role": "staff",
+            "valid_days": 14, "access_hours": 21, "askf_role": "staff",
             "show_credentials": False,
         })
 
@@ -263,14 +263,14 @@ def test_editing_a_code_updates_every_field_but_the_code(client):
 
 
 def test_editing_without_show_credentials_leaves_it_switched_on(client):
-    bestehend = {"id": 7, "code": "KIS-AAAA-BBBB", "label": "Alt", "role": "user",
+    bestehend = {"id": 7, "code": "ASKF-AAAA-BBBB", "label": "Alt", "role": "user",
                  "custom_role_id": None, "max_uses": 50, "used_count": 3,
                  "valid_until": MORGEN, "access_hours": 14, "active": True}
     with patch("src.routes.admin.access_codes.repo.get_code_by_id", return_value=bestehend), \
          patch("src.routes.admin.access_codes.repo.update_code", return_value=True) as bearbeiten:
         r = client.patch("/admin/access-codes/7", json={
             "label": "Kollegen September", "max_uses": 25,
-            "valid_days": 14, "access_hours": 21, "kis_role": "staff",
+            "valid_days": 14, "access_hours": 21, "askf_role": "staff",
         })
 
     assert r.status_code == 200
@@ -279,14 +279,14 @@ def test_editing_without_show_credentials_leaves_it_switched_on(client):
 
 def test_editing_switches_the_evaluation_on_afterwards(client):
     """The switch was forgotten while creating the code, the edit has to fix that."""
-    bestehend = {"id": 7, "code": "KIS-AAAA-BBBB", "label": "Alt", "role": "user",
+    bestehend = {"id": 7, "code": "ASKF-AAAA-BBBB", "label": "Alt", "role": "user",
                  "custom_role_id": None, "max_uses": 50, "used_count": 3,
                  "valid_until": MORGEN, "access_hours": 14, "active": True}
     with patch("src.routes.admin.access_codes.repo.get_code_by_id", return_value=bestehend), \
          patch("src.routes.admin.access_codes.repo.update_code", return_value=True) as bearbeiten:
         r = client.patch("/admin/access-codes/7", json={
             "label": "Tag der Lehre", "max_uses": 25,
-            "valid_days": 14, "access_hours": 12, "kis_role": "user",
+            "valid_days": 14, "access_hours": 12, "askf_role": "user",
             "show_evaluation": True,
         })
 
@@ -295,14 +295,14 @@ def test_editing_switches_the_evaluation_on_afterwards(client):
 
 
 def test_editing_without_the_evaluation_field_leaves_it_off(client):
-    bestehend = {"id": 7, "code": "KIS-AAAA-BBBB", "label": "Alt", "role": "user",
+    bestehend = {"id": 7, "code": "ASKF-AAAA-BBBB", "label": "Alt", "role": "user",
                  "custom_role_id": None, "max_uses": 50, "used_count": 3,
                  "valid_until": MORGEN, "access_hours": 14, "active": True}
     with patch("src.routes.admin.access_codes.repo.get_code_by_id", return_value=bestehend), \
          patch("src.routes.admin.access_codes.repo.update_code", return_value=True) as bearbeiten:
         r = client.patch("/admin/access-codes/7", json={
             "label": "Kollegen September", "max_uses": 25,
-            "valid_days": 14, "access_hours": 21, "kis_role": "staff",
+            "valid_days": 14, "access_hours": 21, "askf_role": "staff",
         })
 
     assert r.status_code == 200
@@ -314,7 +314,7 @@ def test_editing_an_unknown_code_reports_not_found(client):
          patch("src.routes.admin.access_codes.repo.update_code") as bearbeiten:
         r = client.patch("/admin/access-codes/999", json={
             "label": "Kollegen September", "max_uses": 25,
-            "valid_days": 14, "access_hours": 21, "kis_role": "staff",
+            "valid_days": 14, "access_hours": 21, "askf_role": "staff",
         })
 
     assert r.status_code == 404
@@ -322,14 +322,14 @@ def test_editing_an_unknown_code_reports_not_found(client):
 
 
 def test_editing_to_reduce_max_uses_below_used_count_is_refused(client):
-    bestehend = {"id": 7, "code": "KIS-AAAA-BBBB", "label": "Alt", "role": "user",
+    bestehend = {"id": 7, "code": "ASKF-AAAA-BBBB", "label": "Alt", "role": "user",
                  "custom_role_id": None, "max_uses": 50, "used_count": 10,
                  "valid_until": MORGEN, "access_hours": 14, "active": True}
     with patch("src.routes.admin.access_codes.repo.get_code_by_id", return_value=bestehend), \
          patch("src.routes.admin.access_codes.repo.update_code", return_value=False) as bearbeiten:
         r = client.patch("/admin/access-codes/7", json={
             "label": "Alt", "max_uses": 5,
-            "valid_days": 14, "access_hours": 21, "kis_role": "staff",
+            "valid_days": 14, "access_hours": 21, "askf_role": "staff",
         })
 
     assert r.status_code == 400
@@ -337,14 +337,14 @@ def test_editing_to_reduce_max_uses_below_used_count_is_refused(client):
 
 
 def test_editing_to_a_role_beyond_the_admins_own_permissions_is_refused(limited_client):
-    bestehend = {"id": 7, "code": "KIS-AAAA-BBBB", "label": "Alt", "role": "user",
+    bestehend = {"id": 7, "code": "ASKF-AAAA-BBBB", "label": "Alt", "role": "user",
                  "custom_role_id": None, "max_uses": 50, "used_count": 3,
                  "valid_until": MORGEN, "access_hours": 14, "active": True}
     with patch("src.routes.admin.access_codes.repo.get_code_by_id", return_value=bestehend), \
          patch("src.routes.admin.access_codes.repo.update_code") as bearbeiten:
         r = limited_client.patch("/admin/access-codes/7", json={
             "label": "Zuviel", "max_uses": 5,
-            "valid_days": 30, "access_hours": 14, "kis_role": "staff",
+            "valid_days": 30, "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code == 403
@@ -352,7 +352,7 @@ def test_editing_to_a_role_beyond_the_admins_own_permissions_is_refused(limited_
 
 
 def test_editing_needs_a_custom_role_that_exists(client):
-    bestehend = {"id": 7, "code": "KIS-AAAA-BBBB", "label": "Alt", "role": "user",
+    bestehend = {"id": 7, "code": "ASKF-AAAA-BBBB", "label": "Alt", "role": "user",
                  "custom_role_id": None, "max_uses": 50, "used_count": 3,
                  "valid_until": MORGEN, "access_hours": 14, "active": True}
     with patch("src.routes.admin.access_codes.repo.get_code_by_id", return_value=bestehend), \
@@ -360,7 +360,7 @@ def test_editing_needs_a_custom_role_that_exists(client):
          patch("src.routes.admin.access_codes.repo.update_code") as bearbeiten:
         r = client.patch("/admin/access-codes/7", json={
             "label": "Sprachenzentrum", "max_uses": 10, "valid_days": 30,
-            "access_hours": 21, "kis_role": "custom", "custom_role_id": 99,
+            "access_hours": 21, "askf_role": "custom", "custom_role_id": 99,
         })
 
     assert r.status_code == 400
@@ -405,7 +405,7 @@ def test_a_role_beyond_the_admins_own_permissions_is_refused(limited_client):
     with patch("src.routes.admin.access_codes.repo.create_code") as anlegen:
         r = limited_client.post("/admin/access-codes", json={
             "label": "Zuviel", "max_uses": 5, "valid_days": 30,
-            "access_hours": 14, "kis_role": "staff",
+            "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code == 403
@@ -589,7 +589,7 @@ def test_creating_a_code_stores_the_chosen_workspaces(client):
          patch("src.routes.admin.access_codes.repo.set_code_workspaces") as zuordnen:
         r = client.post("/admin/access-codes", json={
             "label": "Seminar Recht", "max_uses": 30, "valid_days": 14,
-            "access_hours": None, "kis_role": "user", "workspace_ids": [11, 12],
+            "access_hours": None, "askf_role": "user", "workspace_ids": [11, 12],
         })
 
     assert r.status_code == 200
@@ -601,7 +601,7 @@ def test_creating_a_code_without_workspaces_writes_none(client):
          patch("src.routes.admin.access_codes.repo.set_code_workspaces") as zuordnen:
         r = client.post("/admin/access-codes", json={
             "label": "Kollegen August", "max_uses": 50,
-            "valid_days": 30, "access_hours": 14, "kis_role": "staff",
+            "valid_days": 30, "access_hours": 14, "askf_role": "staff",
         })
 
     assert r.status_code == 200
@@ -616,7 +616,7 @@ def test_editing_the_workspaces_also_enrolls_earlier_accounts(client):
          patch("src.routes.admin.access_codes.repo.enroll_into_code_workspaces", return_value=2) as einschreiben:
         r = client.patch("/admin/access-codes/7", json={
             "label": "Seminar Recht", "max_uses": 30, "valid_days": 14,
-            "access_hours": None, "kis_role": "user", "workspace_ids": [11],
+            "access_hours": None, "askf_role": "user", "workspace_ids": [11],
         })
 
     assert r.status_code == 200
@@ -635,7 +635,7 @@ def test_switching_a_code_off_leaves_its_workspaces_alone(client):
 
 def test_the_list_carries_each_codes_workspaces(client):
     eintrag = {
-        "id": 7, "code": "KIS-4K2P-7RXM", "label": "Seminar", "role": "user",
+        "id": 7, "code": "ASKF-4K2P-7RXM", "label": "Seminar", "role": "user",
         "custom_role_id": None, "max_uses": 30, "used_count": 0, "valid_until": MORGEN,
         "access_hours": None, "show_credentials": True, "show_evaluation": False,
         "active": True, "created_at": datetime.now(),

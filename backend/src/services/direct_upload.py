@@ -38,7 +38,7 @@ PART_URL_SECONDS = 60 * 60
 MAX_URLS_PER_CALL = 20
 # Bytes of the joined file that are checked against the file type.
 HEAD_BYTES = 65536
-_SESSION_PREFIX = "kis:upload:"
+_SESSION_PREFIX = "askf:upload:"
 
 
 @dataclass(frozen=True)

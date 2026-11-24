@@ -64,7 +64,7 @@ def bucket(monkeypatch):
 
 
 def _start(name="vortrag.mp3", size=PART * 2 + 5, user_id=42, rule=RULE, tool="transcription"):
-    return du.start(tool, rule, name, size, user_id, {}, "https://kis.example", "kis.example", "de")
+    return du.start(tool, rule, name, size, user_id, {}, "https://askfrancis.example", "askfrancis.example", "de")
 
 
 def _parts(numbers, size):
@@ -104,9 +104,9 @@ def test_teile_muessen_lueckenlos_und_in_der_summe_passen():
 
 
 def test_same_site_origin_nur_bei_gleichem_host():
-    assert du.same_site_origin("https://kis.example", "kis.example") == "https://kis.example"
-    assert du.same_site_origin("https://evil.example", "kis.example") == ""
-    assert du.same_site_origin("", "kis.example") == ""
+    assert du.same_site_origin("https://askfrancis.example", "askfrancis.example") == "https://askfrancis.example"
+    assert du.same_site_origin("https://evil.example", "askfrancis.example") == ""
+    assert du.same_site_origin("", "askfrancis.example") == ""
 
 
 def test_teilgroesse_voll_bis_auf_den_letzten():
@@ -125,7 +125,7 @@ def test_start_legt_die_datei_im_zwischenordner_ab(bucket):
     answer = _start()
     assert answer["direct"] is True and answer["part_size"] == PART and answer["part_count"] == 3
     assert bucket["started"] == [f"tmp/uploads/42/{answer['token']}.mp3"]
-    assert bucket["cors"] == ["https://kis.example"]
+    assert bucket["cors"] == ["https://askfrancis.example"]
 
 
 def test_start_ohne_s3_nimmt_den_klassischen_weg(bucket, monkeypatch):

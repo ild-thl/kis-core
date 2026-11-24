@@ -180,7 +180,7 @@ def _silence_wav(duration_sec: float = 0.1, sample_rate: int = 16000) -> bytes:
 
 
 # An obviously wrong model name as bait.
-_STT_CANARY_MODEL = "__kis_canary_invalid_model_xyz__"
+_STT_CANARY_MODEL = "__askf_canary_invalid_model_xyz__"
 
 
 def _stt_probe(

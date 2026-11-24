@@ -48,7 +48,7 @@ def konto_bauen(schema):
         code_id = None
         if mit_code:
             code_id = repo.create_code(
-                code=f"KIS-TEST-{kennung.upper()}",
+                code=f"ASKF-TEST-{kennung.upper()}",
                 label="Testrunde Schonfrist",
                 role="user",
                 custom_role_id=None,
@@ -65,7 +65,7 @@ def konto_bauen(schema):
                     "INSERT INTO users (username, display_name, email, active, role) "
                     "VALUES (%s, %s, %s, 0, 'user') RETURNING id",
                     (f"test.schonfrist.{kennung}", "Test Schonfrist",
-                     f"test.schonfrist.{kennung}@demo.kis.local"),
+                     f"test.schonfrist.{kennung}@demo.askfrancis.local"),
                 )
                 user_id = cur.fetchone()[0]
             conn.commit()

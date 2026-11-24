@@ -1,5 +1,5 @@
 #!/bin/sh
-# Starts kis-backend with one process per core minus one, at most 4.
+# Starts askf-backend with one process per core minus one, at most 4.
 #
 # Several processes are only possible since everything shared left memory:
 #   - session list in Redis          (services/session.py)
@@ -23,7 +23,7 @@ fi
 
 WORKERS=$AUTO
 
-echo "kis-backend: ${KERNE} core(s), starting ${WORKERS} process(es)"
+echo "askf-backend: ${KERNE} core(s), starting ${WORKERS} process(es)"
 
 # With one process start deliberately WITHOUT --workers. That is exactly the
 # previous behaviour, without an extra supervisor process in front.

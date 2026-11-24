@@ -63,7 +63,7 @@ class _Zwischenstand:
     """The finished steps of a small model's map in Redis, so a requeued run continues there."""
 
     def __init__(self, mindmap_id: int):
-        self._key = f"kis:mindmap-stand:{mindmap_id}"
+        self._key = f"askf:mindmap-stand:{mindmap_id}"
 
     def _redis(self):
         import redis

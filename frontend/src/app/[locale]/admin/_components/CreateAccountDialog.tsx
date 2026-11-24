@@ -69,8 +69,8 @@ export default function CreateAccountDialog({ onClose }: Props) {
       surname: form.surname,
       email: form.email.trim() || null,
       ...(form.role.kind === "system"
-        ? { kis_role: form.role.value }
-        : { kis_role: "custom", custom_role_id: form.role.customRoleId }),
+        ? { askf_role: form.role.value }
+        : { askf_role: "custom", custom_role_id: form.role.customRoleId }),
     };
     try {
       const r = await fetch("/api/admin/accounts", {

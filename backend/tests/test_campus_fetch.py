@@ -60,7 +60,7 @@ def test_umleitung_wird_gefolgt_aber_nur_zu_http():
 
     r = fetch.fetch_conditional(_client(privat), "https://x.test/alt")
     assert r.status == "error" and "forbidden" in r.error
-    assert fetch.fetch_conditional(_client(privat), "http://kis-redis:6379/").status == "error"
+    assert fetch.fetch_conditional(_client(privat), "http://askf-redis:6379/").status == "error"
 
 
 def test_zu_grosse_seite_und_fremder_typ():

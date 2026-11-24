@@ -356,7 +356,7 @@ def _route_row(feature, provider_id, *, fallback=None, models=None):
 
 
 def test_export_carries_the_caps_and_the_fallback_by_name(monkeypatch):
-    monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
+    monkeypatch.delenv("ASKF_SECRETS_KEY", raising=False)
     monkeypatch.setattr(admin.db, "list_providers", lambda: [
         _provider(1, "myLab", concurrency={"llm": 10}), _provider(2, "Lokal"),
     ])
@@ -415,7 +415,7 @@ def _install(monkeypatch, fake):
 
 
 def test_export_then_import_keeps_caps_and_fallback(monkeypatch):
-    monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
+    monkeypatch.delenv("ASKF_SECRETS_KEY", raising=False)
     quelle = _FakeDb([_provider(1, "myLab", concurrency={"llm": 10, "tts": 4}),
                       _provider(2, "Lokal")])
     quelle.routes["chat"] = _route_row("chat", 2, fallback=1,
@@ -464,7 +464,7 @@ def test_an_old_export_without_caps_keeps_the_existing_ones(monkeypatch):
 
 
 def test_export_then_import_keeps_the_tts_fallback(monkeypatch):
-    monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
+    monkeypatch.delenv("ASKF_SECRETS_KEY", raising=False)
     quelle = _FakeDb([_provider(1, "myLab", caps=("tts",), voices=_STIMMEN),
                       _provider(2, "Lokal", caps=("tts",), voices=_STIMMEN)])
     quelle.routes["tts"] = _route_row("tts", 2, fallback=1,
@@ -486,7 +486,7 @@ def test_export_then_import_keeps_the_tts_fallback(monkeypatch):
 
 def _roundtrip(monkeypatch, feature, provider_id, fallback, models):
     """Exports one route from a source and imports it into an empty target."""
-    monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
+    monkeypatch.delenv("ASKF_SECRETS_KEY", raising=False)
     quelle = _FakeDb([_provider(1, "myLab", caps=("tts", "chat"), voices=_STIMMEN),
                       _provider(2, "Lokal", caps=("tts", "chat"), voices=_STIMMEN)])
     quelle.routes[feature] = _route_row(feature, provider_id, fallback=fallback, models=models)

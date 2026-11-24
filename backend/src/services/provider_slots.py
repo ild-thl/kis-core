@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from loguru import logger
 from src.core.redis_url import REDIS_URL
 
-_KEY = "kis:provider-slots:{}"
+_KEY = "askf:provider-slots:{}"
 
 # A seat older than this belongs to a worker that died mid request and is freed.
 STALE_SECONDS = 5 * 60
@@ -114,8 +114,8 @@ def _hold(provider: str, ticket: str) -> None:
 
 
 # The line in front of a provider, ordered by rank first and arrival second.
-_WAIT_KEY = "kis:provider-wait:{}"
-_SEEN_KEY = "kis:provider-seen:{}"
+_WAIT_KEY = "askf:provider-wait:{}"
+_SEEN_KEY = "askf:provider-seen:{}"
 # A waiter asks again at least every 1.5 s, one that stayed silent this long has died.
 WAITER_STALE_SECONDS = 30.0
 # Keeps every rank apart from the next, the arrival time sorts within one rank.

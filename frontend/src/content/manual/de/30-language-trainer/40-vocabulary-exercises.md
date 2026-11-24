@@ -22,11 +22,11 @@ Lernkarten-Satz entsteht jeder Text neu.
 
 ## Was im Text steckt
 
-- **Gebeugte Formen**: KIS lässt mindestens etwa ein Drittel der Lücken so bauen, dass die
+- **Gebeugte Formen**: askFrancis lässt mindestens etwa ein Drittel der Lücken so bauen, dass die
   Grundform nicht unverändert passt, etwa wegen einer Endung, eines Plurals oder einer Zeitform.
   Mindestens eine Lücke nimmt das Wort unverändert
 - **Jeder Begriff einmal**: Kein Wort kommt zweimal als Lücke vor
-- **Weniger Lücken als gewählt**: Unbrauchbare Lücken füllt KIS vor dem Anzeigen selbst aus.
+- **Weniger Lücken als gewählt**: Unbrauchbare Lücken füllt askFrancis vor dem Anzeigen selbst aus.
   Bleibt weniger als die Hälfte übrig, scheitert die Übung
 
 ![Eine Wortschatzübung](/manual/{lang}/vocabulary-exercise.png)
@@ -49,6 +49,6 @@ aktuell den ganzen Text wieder leer, nicht nur die falschen Lücken.
 
 ## Wie geprüft wird
 
-KIS vergleicht jede Eingabe ohne KI-Aufruf mit genau einer Lösung. Groß- und Kleinschreibung und
+askFrancis vergleicht jede Eingabe ohne KI-Aufruf mit genau einer Lösung. Groß- und Kleinschreibung und
 Satzzeichen zählen nicht. Eine andere, ebenso passende Form gilt deshalb als fast richtig oder als
 falsch.

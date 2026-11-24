@@ -1,6 +1,6 @@
 # Feedback and evaluation
 
-Two ways to report something or say how KIS is working out for you.
+Two ways to report something or say how askFrancis is working out for you.
 
 ## Report a bug or share an idea
 
@@ -14,7 +14,7 @@ The link sits in the footer of every page, inside a workspace in its settings.
 - **Message**: up to 2,000 characters. For a bug it helps to say what you did and what happened,
   that saves a follow-up question
 - **Attachments**: up to 10 files, PNG, JPG or PDF, up to 15 MB each
-- **Page**: KIS notes from which page you opened the form
+- **Page**: askFrancis notes from which page you opened the form
 - **Who reads it**: the administration under Users on the Feedback page, with the permission View
   anonymous feedback
 

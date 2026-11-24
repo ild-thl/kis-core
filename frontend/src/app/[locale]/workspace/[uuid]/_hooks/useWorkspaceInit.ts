@@ -101,7 +101,7 @@ export function useWorkspaceInit(opts: UseWorkspaceInitOptions) {
 
 // Restores the remembered selection, otherwise all ready sources without the running ones.
 function restoreSelectedSources(uuid: string, srcs: Source[]): string[] {
-  const storageKey = `kis-selected-sources-${uuid}`;
+  const storageKey = `askf-selected-sources-${uuid}`;
   const isFullyReady = (s: Source) => s.status === "ready" && !s.progress;
   const allReady = () => srcs.filter(isFullyReady).map((s) => s.uuid);
   const saved = sessionStorage.getItem(storageKey);

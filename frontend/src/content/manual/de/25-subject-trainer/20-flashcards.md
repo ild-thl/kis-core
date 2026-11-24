@@ -11,7 +11,7 @@ die Lösung zu verraten. Nach dem Aufdecken sagen Sie, ob Sie es wussten, und Me
 - **Bewertung ändern**: Wer zurückblättert, findet die Karte auf der Antwortseite und klickt
   einfach den anderen Knopf
 - **Zurück und Weiter gehen immer**: Eine Karte lässt sich überspringen und später bewerten
-- **Offene Karten**: Sind am Ende Karten unbewertet, fragt KIS nach. Offene ansehen springt zur
+- **Offene Karten**: Sind am Ende Karten unbewertet, fragt askFrancis nach. Offene ansehen springt zur
   ersten davon, Trotzdem abschließen wertet nur die bewerteten
 
 Am Ende steht, wie viele Sie wussten, dazu die Zahl der falschen und der offenen.

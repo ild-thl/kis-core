@@ -31,8 +31,8 @@ def _dump_command_and_env() -> tuple[list[str], dict]:
         "pg_dump",
         "-h", url.hostname or "postgres",
         "-p", str(url.port or 5432),
-        "-U", url.username or "kis",
-        "-d", (url.path or "/kis").lstrip("/"),
+        "-U", url.username or "askf",
+        "-d", (url.path or "/askf").lstrip("/"),
         # Custom format with compression so single tables can be restored.
         "-Fc", "-Z6",
     ]
@@ -58,7 +58,7 @@ def _prune_old(prefix: str, keep: int) -> int:
 
 def _period_copy_missing(prefix: str, label: str) -> bool:
     """True when there is no copy for this period yet."""
-    return not any(k.endswith(f"kis-{label}.dump") for k in list_keys(prefix))
+    return not any(k.endswith(f"askfrancis-{label}.dump") for k in list_keys(prefix))
 
 
 @celery_app.task(
@@ -74,11 +74,11 @@ def run_database_backup() -> dict:
     # ISO week, so the turn of the year produces no duplicate names.
     woche = jetzt.strftime("%G-W%V")
     monat = jetzt.strftime("%Y-%m")
-    key = f"{_DAILY}kis-{tag}.dump"
+    key = f"{_DAILY}askfrancis-{tag}.dump"
     cmd, env = _dump_command_and_env()
     begonnen = time.time()
 
-    with tempfile.TemporaryDirectory(prefix="kis_backup_") as tmp:
+    with tempfile.TemporaryDirectory(prefix="askf_backup_") as tmp:
         ziel = str(Path(tmp) / "db.dump")
         try:
             subprocess.run(
@@ -111,7 +111,7 @@ def run_database_backup() -> dict:
         if not _period_copy_missing(prefix, label):
             kopien[stufe] = None
             continue
-        ziel_key = f"{prefix}kis-{label}.dump"
+        ziel_key = f"{prefix}askfrancis-{label}.dump"
         try:
             copy_key(key, ziel_key)
             kopien[stufe] = ziel_key

@@ -1,6 +1,6 @@
 # Feedback und Evaluation
 
-Zwei Wege, um etwas zu melden oder zurückzumelden, wie KIS ankommt.
+Zwei Wege, um etwas zu melden oder zurückzumelden, wie askFrancis ankommt.
 
 ## Fehler melden oder Idee teilen
 
@@ -14,7 +14,7 @@ Der Link steht in der Fußzeile jeder Seite, innerhalb eines Workspace in dessen
 - **Nachricht**: bis 2.000 Zeichen. Bei einem Fehler hilft, was Sie gemacht haben und was
   passiert ist, das spart eine Rückfrage
 - **Anhänge**: bis zu 10 Dateien, PNG, JPG oder PDF, je bis 15 MB
-- **Seite**: KIS merkt sich, von welcher Seite aus Sie das Formular geöffnet haben
+- **Seite**: askFrancis merkt sich, von welcher Seite aus Sie das Formular geöffnet haben
 - **Wer es liest**: die Verwaltung unter Nutzer auf der Seite Feedback, mit dem Recht Anonyme
   Rückmeldungen einsehen
 

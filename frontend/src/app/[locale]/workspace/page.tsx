@@ -26,7 +26,6 @@ export default function WorkspaceListPage() {
         <Suspense>
           <WorkspaceHome
             canCreate={!!perms.allow_workspace_create}
-            firstName={auth.display_name?.split(" ")[0] ?? auth.username ?? ""}
             languageInvite={hasPerm(perms, PERM.aiaLanguageLevel)}
           />
         </Suspense>

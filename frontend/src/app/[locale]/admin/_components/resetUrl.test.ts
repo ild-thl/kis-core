@@ -3,6 +3,6 @@ import { resetUrl } from "./resetUrl";
 
 describe("resetUrl", () => {
   it("joins origin and token", () => {
-    expect(resetUrl("https://kis.example/", "abc")).toBe("https://kis.example/reset-password/abc");
+    expect(resetUrl("https://askfrancis.example/", "abc")).toBe("https://askfrancis.example/reset-password/abc");
   });
 });

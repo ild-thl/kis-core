@@ -116,7 +116,7 @@ export function StudioSavedList({
                         onCancel={() => setUmbenennt(null)}
                       />
                     ) : (
-                      <span className="text-sm font-semibold leading-snug flex-1 line-clamp-3 kis-tooltip" style={{ color: "var(--foreground)" }}
+                      <span className="text-sm font-semibold leading-snug flex-1 line-clamp-3 askf-tooltip" style={{ color: "var(--foreground)" }}
                         onDoubleClick={(e) => { if (onRename) { e.stopPropagation(); setUmbenennt(item.id); } }}
                         data-tip={item.title}>
                         {item.title}

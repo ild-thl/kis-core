@@ -1,10 +1,10 @@
 // Caps inflated character heights in PDFs with wrong font metrics.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function wrapEngineGeometry(engine: any) {
-  if (!engine || engine.__kisGeometryWrapped) return;
+  if (!engine || engine.__askfGeometryWrapped) return;
   const original = engine.getPageGeometry?.bind(engine);
   if (typeof original !== "function") return;
-  engine.__kisGeometryWrapped = true;
+  engine.__askfGeometryWrapped = true;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   engine.getPageGeometry = (doc: any, page: any) => {

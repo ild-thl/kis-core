@@ -6,7 +6,7 @@ welches Modell nutzt, in zwei Reitern.
 ## Anbieter
 
 Ein Anbieter braucht einen Namen, ein Protokoll, eine Adresse und meist einen Schlüssel. Nach dem
-Speichern zeigt KIS nur noch die letzten sechs Zeichen des Schlüssels. Dazu lässt sich die Zahl
+Speichern zeigt askFrancis nur noch die letzten sechs Zeichen des Schlüssels. Dazu lässt sich die Zahl
 gleichzeitiger Aufrufe je Bereich begrenzen, und bei einem Stimmanbieter die Stimmen laden oder
 von Hand eintragen. Je Zeile: aktivieren, Erreichbarkeit prüfen, bearbeiten, löschen, dazu
 Export/Import und Alles löschen im Menü.

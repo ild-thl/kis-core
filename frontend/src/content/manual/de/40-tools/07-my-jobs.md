@@ -31,7 +31,7 @@ geöffnet haben, ist ein Auftrag fertig geworden oder gescheitert.
 
 ## Was bei einem Fehler passiert
 
-Lange Aufträge arbeiten in Etappen und sichern Zwischenstände. Scheitert ein Stück, macht KIS von
+Lange Aufträge arbeiten in Etappen und sichern Zwischenstände. Scheitert ein Stück, macht askFrancis von
 selbst bis zu 3 neue Anläufe, nach 1 Minute, 3 Minuten und 10 Minuten. Danach steht der Auftrag auf
 Angehalten und nennt den letzten Fehler. Weiter setzt dort an, wo es aufgehört hat, fertige Teile
 bleiben.

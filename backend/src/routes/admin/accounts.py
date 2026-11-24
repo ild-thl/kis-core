@@ -22,14 +22,14 @@ class CreateAccountPayload(BaseModel):
     given_name: str = Field(..., min_length=1, max_length=64)
     surname: str = Field(..., min_length=1, max_length=64)
     email: str | None = Field(None, max_length=254)
-    kis_role: str = Field(..., pattern="^(staff|user|custom)$")
+    askf_role: str = Field(..., pattern="^(staff|user|custom)$")
     custom_role_id: int | None = None
 
     @model_validator(mode="after")
     def _custom_role_id_required_for_custom(self):
-        if self.kis_role == "custom" and self.custom_role_id is None:
-            raise ValueError("custom_role_id required when kis_role is 'custom'")
-        if self.kis_role != "custom" and self.custom_role_id is not None:
+        if self.askf_role == "custom" and self.custom_role_id is None:
+            raise ValueError("custom_role_id required when askf_role is 'custom'")
+        if self.askf_role != "custom" and self.custom_role_id is not None:
             self.custom_role_id = None
         return self
 
@@ -47,7 +47,7 @@ def admin_create_account(
     if email is not None and "@" not in email:
         raise HTTPException(status_code=400, detail=t("admin.accounts.invalidEmail", locale))
 
-    if payload.kis_role == "custom":
+    if payload.askf_role == "custom":
         if database.get_custom_role(payload.custom_role_id) is None:
             raise HTTPException(status_code=400, detail=t("admin.accounts.invalidCustomRole", locale))
 
@@ -64,7 +64,7 @@ def admin_create_account(
             given_name=payload.given_name,
             surname=payload.surname,
             email=email,
-            role=payload.kis_role,
+            role=payload.askf_role,
             custom_role_id=payload.custom_role_id,
             password=password,
         )
@@ -76,6 +76,6 @@ def admin_create_account(
         "admin {} created account uid={} role={}",
         admin.get("email"),
         payload.uid,
-        payload.kis_role,
+        payload.askf_role,
     )
     return {"uid": payload.uid, "generated_password": password}

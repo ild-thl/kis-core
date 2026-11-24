@@ -1,9 +1,9 @@
 /**
  * Everything the app keeps in localStorage, bundled into three keys:
  *
- * - `kis.prefs`      device-wide settings and "already seen" markers, kept for good
- * - `kis.workspaces` view state per workspace (panels, folded chapters), only the most recent ones
- * - `kis.user`       drafts and running jobs of the signed-in person, cleared on logout
+ * - `askf.prefs`      device-wide settings and "already seen" markers, kept for good
+ * - `askf.workspaces` view state per workspace (panels, folded chapters), only the most recent ones
+ * - `askf.user`       drafts and running jobs of the signed-in person, cleared on logout
  *
  * Every access is wrapped, private mode or a full quota just means nothing is remembered.
  */
@@ -43,9 +43,9 @@ interface UserData {
   translations?: Record<string, PendingTranslation>;
 }
 
-export const PREFS_KEY = "kis.prefs";
-export const WORKSPACES_KEY = "kis.workspaces";
-export const USER_KEY = "kis.user";
+export const PREFS_KEY = "askf.prefs";
+export const WORKSPACES_KEY = "askf.workspaces";
+export const USER_KEY = "askf.user";
 
 /** More workspaces than anyone has open in a term, older view state falls away. */
 export const MAX_WORKSPACES = 30;
@@ -121,7 +121,11 @@ export function migrateLegacyKeys() {
     const raw = s.getItem(k);
     if (raw === null) continue;
     let handled = true;
-    if (k === "kis.theme") prefs.theme ??= raw === "dark" ? "dark" : "light";
+    // The three bundle keys from before the rename to askFrancis, newer values win.
+    if (k === "kis.prefs") Object.assign(prefs, { ...parseOr<Prefs>(raw, {}), ...prefs });
+    else if (k === "kis.workspaces") Object.assign(workspaces, { ...parseOr<Record<string, WorkspaceUi>>(raw, {}), ...workspaces });
+    else if (k === "kis.user") Object.assign(user, { ...parseOr<UserData>(raw, {}), ...user });
+    else if (k === "kis.theme") prefs.theme ??= raw === "dark" ? "dark" : "light";
     else if (k === "kis.pdf-theme") { /* was never read, just dropped */ }
     else if (k === "ki-assistent-mascot") prefs.mascot ??= raw;
     else if (k === "kis.youtube-consent") prefs.youtubeConsent ??= raw === "granted";

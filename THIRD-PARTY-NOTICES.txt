@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-This file aggregates the licenses of third-party software included in or used by KIS.
+This file aggregates the licenses of third-party software included in or used by askFrancis.
 
 It is split into two sections:
 1. Backend (Python): direct + transitive dependencies of `backend/requirements.txt`

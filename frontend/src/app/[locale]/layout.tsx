@@ -33,7 +33,7 @@ export function generateStaticParams() {
 export const dynamic = "force-dynamic";
 
 // Backfills the theme cookie so the server reads it on the next request. Reads the bundled prefs, the old single key as fallback.
-const themeBootScript = `(function(){try{var t;try{t=JSON.parse(localStorage.getItem('kis.prefs')||'{}').theme;}catch(e){}if(!t)t=localStorage.getItem('kis.theme');var hasCookie=document.cookie.indexOf('kis-theme=')!==-1;if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');if(!hasCookie)document.cookie='kis-theme=dark; path=/; max-age=31536000; SameSite=Lax';}else if(t==='light'&&!hasCookie){document.cookie='kis-theme=light; path=/; max-age=31536000; SameSite=Lax';}}catch(e){}})();`;
+const themeBootScript = `(function(){try{var t;try{t=JSON.parse(localStorage.getItem('askf.prefs')||'{}').theme;}catch(e){}if(!t){try{t=JSON.parse(localStorage.getItem('kis.prefs')||'{}').theme;}catch(e){}}if(!t)t=localStorage.getItem('kis.theme');var hasCookie=document.cookie.indexOf('askf-theme=')!==-1;if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');if(!hasCookie)document.cookie='askf-theme=dark; path=/; max-age=31536000; SameSite=Lax';}else if(t==='light'&&!hasCookie){document.cookie='askf-theme=light; path=/; max-age=31536000; SameSite=Lax';}}catch(e){}})();`;
 
 type Props = {
   children: React.ReactNode;
@@ -48,7 +48,7 @@ export default async function RootLayout({ children, params }: Props) {
   setRequestLocale(locale);
   const messages = await getMessages();
   const cookieStore = await cookies();
-  const themeCookie = cookieStore.get("kis-theme")?.value;
+  const themeCookie = cookieStore.get("askf-theme")?.value;
   const dataTheme = themeCookie === "dark" ? "dark" : undefined;
   // Same switch as the backend, only AUTH_DISABLED turns on the local mode.
   const isLocalMode = ["1", "true", "yes", "on"].includes((process.env.AUTH_DISABLED ?? "").toLowerCase());

@@ -4,8 +4,8 @@ Needed because the mark used to be one per account, so a demo module added later
 never reached anybody who had logged in before. Owners of a demo module are left
 alone, and an existing enrollment is kept as it is.
 
-Dry run:  docker exec kis-backend python scripts/demo_module_nachtragen.py
-Really:   docker exec kis-backend python scripts/demo_module_nachtragen.py --schreiben
+Dry run:  docker exec askf-backend python scripts/demo_module_nachtragen.py
+Really:   docker exec askf-backend python scripts/demo_module_nachtragen.py --schreiben
 """
 import sys
 from pathlib import Path

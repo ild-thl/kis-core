@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { JOBS_CHANGED_EVENT, JOBS_STATUS_CHANGED_EVENT } from "@/lib/jobs-events";
 import type { MyJob } from "./_myJob";
 
-const CHANNEL = "kis-jobs";
+const CHANNEL = "askf-jobs";
 // Through the proxy, so every dev server reaches its own backend.
 const STREAM_URL = "/api/jobs/stream";
 const FALLBACK_POLL_MS = 30000;

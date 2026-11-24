@@ -3,7 +3,7 @@
 ![Die Einstellungen im Workspace](/manual/{lang}/module-settings.png)
 
 Das Zahnrad im geöffneten Workspace gilt nur für Sie, andere im Workspace sehen davon nichts.
-KIS merkt sich die Wahl je Person, sie gilt also auch in einem anderen Browser.
+askFrancis merkt sich die Wahl je Person, sie gilt also auch in einem anderen Browser.
 
 - **Studio**: ob der rechte Bereich eingeblendet ist
 - **Studierenden-Ansicht**: nur für Eigentümer und Tutoren, siehe unten

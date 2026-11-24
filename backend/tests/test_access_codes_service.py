@@ -15,14 +15,14 @@ FRUEHER = JETZT - timedelta(seconds=1)
 
 def test_new_code_has_the_readable_shape():
     code = new_code()
-    assert code.startswith("KIS-")
+    assert code.startswith("ASKF-")
     teile = code.split("-")
     assert len(teile) == 3
     assert all(len(teil) == 4 for teil in teile[1:])
 
 
 def test_new_code_avoids_characters_that_look_alike():
-    # Only the two random blocks, the fixed prefix KIS carries an I on purpose.
+    # Only the two random blocks, the fixed prefix is checked elsewhere.
     zusammen = "".join("".join(new_code().split("-")[1:]) for _ in range(50))
     for zeichen in "01OIL":
         assert zeichen not in zusammen
@@ -50,7 +50,7 @@ def test_new_username_is_not_the_same_twice():
 
 
 def test_normalize_code_repairs_sloppy_typing():
-    assert normalize_code(" kis-4k2p-7rxm ") == "KIS-4K2P-7RXM"
+    assert normalize_code(" askf-4k2p-7rxm ") == "ASKF-4K2P-7RXM"
 
 
 def test_status_active_when_everything_is_fine():

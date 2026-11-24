@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate THIRD-PARTY-NOTICES.txt at repo root by aggregating:
-- Backend Python deps (via pip-licenses inside the running kis-backend container)
+- Backend Python deps (via pip-licenses inside the running askf-backend container)
 - Frontend npm deps (via license-checker-rseidelsohn against node_modules)
 
 Fails with non-zero exit if any AGPL/GPL-only dependency is detected (allowlist
@@ -31,7 +31,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent
 NOTICE_PATH = REPO_ROOT / "THIRD-PARTY-NOTICES.txt"
 FRONTEND_DIR = REPO_ROOT / "frontend"
-BACKEND_CONTAINER = "kis-backend"
+BACKEND_CONTAINER = "askf-backend"
 
 REQUIREMENTS_FILE = REPO_ROOT / "backend" / "requirements.txt"
 
@@ -97,7 +97,7 @@ def fetch_frontend_licenses() -> list[dict]:
     cmd = [
         "npx", "license-checker-rseidelsohn",
         "--json",
-        "--excludePackages", "kis-frontend@0.1.0",
+        "--excludePackages", "askf-frontend@0.1.0",
     ]
     raw = run(cmd, cwd=FRONTEND_DIR)
     data = json.loads(raw)
@@ -184,7 +184,7 @@ def build_notice(backend: list[dict], frontend: list[dict]) -> str:
     parts = [
         "# Third-Party Notices",
         "",
-        "This file aggregates the licenses of third-party software included in or used by KIS.",
+        "This file aggregates the licenses of third-party software included in or used by askFrancis.",
         "",
         "It is split into two sections:",
         "1. Backend (Python): direct + transitive dependencies of `backend/requirements.txt`",

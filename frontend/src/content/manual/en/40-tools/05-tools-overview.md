@@ -18,7 +18,7 @@ the tag Teachers, it is aimed at teaching staff.
 - **Glossary** keeps term lists for translations
 
 Anyone with a single destination only, such as students with just the learning assistant, lands there
-directly and never sees the tile page. The KIS logo in the top left always leads back to the
+directly and never sees the tile page. The askFrancis logo in the top left always leads back to the
 start page.
 
 ## Who sees which services

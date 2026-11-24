@@ -29,6 +29,8 @@ export interface AuthStatus {
   global_consent_accepted?: boolean;
   /** Set while somebody is logged in as this account. */
   impersonator?: Impersonator;
+  /** Deadline of an access code account, null for normal accounts. */
+  access_expires_at?: string | null;
   /** Why nobody is signed in, currently only "access_expired". */
   reason?: string;
 }

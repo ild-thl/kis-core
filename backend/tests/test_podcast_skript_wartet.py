@@ -1,4 +1,4 @@
-"""The podcast script waits when the model is overloaded instead of failing for good. Load test 26.09.: planning calls over 200 pages outlasted the KIS timeout and the job failed at once."""
+"""The podcast script waits when the model is overloaded instead of failing for good. Load test 26.09.: planning calls over 200 pages outlasted the askFrancis timeout and the job failed at once."""
 
 import pytest
 

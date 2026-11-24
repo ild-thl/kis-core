@@ -5,8 +5,8 @@ import { PREFS_KEY, readPrefs, updatePrefs, type Theme } from "@/lib/browserStor
 
 export type { Theme };
 
-const COOKIE_KEY = "kis-theme";
-const CHANGE_EVENT = "kis-theme:change";
+const COOKIE_KEY = "askf-theme";
+const CHANGE_EVENT = "askf-theme:change";
 
 function readTheme(): Theme {
   return readPrefs().theme === "dark" ? "dark" : "light";

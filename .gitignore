@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .env
+.env.vor-askfrancis
 output/
 .local/
 backend/demo/

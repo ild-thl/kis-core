@@ -5,7 +5,7 @@ uses which model, in two tabs.
 
 ## Providers
 
-A provider needs a name, a protocol, an address, and usually a key. After saving, KIS shows only
+A provider needs a name, a protocol, an address, and usually a key. After saving, askFrancis shows only
 the last six characters of the key. Concurrent calls can be capped per area, and for a voice
 provider, voices can be loaded automatically or entered by hand. Per row: enable, check
 reachability, edit, delete, plus export/import and delete everything in the menu.

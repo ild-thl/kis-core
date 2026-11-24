@@ -8,18 +8,18 @@ from src.features.ai_providers.repository import providers
 
 
 def test_encrypt_key_returns_none_for_none(monkeypatch):
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret")
     assert providers._encrypt_key(None) is None
 
 
 def test_encrypt_key_leaves_plaintext_when_secret_unset(monkeypatch):
-    """No KIS_SECRETS_KEY configured -> unchanged, matches today's behavior."""
-    monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
+    """No ASKF_SECRETS_KEY configured -> unchanged, matches today's behavior."""
+    monkeypatch.delenv("ASKF_SECRETS_KEY", raising=False)
     assert providers._encrypt_key("sk-real") == "sk-real"
 
 
 def test_encrypt_key_wraps_when_secret_set(monkeypatch):
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret")
     stored = providers._encrypt_key("sk-real")
 
     assert stored != "sk-real"
@@ -28,35 +28,35 @@ def test_encrypt_key_wraps_when_secret_set(monkeypatch):
 
 
 def test_decrypt_key_returns_none_for_none(monkeypatch):
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret")
     assert providers._decrypt_key(None) is None
 
 
 def test_decrypt_key_passes_through_legacy_plaintext(monkeypatch):
     """A row saved before this change is a bare string, not an envelope."""
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret")
     assert providers._decrypt_key("sk-legacy") == "sk-legacy"
 
 
 def test_decrypt_key_recovers_wrapped_value(monkeypatch):
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret")
     stored = providers._encrypt_key("sk-real")
 
     assert providers._decrypt_key(stored) == "sk-real"
 
 
 def test_decrypt_key_none_when_secret_lost(monkeypatch):
-    """Losing KIS_SECRETS_KEY makes previously wrapped keys unrecoverable."""
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret")
+    """Losing ASKF_SECRETS_KEY makes previously wrapped keys unrecoverable."""
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret")
     stored = providers._encrypt_key("sk-real")
-    monkeypatch.delenv("KIS_SECRETS_KEY", raising=False)
+    monkeypatch.delenv("ASKF_SECRETS_KEY", raising=False)
 
     assert providers._decrypt_key(stored) is None
 
 
 def test_encrypt_decrypt_survives_provider_rename(monkeypatch):
     """The envelope isn't bound to the provider name, renaming can't break it."""
-    monkeypatch.setenv("KIS_SECRETS_KEY", "test-secret")
+    monkeypatch.setenv("ASKF_SECRETS_KEY", "test-secret")
     stored = providers._encrypt_key("sk-real")
 
     assert providers._decrypt_key(stored) == "sk-real"

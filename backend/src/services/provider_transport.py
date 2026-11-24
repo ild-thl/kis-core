@@ -51,7 +51,7 @@ NO_FALLBACK_FEATURES = frozenset({"tts"})
 
 # Answers that say the provider cannot serve right now, as opposed to a broken request.
 _RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
-_DOWN_KEY = "kis:provider-down:{}:{}"
+_DOWN_KEY = "askf:provider-down:{}:{}"
 # A held seat is renewed every 20 s, so one left unrenewed this long belongs to a process that died.
 _SEAT_STALE_SECONDS = provider_slots.HELD_STALE_SECONDS
 # A first choice that is not there has to be noticed fast, otherwise the fallback helps nobody.

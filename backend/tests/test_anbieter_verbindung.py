@@ -129,8 +129,8 @@ def test_ablehnung_wegen_grenze_sperrt_die_erste_wahl_bis_zum_ende_der_sperre(re
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler)).status_code == 200
-    assert redis.exists("kis:provider-down:1:llm")
-    assert redis.ttl("kis:provider-down:1:llm") == 50
+    assert redis.exists("askf:provider-down:1:llm")
+    assert redis.ttl("askf:provider-down:1:llm") == 50
 
 
 def test_serverfehler_geht_an_den_rueckfall(redis):
@@ -162,7 +162,7 @@ def test_ohne_rueckfall_bleibt_alles_wie_heute(redis):
 
 
 def test_eine_gesperrte_erste_wahl_wird_uebersprungen(redis):
-    redis.set("kis:provider-down:1:llm", "x", ex=60)
+    redis.set("askf:provider-down:1:llm", "x", ex=60)
     gesehen = []
 
     def handler(req):
@@ -174,7 +174,7 @@ def test_eine_gesperrte_erste_wahl_wird_uebersprungen(redis):
 
 
 def test_nach_der_sperre_kommt_die_erste_wahl_wieder_dran(redis, uhr):
-    redis.set("kis:provider-down:1:llm", "x", ex=60)
+    redis.set("askf:provider-down:1:llm", "x", ex=60)
     uhr["t"] += 61
     gesehen = []
 
@@ -187,8 +187,8 @@ def test_nach_der_sperre_kommt_die_erste_wahl_wieder_dran(redis, uhr):
 
 
 def test_sind_beide_gesperrt_wird_trotzdem_zuerst_die_erste_wahl_gefragt(redis):
-    redis.set("kis:provider-down:1:llm", "x", ex=60)
-    redis.set("kis:provider-down:2:llm", "x", ex=60)
+    redis.set("askf:provider-down:1:llm", "x", ex=60)
+    redis.set("askf:provider-down:2:llm", "x", ex=60)
     gesehen = []
 
     def handler(req):
@@ -201,7 +201,7 @@ def test_sind_beide_gesperrt_wird_trotzdem_zuerst_die_erste_wahl_gefragt(redis):
 
 def test_ein_gesperrter_rueckfall_bleibt_als_letzter_versuch_stehen(redis):
     """Run 15 part 2: myLab hit one read timeout, afterwards calls only asked the dead first choice."""
-    redis.set("kis:provider-down:2:llm", "ReadTimeout", ex=60)
+    redis.set("askf:provider-down:2:llm", "ReadTimeout", ex=60)
     gesehen = []
 
     def handler(req):
@@ -228,12 +228,12 @@ def test_ist_auch_der_rueckfall_tot_fragt_die_tuer_den_naechsten_aus_der_liste(r
     assert [r.url.host for r in gesehen] == ["lokal.example", "mylab.example", "gwdg.example"]
     assert gesehen[-1].headers["authorization"] == "Bearer k3"
     assert json.loads(gesehen[-1].content)["model"] == "gemma-gwdg"
-    assert redis.exists("kis:provider-down:1:llm") and redis.exists("kis:provider-down:2:llm")
+    assert redis.exists("askf:provider-down:1:llm") and redis.exists("askf:provider-down:2:llm")
 
 
 def test_sind_erste_wahl_und_rueckfall_gesperrt_kommt_der_naechste_zuerst_dran(redis):
-    redis.set("kis:provider-down:1:llm", "x", ex=60)
-    redis.set("kis:provider-down:2:llm", "x", ex=60)
+    redis.set("askf:provider-down:1:llm", "x", ex=60)
+    redis.set("askf:provider-down:2:llm", "x", ex=60)
     gesehen = []
 
     def handler(req):
@@ -257,11 +257,11 @@ def test_eine_zu_langsame_antwort_sperrt_einen_anbieter_der_noch_antwortet_nicht
 
     assert _chat(_client(handler)).json() == {"ok": 1}
     assert gesehen == ["lokal.example", "mylab.example"]
-    assert not redis.exists("kis:provider-down:1:llm")
+    assert not redis.exists("askf:provider-down:1:llm")
 
 
 def test_eine_abgerissene_verbindung_sperrt_einen_anbieter_der_noch_antwortet_nicht(redis, monkeypatch):
-    """Day simulation 29.09.: a stale gemma connection broke and KIS sent everything to myLab for 60 s."""
+    """Day simulation 29.09.: a stale gemma connection broke and askFrancis sent everything to myLab for 60 s."""
     monkeypatch.setattr(pt, "_answers", lambda target: True)
 
     def handler(req):
@@ -270,7 +270,7 @@ def test_eine_abgerissene_verbindung_sperrt_einen_anbieter_der_noch_antwortet_ni
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler)).json() == {"ok": 1}
-    assert not redis.exists("kis:provider-down:1:llm")
+    assert not redis.exists("askf:provider-down:1:llm")
 
 
 def test_eine_abgelehnte_verbindung_sperrt_ohne_probe(redis, monkeypatch):
@@ -283,7 +283,7 @@ def test_eine_abgelehnte_verbindung_sperrt_ohne_probe(redis, monkeypatch):
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler)).json() == {"ok": 1}
-    assert redis.exists("kis:provider-down:1:llm") and gefragt == []
+    assert redis.exists("askf:provider-down:1:llm") and gefragt == []
 
 
 def test_eine_zu_langsame_antwort_sperrt_einen_stummen_anbieter(redis, monkeypatch):
@@ -295,7 +295,7 @@ def test_eine_zu_langsame_antwort_sperrt_einen_stummen_anbieter(redis, monkeypat
         return httpx.Response(200, json={"ok": 1})
 
     assert _chat(_client(handler)).json() == {"ok": 1}
-    assert redis.exists("kis:provider-down:1:llm")
+    assert redis.exists("askf:provider-down:1:llm")
 
 
 def test_auch_asynchron_sperrt_eine_langsame_antwort_nur_einen_stummen_anbieter(redis, monkeypatch):
@@ -313,7 +313,7 @@ def test_auch_asynchron_sperrt_eine_langsame_antwort_nur_einen_stummen_anbieter(
                                      json={"model": ERSTE.model, "messages": [{"role": "user", "content": "x"}]})
 
     assert asyncio.run(los()).json() == {"ok": 1}
-    assert not redis.exists("kis:provider-down:1:llm")
+    assert not redis.exists("askf:provider-down:1:llm")
 
 
 def test_antworten_alle_nicht_kommt_der_fehler_des_letzten(redis):
@@ -353,7 +353,7 @@ def test_fremde_adressen_laufen_ohne_platz_und_ohne_rueckfall_durch(redis):
 
     voll = _ziel(1, "https://lokal.example", "flux", caps={"image": 1})
     client = _client(handler, primary=voll, bucket="image")
-    redis.zadd("kis:provider-slots:1:image", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:image", {"besetzt": 1000.0})
     assert client.get("https://cdn.example/bild.png").content == b"png"
     assert gesehen == ["https://cdn.example/bild.png"]
 
@@ -371,14 +371,14 @@ def test_die_obergrenze_haelt_und_gibt_den_platz_nach_dem_lesen_zurueck(redis, m
         _chat(client)
     offen.read()
     offen.close()
-    assert redis.zcard("kis:provider-slots:1:llm") == 0
+    assert redis.zcard("askf:provider-slots:1:llm") == 0
     assert _chat(client).status_code == 200
 
 
 def test_volle_bildplaetze_gehen_nicht_an_den_rueckfall(redis, monkeypatch):
     """Images never overflow: small is free after seconds, the fallback needs half a minute."""
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
-    redis.zadd("kis:provider-slots:1:image", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:image", {"besetzt": 1000.0})
     gesehen = []
 
     def handler(req):
@@ -399,7 +399,7 @@ def _eng(pid=1):
 def test_ist_die_erste_wahl_voll_geht_ein_llm_aufruf_sofort_an_den_rueckfall(redis, monkeypatch):
     """User decision 29.09.2026: for the LLM first choice and fallback share the load instead of waiting."""
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 60)
-    redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:llm", {"besetzt": 1000.0})
     gesehen = []
 
     def handler(req):
@@ -411,13 +411,13 @@ def test_ist_die_erste_wahl_voll_geht_ein_llm_aufruf_sofort_an_den_rueckfall(red
     antwort.read()
     assert antwort.json() == {"ok": 1}
     assert gesehen == ["mylab.example"]
-    assert redis.zcard("kis:provider-slots:2:llm") == 0, "der Platz beim Rückfall geht nach dem Lesen zurück"
+    assert redis.zcard("askf:provider-slots:2:llm") == 0, "der Platz beim Rückfall geht nach dem Lesen zurück"
 
 
 def test_sind_beide_voll_wartet_der_aufruf_bei_der_ersten_wahl(redis, monkeypatch):
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
-    redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
-    redis.zadd("kis:provider-slots:2:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:2:llm", {"besetzt": 1000.0})
     gesehen = []
 
     def handler(req):
@@ -434,8 +434,8 @@ def test_sind_beide_voll_wartet_der_aufruf_bei_der_ersten_wahl(redis, monkeypatc
 def test_der_ueberlauf_reicht_bis_zu_weiteren_anbietern_aus_der_liste_durch(redis, monkeypatch):
     """User decision 29.09.2026: when first choice and fallback are full, the next free one in the list takes over."""
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 60)
-    redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
-    redis.zadd("kis:provider-slots:2:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:2:llm", {"besetzt": 1000.0})
     gesehen = []
 
     def handler(req):
@@ -450,8 +450,8 @@ def test_der_ueberlauf_reicht_bis_zu_weiteren_anbietern_aus_der_liste_durch(redi
 
 def test_ein_gesperrter_rueckfall_nimmt_keinen_ueberlauf(redis, monkeypatch):
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
-    redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
-    redis.set("kis:provider-down:2:llm", "x", ex=60)
+    redis.zadd("askf:provider-slots:1:llm", {"besetzt": 1000.0})
+    redis.set("askf:provider-down:2:llm", "x", ex=60)
 
     def handler(req):
         return httpx.Response(200, json={"ok": 1})
@@ -463,7 +463,7 @@ def test_ein_gesperrter_rueckfall_nimmt_keinen_ueberlauf(redis, monkeypatch):
 def test_auch_asynchron_geht_ein_voller_llm_aufruf_an_den_rueckfall(redis, monkeypatch):
     # The test clock stands still while the loop sleeps, so no wait at all: only the overflow gets it through.
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
-    redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:llm", {"besetzt": 1000.0})
     gesehen = []
 
     def handler(req):
@@ -483,7 +483,7 @@ def test_auch_asynchron_geht_ein_voller_llm_aufruf_an_den_rueckfall(redis, monke
 
 def test_der_chat_von_francis_nimmt_keinen_platz(redis, monkeypatch):
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
-    redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:llm", {"besetzt": 1000.0})
     eng = _ziel(1, "https://lokal.example", "gemma-lokal", caps={"llm": 1})
     client = _client(lambda req: httpx.Response(200, json={"ok": 1}), primary=eng)
     with pt.seat_exempt():
@@ -745,7 +745,7 @@ def test_volle_plaetze_meldet_das_sdk_nach_einmal_warten(redis, monkeypatch):
 
     monkeypatch.setattr(provider_slots, "claim_ranked", claim)
     monkeypatch.setattr(pt, "PROVIDER_SEAT_WAIT_SECONDS", 0)
-    redis.zadd("kis:provider-slots:1:llm", {"besetzt": 1000.0})
+    redis.zadd("askf:provider-slots:1:llm", {"besetzt": 1000.0})
     eng = _ziel(1, "https://lokal.example", "gemma-lokal", caps={"llm": 1})
     tuer = pt.SdkTransport(eng, None, "llm", inner=httpx2.MockTransport(lambda req: httpx2.Response(200)))
     client = OpenAI(api_key="k1", base_url="https://lokal.example/v1", max_retries=2,
@@ -855,7 +855,7 @@ def test_ohne_rueckfall_wird_nichts_vermerkt(redis):
 
     with pytest.raises(httpx.ConnectTimeout):
         _chat(_client(handler, fallback=None))
-    assert not redis.exists("kis:provider-down:1:llm")
+    assert not redis.exists("askf:provider-down:1:llm")
 
 
 def test_eine_ausgefallene_stimme_hinterlaesst_einen_vermerk_fuer_den_naechsten_auftrag(redis):
@@ -865,7 +865,7 @@ def test_eine_ausgefallene_stimme_hinterlaesst_einen_vermerk_fuer_den_naechsten_
 
     with pytest.raises(httpx.ConnectError):
         _chat(_client(handler, fallback=None, bucket="tts"))
-    assert redis.exists("kis:provider-down:1:tts")
+    assert redis.exists("askf:provider-down:1:tts")
     assert pt.is_down(1, "tts")
     assert not pt.is_down(1, "llm")
 
@@ -968,7 +968,7 @@ def test_ein_fremder_fehler_mitten_im_aufruf_gibt_den_platz_zurueck(redis, monke
 
     with pytest.raises(SoftTimeLimitExceeded):
         _chat(_client(handler, primary=_eng(), fallback=None))
-    assert redis.zcard("kis:provider-slots:1:llm") == 0
+    assert redis.zcard("askf:provider-slots:1:llm") == 0
     assert "1:llm" not in provider_slots._held.values()
 
 
@@ -986,7 +986,7 @@ def test_ein_abgebrochener_asynchroner_aufruf_gibt_den_platz_zurueck(redis, monk
 
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(los())
-    assert redis.zcard("kis:provider-slots:1:llm") == 0
+    assert redis.zcard("askf:provider-slots:1:llm") == 0
     assert "1:llm" not in provider_slots._held.values()
 
 

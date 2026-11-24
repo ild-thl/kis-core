@@ -6,14 +6,17 @@ import LinkBusy from "@/components/ui/LinkBusy";
 import NoticeDot from "@/components/ui/NoticeDot";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CalendarBlank, Check, Compass, FileText, List, Medal, Moon, PencilSimple, Plugs, Question, SignOut, Stack, SquaresFour, Sun, UserCircleGear, X } from "@phosphor-icons/react";
+import { CalendarBlank, Check, Compass, FileText, Folders, List, Medal, Moon, PencilSimple, Plugs, Question, SignOut, Stack, SquaresFour, Sun, UserCircleGear, X } from "@phosphor-icons/react";
 import { usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { useTheme, type Theme } from "@/hooks/useTheme";
+import HeaderAccountRow, { type HeaderAccount } from "./HeaderAccountRow";
 import { blockStartRows, LOCALES, THEMES, useLocaleSwitch } from "./_headerMenu";
 
 interface HeaderMobileMenuProps {
   hasSession: boolean;
+  /** Who is signed in, shown as a plain line at the top. */
+  account?: HeaderAccount | null;
   isAdmin: boolean;
   canViewManual?: boolean;
   showLanguageLevel?: boolean;
@@ -31,7 +34,7 @@ interface HeaderMobileMenuProps {
   onLogout: () => void;
 }
 
-export default function HeaderMobileMenu({ hasSession, isAdmin, canViewManual = false, showLanguageLevel = false, showInterfaces = false, showTour = false, onStartTour, showEvaluation = false, areaKey = "admin", hasTools = false, hasAia = true, isLocalMode = false, adminNotice = false, onLogout }: HeaderMobileMenuProps) {
+export default function HeaderMobileMenu({ hasSession, account = null, isAdmin, canViewManual = false, showLanguageLevel = false, showInterfaces = false, showTour = false, onStartTour, showEvaluation = false, areaKey = "admin", hasTools = false, hasAia = true, isLocalMode = false, adminNotice = false, onLogout }: HeaderMobileMenuProps) {
   const t = useTranslations("header");
   const tLang = useTranslations("languageSwitch");
   const tManual = useTranslations("manual");
@@ -96,6 +99,7 @@ export default function HeaderMobileMenu({ hasSession, isAdmin, canViewManual = 
   const onCalendar = pathname === "/calendar" || pathname.startsWith("/calendar/");
   // The services page and every tool below it count as being on Dienste.
   const onTools = pathname === "/services" || pathname.startsWith("/tools/");
+  const onWorkspaces = pathname === "/workspace" || pathname.startsWith("/workspace/");
   const onJobsPage = pathname.startsWith("/my-jobs");
   const headingClass = "px-4 pt-2.5 pb-1 text-2xs font-semibold uppercase tracking-wide";
   // Own settings and help, then the admin area, then log out, each block opens with a divider.
@@ -125,6 +129,21 @@ export default function HeaderMobileMenu({ hasSession, isAdmin, canViewManual = 
             borderTop: "1px solid var(--border)",
           }}
         >
+          {hasSession && account?.name && <HeaderAccountRow account={account} />}
+          {hasSession && hasAia && (
+            <Link
+              href="/workspace"
+              onClick={closeIfHere("/workspace")}
+              aria-current={onWorkspaces ? "page" : undefined}
+              className={rowClass}
+              style={{ color: "var(--foreground)", ...(onWorkspaces ? activeRowStyle : {}) }}
+            >
+              <LinkBusy size="sm">
+                <Folders size={20} weight="bold" />
+              </LinkBusy>
+              <span>{t("workspaces")}</span>
+            </Link>
+          )}
           {hasSession && hasTools && (
             <Link
               href="/services"
@@ -139,20 +158,6 @@ export default function HeaderMobileMenu({ hasSession, isAdmin, canViewManual = 
               <span>{t("tools")}</span>
             </Link>
           )}
-          {hasSession && hasAia && (
-            <Link
-              href="/calendar"
-              onClick={closeIfHere("/calendar")}
-              aria-current={onCalendar ? "page" : undefined}
-              className={rowClass}
-              style={{ color: "var(--foreground)", ...(onCalendar ? activeRowStyle : {}) }}
-            >
-              <LinkBusy size="sm">
-                <CalendarBlank size={20} weight="bold" />
-              </LinkBusy>
-              <span>{t("calendar")}</span>
-            </Link>
-          )}
           {hasSession && hasTools && (
             <Link
               href="/my-jobs"
@@ -165,6 +170,20 @@ export default function HeaderMobileMenu({ hasSession, isAdmin, canViewManual = 
                 <Stack size={20} weight="bold" />
               </LinkBusy>
               <span>{t("jobs")}</span>
+            </Link>
+          )}
+          {hasSession && hasAia && (
+            <Link
+              href="/calendar"
+              onClick={closeIfHere("/calendar")}
+              aria-current={onCalendar ? "page" : undefined}
+              className={rowClass}
+              style={{ color: "var(--foreground)", ...(onCalendar ? activeRowStyle : {}) }}
+            >
+              <LinkBusy size="sm">
+                <CalendarBlank size={20} weight="bold" />
+              </LinkBusy>
+              <span>{t("calendar")}</span>
             </Link>
           )}
           <div

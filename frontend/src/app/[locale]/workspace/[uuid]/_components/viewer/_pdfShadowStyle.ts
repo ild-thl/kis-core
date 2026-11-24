@@ -45,9 +45,9 @@ const PDF_SHADOW_CSS = `
 /** Adds the style once, false while the shadow root is not there yet. */
 export function injectShadowStyle(container: HTMLElement | null): boolean {
   const shadow = container?.querySelector("embedpdf-container")?.shadowRoot;
-  if (!shadow || shadow.querySelector("[data-kis-scrollbar]")) return false;
+  if (!shadow || shadow.querySelector("[data-askf-scrollbar]")) return false;
   const style = document.createElement("style");
-  style.setAttribute("data-kis-scrollbar", "");
+  style.setAttribute("data-askf-scrollbar", "");
   style.textContent = PDF_SHADOW_CSS;
   shadow.appendChild(style);
   return true;
