@@ -106,37 +106,37 @@ def test_custom_role_without_id_falls_back_to_user():
     assert perms.tools == ()
 
 
-# ── LDAP-Schalter ─────────────────────────────────────────────────────────────
+# ── Konten-Schalter ───────────────────────────────────────────────────────────
 
-def test_admin_has_ldap_user_create_when_flag_on(monkeypatch):
+def test_admin_has_account_create_when_flag_on(monkeypatch):
     from src.dependencies import get_settings
 
     get_settings.cache_clear()
     try:
         perms = resolve_user_permissions(role="admin", custom_role_id=None, is_env_admin=False)
-        assert perms.allow_ldap_user_create is True
+        assert perms.allow_account_create is True
     finally:
         get_settings.cache_clear()
 
 
-def test_staff_does_not_get_ldap_user_create_even_with_flag(monkeypatch):
+def test_staff_does_not_get_account_create_even_with_flag(monkeypatch):
     from src.dependencies import get_settings
 
     get_settings.cache_clear()
     try:
         perms = resolve_user_permissions(role="staff", custom_role_id=None, is_env_admin=False)
-        assert perms.allow_ldap_user_create is False
+        assert perms.allow_account_create is False
     finally:
         get_settings.cache_clear()
 
 
-def test_env_admin_gets_ldap_user_create_when_flag_on(monkeypatch):
+def test_env_admin_gets_account_create_when_flag_on(monkeypatch):
     from src.dependencies import get_settings
 
     get_settings.cache_clear()
     try:
         perms = resolve_user_permissions(role="user", custom_role_id=None, is_env_admin=True)
-        assert perms.allow_ldap_user_create is True
+        assert perms.allow_account_create is True
     finally:
         get_settings.cache_clear()
 
@@ -148,7 +148,7 @@ def test_custom_role_with_only_aia_use_reads_but_cannot_create():
     assert perms.allow_aia is True
     assert perms.allow_workspace_create is False
     assert perms.allow_admin_panel is False
-    assert perms.allow_ldap_user_create is False
+    assert perms.allow_account_create is False
 
 
 def test_custom_role_with_workspace_create_gets_lecturer_view():

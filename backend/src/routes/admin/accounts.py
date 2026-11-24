@@ -41,21 +41,21 @@ def admin_create_account(
     locale: str = Depends(get_locale),
 ):
     if not ist_anmeldename(payload.uid):
-        raise HTTPException(status_code=400, detail=t("admin.ldap.invalidUid", locale))
+        raise HTTPException(status_code=400, detail=t("admin.accounts.invalidUid", locale))
 
     email = (payload.email or "").strip() or None
     if email is not None and "@" not in email:
-        raise HTTPException(status_code=400, detail=t("admin.ldap.invalidEmail", locale))
+        raise HTTPException(status_code=400, detail=t("admin.accounts.invalidEmail", locale))
 
     if payload.kis_role == "custom":
         if database.get_custom_role(payload.custom_role_id) is None:
-            raise HTTPException(status_code=400, detail=t("admin.ldap.invalidCustomRole", locale))
+            raise HTTPException(status_code=400, detail=t("admin.accounts.invalidCustomRole", locale))
 
     if database.get_user_by_username(payload.uid) is not None:
-        raise HTTPException(status_code=409, detail=t("admin.ldap.userExists", locale))
+        raise HTTPException(status_code=409, detail=t("admin.accounts.userExists", locale))
 
     if email is not None and database.get_user_by_email(email) is not None:
-        raise HTTPException(status_code=409, detail=t("admin.ldap.userExists", locale))
+        raise HTTPException(status_code=409, detail=t("admin.accounts.userExists", locale))
 
     password = generate_password()
     try:
@@ -70,7 +70,7 @@ def admin_create_account(
         )
     except Exception as e:
         logger.error("account creation failed for uid={}: {}", payload.uid, e)
-        raise HTTPException(status_code=500, detail=t("admin.ldap.addFailed", locale))
+        raise HTTPException(status_code=500, detail=t("admin.accounts.addFailed", locale))
 
     logger.info(
         "admin {} created account uid={} role={}",

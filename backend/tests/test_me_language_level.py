@@ -12,7 +12,6 @@ ROUTE = "src.routes.me"
 @pytest.fixture
 def client(monkeypatch):
     # The variable keeps the request out of the database.
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.app import app
     from src.dependencies import get_current_user, get_settings
@@ -64,7 +63,7 @@ def test_put_is_refused_while_the_trainer_is_not_offered(client):
 
 
 def test_get_me_carries_the_level_source(client):
-    row = {"id": 1, "ldap_username": "a", "display_name": "A", "email": None,
+    row = {"id": 1, "username": "a", "display_name": "A", "email": None,
            "role": "user", "locale": "de", "tour_seen_at": None}
     state = {"language_training_active": True, "language_training_asked_at": None}
     with patch(f"{ROUTE}.db.get_user_by_id", return_value=row), \

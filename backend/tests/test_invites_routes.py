@@ -8,10 +8,6 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.dependencies import get_current_user, get_settings
     from src.security.auth import verify_auth
@@ -248,7 +244,7 @@ def test_redeeming_creates_an_active_account_and_signs_in(client):
 
     assert r.status_code == 200
     kwargs = anlegen.call_args.kwargs
-    assert kwargs["ldap_username"] == "max.mustermann"
+    assert kwargs["username"] == "max.mustermann"
     assert verify_password("ein-langes-passwort", kwargs["password_hash"]) is True
     whitelist.assert_called_once_with("max.mustermann@kis.local")
     assert kwargs["active"] == 1
@@ -329,10 +325,6 @@ def test_without_a_name_the_username_is_shown(client):
 
 @pytest.fixture
 def client_ohne_sitzung(monkeypatch):
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.dependencies import get_settings
     from src.app import app

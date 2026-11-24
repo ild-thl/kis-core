@@ -14,7 +14,7 @@ export async function demoKontoUebernehmen(
 ): Promise<() => Promise<void>> {
   const liste = await (await admin.get("/api/admin/users?limit=100")).json();
   const vorher = liste.users.find((u: { is_demo?: boolean }) => u.is_demo);
-  const konto = liste.users.find((u: { ldap_username: string }) => u.ldap_username === username);
+  const konto = liste.users.find((u: { username: string }) => u.username === username);
   await admin.post(`/api/admin/users/${konto.id}/demo`, { data: { is_demo: true } });
   return async () => {
     await admin.post(`/api/admin/users/${konto.id}/demo`, { data: { is_demo: false } });

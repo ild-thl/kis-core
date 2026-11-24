@@ -39,7 +39,7 @@ def db(monkeypatch):
 
 
 def _konto(**felder):
-    basis = {"id": 1, "ldap_username": "a", "email": "alt@th-luebeck.de",
+    basis = {"id": 1, "username": "a", "email": "alt@th-luebeck.de",
              "password_hash": "$2b$12$alterhash", "display_name": "Hans"}
     basis.update(felder)
     return basis
@@ -59,7 +59,7 @@ def test_a_missing_account_is_created_with_all_three_values(db):
     assert ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chefin") == 99
 
     kwargs = db["aufrufe"]["create_user"][0][1]
-    assert kwargs["ldap_username"] == "chefin"
+    assert kwargs["username"] == "chefin"
     assert kwargs["email"] == "chefin@th-luebeck.de"
     assert kwargs["role"] == "admin"
     assert kwargs["password_hash"].startswith("$2")
@@ -67,7 +67,7 @@ def test_a_missing_account_is_created_with_all_three_values(db):
 
 def test_without_a_user_name_the_local_part_is_used(db):
     ensure_env_admin("chefin@th-luebeck.de", "geheim123", "")
-    assert db["aufrufe"]["create_user"][0][1]["ldap_username"] == "chefin"
+    assert db["aufrufe"]["create_user"][0][1]["username"] == "chefin"
 
 
 def test_the_new_account_is_remembered_for_the_next_start(db):
@@ -127,7 +127,7 @@ def test_a_user_name_with_an_at_sign_is_refused(db):
 def test_a_user_name_taken_by_somebody_else_is_refused(db):
     db["setting"] = "1"
     db["by_id"] = _konto()
-    db["by_username"] = _konto(id=2, ldap_username="chefin")
+    db["by_username"] = _konto(id=2, username="chefin")
     ensure_env_admin("chefin@th-luebeck.de", "geheim123", "chefin")
 
     assert db["aufrufe"]["_rename_and_remail"][0][0] == (1, "a", "chefin@th-luebeck.de")

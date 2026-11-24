@@ -16,7 +16,7 @@ from src.features.accounts.passwords import (
 
 
 def _ssha(password: str) -> str:
-    """Builds a hash exactly the way ldap_admin did, for the migration tests."""
+    """Builds a salted SHA-1 hash in the taken over format, for the upgrade tests."""
     salt = os.urandom(4)
     digest = hashlib.sha1(password.encode("utf-8") + salt).digest()
     return "{SSHA}" + base64.b64encode(digest + salt).decode("ascii")

@@ -46,7 +46,7 @@ function roleFromSelectValue(value: string): RoleSelection {
 }
 
 export default function CreateAccountDialog({ onClose }: Props) {
-  const t = useTranslations("admin.createLdapUser");
+  const t = useTranslations("admin.createAccount");
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

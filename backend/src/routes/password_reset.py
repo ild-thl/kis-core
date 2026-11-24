@@ -34,7 +34,7 @@ def _open_token_or_error(token: str, locale: str) -> tuple[dict, dict]:
 @router.get("/{token}")
 def read_reset_link(token: str, locale: str = Depends(get_locale)):
     _, konto = _open_token_or_error(token, locale)
-    return {"uid": konto["ldap_username"]}
+    return {"uid": konto["username"]}
 
 
 class ResetPayload(BaseModel):
@@ -69,4 +69,4 @@ def reset_password(token: str, payload: ResetPayload, locale: str = Depends(get_
     # Whoever is still logged in with the old password has to log in again.
     get_session_store().destroy_for_users([konto["id"]])
     logger.info("password reset via link for user_id={}", konto["id"])
-    return {"status": "ok", "username": konto["ldap_username"]}
+    return {"status": "ok", "username": konto["username"]}

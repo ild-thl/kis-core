@@ -12,7 +12,6 @@ ROUTE = "src.routes.me"
 @pytest.fixture
 def client(monkeypatch):
     # The variable keeps the request out of the database.
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.app import app
     from src.dependencies import get_current_user, get_settings
@@ -31,7 +30,7 @@ def _state(active=False, asked=None):
 
 
 def test_get_me_carries_the_trainer_fields(client):
-    row = {"id": 1, "ldap_username": "a", "display_name": "A", "email": None,
+    row = {"id": 1, "username": "a", "display_name": "A", "email": None,
            "role": "user", "locale": "de", "tour_seen_at": None}
     with patch(f"{ROUTE}.db.get_user_by_id", return_value=row), \
          patch(f"{ROUTE}.db.get_user_language_level",

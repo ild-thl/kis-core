@@ -40,7 +40,7 @@ class FakeStore:
 
 def _user(**felder) -> dict:
     basis = {
-        "id": 7, "ldap_username": "anna", "display_name": "Anna Beispiel",
+        "id": 7, "username": "anna", "display_name": "Anna Beispiel",
         "email": "anna@th-luebeck.de", "role": "user", "custom_role_id": None,
         "active": 1, "access_expires_at": None,
     }
@@ -51,7 +51,6 @@ def _user(**felder) -> dict:
 @pytest.fixture
 def umgebung(monkeypatch):
     """App with a fake session store, a fake record and a settable target."""
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
     monkeypatch.setenv("ADMIN_EMAIL", "chef@th-luebeck.de")
 
     from src import database
@@ -123,7 +122,7 @@ def test_unbekanntes_konto_ist_404(umgebung):
 
 
 def test_sich_selbst_geht_nicht(umgebung):
-    umgebung["ziel"]["row"] = _user(id=1, ldap_username="chef")
+    umgebung["ziel"]["row"] = _user(id=1, username="chef")
     antwort = _post(umgebung, "/admin/users/1/impersonate")
     assert antwort.status_code == 403
 

@@ -35,14 +35,14 @@ def _online_details(cur, seit: dict[int, int]) -> dict:
         return {"count": 0, "users": []}
     jetzt = int(time.time())
     cur.execute(
-        """SELECT id, display_name, ldap_username
+        """SELECT id, display_name, username
            FROM users WHERE id = ANY(%s) ORDER BY display_name""",
         (list(seit),),
     )
     users = [
         {
             "id": r["id"],
-            "name": r["display_name"] or r["ldap_username"] or "Unbekannt",
+            "name": r["display_name"] or r["username"] or "Unbekannt",
             # Minutes since the first sign of life, not since the last.
             "minutes": max(0, (jetzt - seit[r["id"]]) // 60),
         }
@@ -103,7 +103,7 @@ def users_by_hour(hour: int) -> list[dict]:
 def _users_by_hour(cur, hour: int) -> list[dict]:
     """LEFT JOIN, a deleted user's presence row stays and must still count."""
     cur.execute(
-        """SELECT p.user_id AS id, COALESCE(u.display_name, u.ldap_username, 'Unbekannt') AS name
+        """SELECT p.user_id AS id, COALESCE(u.display_name, u.username, 'Unbekannt') AS name
            FROM user_presence p LEFT JOIN users u ON u.id = p.user_id
            WHERE p.day = (NOW() AT TIME ZONE 'Europe/Berlin')::date AND p.hour = %s
            ORDER BY 2""",
@@ -122,7 +122,7 @@ def users_by_day(day: str) -> list[dict]:
 def _users_by_day(cur, day: str) -> list[dict]:
     """DISTINCT because one user shows up once per hour, LEFT JOIN keeps deleted users' rows."""
     cur.execute(
-        """SELECT DISTINCT p.user_id AS id, COALESCE(u.display_name, u.ldap_username, 'Unbekannt') AS name
+        """SELECT DISTINCT p.user_id AS id, COALESCE(u.display_name, u.username, 'Unbekannt') AS name
            FROM user_presence p LEFT JOIN users u ON u.id = p.user_id
            WHERE p.day = %s
            ORDER BY 2""",
@@ -140,7 +140,7 @@ def users_new_in_month(month: str) -> list[dict]:
 
 def _users_new_in_month(cur, month: str) -> list[dict]:
     cur.execute(
-        """SELECT id, COALESCE(display_name, ldap_username, 'Unbekannt') AS name
+        """SELECT id, COALESCE(display_name, username, 'Unbekannt') AS name
            FROM users WHERE date_trunc('month', created_at) = to_date(%s, 'MM/YY')
            ORDER BY 2""",
         (month,),
@@ -186,7 +186,7 @@ def _retention(cur) -> dict:
 def _people(cur) -> list[dict]:
     """All names for the search, the detail view fetches the rest."""
     cur.execute(
-        """SELECT u.id, COALESCE(u.display_name, u.ldap_username, 'Unbekannt') AS name,
+        """SELECT u.id, COALESCE(u.display_name, u.username, 'Unbekannt') AS name,
                   COALESCE(c.name, u.role) AS rolle
            FROM users u LEFT JOIN custom_roles c ON u.custom_role_id = c.id
            ORDER BY 2"""

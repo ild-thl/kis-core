@@ -28,7 +28,6 @@ class FakeStore:
 
 @pytest.fixture
 def umgebung(monkeypatch):
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
     monkeypatch.setenv("ADMIN_EMAIL", "chef@th-luebeck.de")
 
     from src import database

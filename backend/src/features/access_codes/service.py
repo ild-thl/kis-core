@@ -1,4 +1,4 @@
-"""Pure rules around an access code, without database and without LDAP."""
+"""Pure rules around an access code, without database."""
 import secrets
 from datetime import datetime, timedelta
 

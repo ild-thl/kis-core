@@ -6,10 +6,10 @@ from src.core.db._common import _de_date_to_utc
 from src.core.db.pool import get_connection
 
 
-def get_user_by_username(ldap_username: str):
+def get_user_by_username(username: str):
     with get_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-            cur.execute("SELECT * FROM users WHERE ldap_username = %s", (ldap_username,))
+            cur.execute("SELECT * FROM users WHERE username = %s", (username,))
             return cur.fetchone()
 
 def get_user_by_id(user_id: int):
@@ -33,7 +33,7 @@ def get_user_by_email(email: str):
 
 
 def create_user(
-    ldap_username: str,
+    username: str,
     display_name: str,
     email: str | None,
     active: int,
@@ -43,9 +43,9 @@ def create_user(
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (ldap_username, display_name, email, active, role, password_hash) "
+                "INSERT INTO users (username, display_name, email, active, role, password_hash) "
                 "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
-                (ldap_username, display_name, email or None, active, role, password_hash),
+                (username, display_name, email or None, active, role, password_hash),
             )
             user_id = cur.fetchone()[0]
         conn.commit()
@@ -103,7 +103,7 @@ def get_all_users(
 
     if q:
         like = f"%{q}%"
-        conditions.append("(display_name ILIKE %s OR ldap_username ILIKE %s OR email ILIKE %s)")
+        conditions.append("(display_name ILIKE %s OR username ILIKE %s OR email ILIKE %s)")
         params += [like, like, like]
     if date_from:
         conditions.append("created_at >= %s::timestamp")
@@ -126,7 +126,7 @@ def get_all_users(
     return [dict(row) for row in rows], total
 
 def get_pending_users() -> list[dict]:
-    """Users with active=0 (passed LDAP auth but not yet whitelisted)."""
+    """Users with active=0, waiting for an admin to activate them."""
     with get_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute("SELECT * FROM users WHERE active = 0 ORDER BY created_at DESC")
@@ -186,7 +186,7 @@ def ensure_local_admin() -> int:
     if existing:
         return existing["id"]
     return create_user(
-        ldap_username="local",
+        username="local",
         display_name="Admin",
         email="",
         active=1,

@@ -37,7 +37,7 @@ def _student_stats(cur, workspace_id: int, student: dict, interval: str,
     )
     ex = cur.fetchone()
     return {
-        "name": student["display_name"] or student["ldap_username"] or "Unbekannt",
+        "name": student["display_name"] or student["username"] or "Unbekannt",
         "answers": ex["answers"],
         "correct": ex["correct_cnt"],
         "accuracy": _accuracy(ex["correct_cnt"], ex["answers"]),
@@ -76,7 +76,7 @@ def _workspace_stats(cur, m: dict, interval: str, mode_filter: str, mode_params:
 
     cur.execute(
         """SELECT DISTINCT u.id AS user_id,
-                  u.display_name, u.ldap_username
+                  u.display_name, u.username
            FROM aia_enrollments e
            JOIN users u ON e.user_id = u.id
            WHERE e.workspace_id = %s
@@ -137,7 +137,7 @@ def get_aia_admin_stats(days: int = 30, mode: str | None = None) -> dict:
 
             cur.execute(
                 """SELECT m.id, m.uuid, m.title, m.is_active, m.user_id AS owner_id,
-                          u.display_name AS owner_name, u.ldap_username AS owner_username,
+                          u.display_name AS owner_name, u.username AS owner_username,
                           (SELECT COUNT(*) FROM aia_enrollments e WHERE e.workspace_id = m.id) AS enrollment_count,
                           (SELECT COUNT(DISTINCT src.id) FROM aia_sources src WHERE src.workspace_id = m.id) AS source_count
                    FROM aia_workspaces m

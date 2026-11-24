@@ -21,7 +21,7 @@ def provision_account(
     if adresse:
         database.add_to_whitelist(adresse)
     user_id = database.create_user(
-        ldap_username=uid,
+        username=uid,
         display_name=display_name,
         email=adresse,
         active=1,

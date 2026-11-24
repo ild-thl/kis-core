@@ -419,7 +419,7 @@ def list_participants(
             {
                 "user_id": p["user_id"],
                 "display_name": p["display_name"],
-                "username": p["ldap_username"],
+                "username": p["username"],
                 "role": "tutor" if p["is_tutor"] else "student",
                 "joined_at": p["joined_at"].isoformat() + "Z" if p["joined_at"] else None,
                 "enrolled_until": p["enrolled_until"].isoformat() + "Z" if p["enrolled_until"] else None,

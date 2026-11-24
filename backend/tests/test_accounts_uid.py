@@ -9,7 +9,7 @@ def test_slugify_lowers_case_and_replaces_umlauts():
     assert slugify_uid("Jörg.Müller") == "joerg.mueller"
 
 
-def test_slugify_drops_characters_ldap_does_not_accept():
+def test_slugify_drops_characters_a_login_name_does_not_accept():
     assert slugify_uid("anna+test") == "annatest"
 
 

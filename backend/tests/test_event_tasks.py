@@ -167,7 +167,7 @@ def konto_am_code():
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (ldap_username, display_name, email, active, role, access_code_id) "
+                "INSERT INTO users (username, display_name, email, active, role, access_code_id) "
                 "VALUES (%s, 'Test Aufgaben', %s, 1, 'staff', %s) RETURNING id",
                 (f"test.aufgaben.{kennung}", f"test.aufgaben.{kennung}@demo.kis.local", code_id),
             )

@@ -1,6 +1,6 @@
 "use client";
 
-/** Access codes, behind the same server switch as the LDAP users. */
+/** Access codes, behind the same server switch as creating accounts. */
 
 import { useTranslations } from "next-intl";
 import AccessCodesTab from "../../_components/AccessCodesTab";
@@ -11,7 +11,7 @@ export default function AccessCodesPage() {
   const { loaded, permissions } = usePermissions();
 
   if (!loaded) return null;
-  if (!permissions.allow_ldap_user_create) {
+  if (!permissions.allow_account_create) {
     return <p className="text-sm text-muted-soft">{t("disabled")}</p>;
   }
   return <AccessCodesTab />;

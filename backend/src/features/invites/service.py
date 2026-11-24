@@ -1,4 +1,4 @@
-"""Pure rules around invitations, without database and without LDAP."""
+"""Pure rules around invitations, without database."""
 import secrets
 from datetime import datetime
 

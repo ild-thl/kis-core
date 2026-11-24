@@ -9,7 +9,7 @@ export interface UserPermissions {
   /** All permission keys, the sidebar decides per page with them. */
   keys: string[];
   /** Not a grantable permission but the permission plus the server switch. */
-  allow_ldap_user_create?: boolean;
+  allow_account_create?: boolean;
 }
 
 export interface AuthStatus {

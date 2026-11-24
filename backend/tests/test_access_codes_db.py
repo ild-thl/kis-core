@@ -53,7 +53,7 @@ def konto_am_code(schema):
     with schema() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (ldap_username, display_name, email, active, role) "
+                "INSERT INTO users (username, display_name, email, active, role) "
                 "VALUES (%s, %s, %s, 1, 'user') RETURNING id",
                 (f"test.loeschen.{kennung}", "Test Loeschen",
                  f"test.loeschen.{kennung}@demo.kis.local"),
@@ -144,7 +144,7 @@ def test_set_users_active_switches_code_accounts_but_never_others(schema, konto_
     with schema() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (ldap_username, display_name, email, active, role) "
+                "INSERT INTO users (username, display_name, email, active, role) "
                 "VALUES (%s, 'Echt', %s, 1, 'user') RETURNING id",
                 (f"test.echt.{kennung}", f"test.echt.{kennung}@demo.kis.local"),
             )

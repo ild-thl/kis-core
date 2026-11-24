@@ -21,7 +21,7 @@ def user_detail(user_id: int) -> dict | None:
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(
-                """SELECT u.id, COALESCE(u.display_name, u.ldap_username, 'Unbekannt') AS name,
+                """SELECT u.id, COALESCE(u.display_name, u.username, 'Unbekannt') AS name,
                           COALESCE(c.name, u.role) AS rolle, u.language_level AS niveau,
                           u.created_at
                    FROM users u LEFT JOIN custom_roles c ON u.custom_role_id = c.id
@@ -103,7 +103,7 @@ def workspace_detail(uuid: str) -> dict | None:
             cur.execute(
                 """SELECT m.id, m.uuid, m.title, m.is_active, m.created_at,
                           m.user_id AS owner_id,
-                          COALESCE(u.display_name, u.ldap_username, 'Unbekannt') AS owner
+                          COALESCE(u.display_name, u.username, 'Unbekannt') AS owner
                    FROM aia_workspaces m JOIN users u ON m.user_id = u.id
                    WHERE m.uuid = %s""",
                 (uuid,),
@@ -195,7 +195,7 @@ def _workspace_members(cur, mid: int, owner_id: int) -> list[dict]:
     # The owner was missing entirely, enrollments are grouped per person.
     cur.execute(
         """SELECT u.id AS user_id,
-                  COALESCE(u.display_name, u.ldap_username, 'Unbekannt') AS name,
+                  COALESCE(u.display_name, u.username, 'Unbekannt') AS name,
                   t.rolle,
                   (SELECT COUNT(*) FROM aia_exercise_progress p
                      JOIN aia_exercise_sets s ON s.id = p.set_id

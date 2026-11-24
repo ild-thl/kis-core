@@ -8,10 +8,7 @@ from fastapi.testclient import TestClient
 
 # Out of local mode, otherwise the app's own session middleware hits the real database.
 def _out_of_local_mode(monkeypatch):
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
+    monkeypatch.setenv("AUTH_DISABLED", "false")
 
 
 @pytest.fixture

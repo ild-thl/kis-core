@@ -16,7 +16,7 @@ describe("uidPreview", () => {
     expect(uidPreview("Anna Beispiel")).toBe("anna-beispiel");
   });
 
-  it("wirft weg was LDAP nicht annimmt", () => {
+  it("wirft weg was ein Anmeldename nicht annimmt", () => {
     expect(uidPreview("anna+test")).toBe("annatest");
   });
 

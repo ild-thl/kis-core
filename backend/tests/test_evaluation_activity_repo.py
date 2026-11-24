@@ -41,7 +41,7 @@ def konto(schema):
     with schema() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (ldap_username, display_name, email, active, role) "
+                "INSERT INTO users (username, display_name, email, active, role) "
                 "VALUES (%s, %s, %s, 1, 'user') RETURNING id",
                 (f"test.activity.{kennung}", "Test Aktivitaet",
                  f"test.activity.{kennung}@demo.kis.local"),
@@ -120,7 +120,7 @@ def test_sending_a_prompt_counts_even_in_someone_elses_workspace(schema, konto):
     with schema() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (ldap_username, display_name, email, active, role) "
+                "INSERT INTO users (username, display_name, email, active, role) "
                 "VALUES (%s, %s, %s, 1, 'user') RETURNING id",
                 (f"test.owner.{kennung}", "Testbesitzer", f"test.owner.{kennung}@demo.kis.local"),
             )

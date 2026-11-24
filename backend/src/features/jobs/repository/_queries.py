@@ -170,12 +170,12 @@ def get_all_jobs(
         like = f"%{q}%"
         if extra_tools:
             conditions.append(
-                "(u.display_name ILIKE %s OR u.ldap_username ILIKE %s OR j.tool ILIKE %s OR j.original_filename ILIKE %s OR j.tool = ANY(%s))"
+                "(u.display_name ILIKE %s OR u.username ILIKE %s OR j.tool ILIKE %s OR j.original_filename ILIKE %s OR j.tool = ANY(%s))"
             )
             params += [like, like, like, like, extra_tools]
         else:
             conditions.append(
-                "(u.display_name ILIKE %s OR u.ldap_username ILIKE %s OR j.tool ILIKE %s OR j.original_filename ILIKE %s)"
+                "(u.display_name ILIKE %s OR u.username ILIKE %s OR j.tool ILIKE %s OR j.original_filename ILIKE %s)"
             )
             params += [like, like, like, like]
     if date_from:
@@ -190,7 +190,7 @@ def get_all_jobs(
     with get_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             cur.execute(
-                f"""SELECT j.*, u.display_name AS user_display_name, u.ldap_username
+                f"""SELECT j.*, u.display_name AS user_display_name, u.username
                    FROM jobs j
                    JOIN users u ON j.user_id = u.id
                    {where}

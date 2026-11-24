@@ -129,37 +129,25 @@ MESSAGES: dict[str, dict[str, str]] = {
         "de": "Die Admin-Email kann nicht aus der Whitelist entfernt werden.",
         "en": "The admin email cannot be removed from the whitelist.",
     },
-    # LDAP user creation
-    "admin.ldap.userExists": {
+    # Account creation by an admin.
+    "admin.accounts.userExists": {
         "de": "Benutzer existiert bereits",
         "en": "User already exists",
     },
-    "admin.ldap.invalidUid": {
+    "admin.accounts.invalidUid": {
         "de": "Ungültiger Benutzername (a-z, 0-9, _ . -, 2-32 Zeichen)",
         "en": "Invalid username (a-z, 0-9, _ . -, 2-32 characters)",
     },
-    "admin.ldap.invalidEmail": {
+    "admin.accounts.invalidEmail": {
         "de": "Ungültige E-Mail-Adresse",
         "en": "Invalid email address",
     },
-    "admin.ldap.invalidEmployeeType": {
-        "de": "Rolle muss 'staff' oder 'user' sein",
-        "en": "Role must be 'staff' or 'user'",
+    "admin.accounts.addFailed": {
+        "de": "Konto konnte nicht angelegt werden",
+        "en": "Account could not be created",
     },
-    "admin.ldap.nameRequired": {
-        "de": "Vor- und Nachname sind Pflicht",
-        "en": "First and last name are required",
-    },
-    "admin.ldap.addFailed": {
-        "de": "LDAP-Eintrag fehlgeschlagen",
-        "en": "LDAP add failed",
-    },
-    "admin.ldap.invalidCustomRole": {
+    "admin.accounts.invalidCustomRole": {
         "de": "Custom Role nicht gefunden",
         "en": "Custom role not found",
-    },
-    "admin.ldap.dbWriteFailed": {
-        "de": "LDAP-Eintrag erstellt, aber DB-Anlage fehlgeschlagen. Rolle bitte nach erstem Login manuell zuweisen.",
-        "en": "LDAP entry created but DB record failed. Assign the role manually after the user's first login.",
     },
 }

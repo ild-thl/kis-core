@@ -83,10 +83,6 @@ class _FakeWhisper:
 
 def _out_of_local_mode(monkeypatch):
     monkeypatch.setenv("AUTH_DISABLED", "false")
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
-    monkeypatch.setenv("LDAP_BASE_DN", "dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_DN", "cn=admin,dc=th-luebeck,dc=de")
-    monkeypatch.setenv("LDAP_BIND_PASSWORD", "admin")
 
 
 @pytest.fixture

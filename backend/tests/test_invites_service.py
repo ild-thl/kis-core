@@ -18,7 +18,7 @@ def test_uid_from_username_normalizes_case_and_umlauts():
     assert uid_from_username("Jörg.Müller") == "joerg.mueller"
 
 
-def test_uid_from_username_drops_characters_ldap_does_not_accept():
+def test_uid_from_username_drops_characters_a_login_name_does_not_accept():
     assert uid_from_username("anna+test") == "annatest"
 
 

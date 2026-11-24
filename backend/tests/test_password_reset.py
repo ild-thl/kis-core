@@ -30,7 +30,7 @@ def client(monkeypatch):
 
 
 def _konto(**ueberschrieben):
-    konto = {"id": 7, "ldap_username": "max", "email": "max@x.de", "role": "user", "active": 1, "password_hash": BCRYPT}
+    konto = {"id": 7, "username": "max", "email": "max@x.de", "role": "user", "active": 1, "password_hash": BCRYPT}
     konto.update(ueberschrieben)
     return konto
 

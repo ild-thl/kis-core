@@ -29,15 +29,15 @@ def get_job_stats(days: int = 30) -> dict:
 
             # 3. Top users
             cur.execute("""
-                SELECT u.display_name, u.ldap_username, COUNT(*) AS cnt
+                SELECT u.display_name, u.username, COUNT(*) AS cnt
                 FROM jobs j
                 JOIN users u ON j.user_id = u.id
                 WHERE j.created_at >= NOW() - make_interval(days => %s)
-                GROUP BY u.display_name, u.ldap_username
+                GROUP BY u.display_name, u.username
                 ORDER BY cnt DESC LIMIT 10
             """, (days,))
             top_users = [
-                {"name": r["display_name"] or r["ldap_username"], "count": r["cnt"]}
+                {"name": r["display_name"] or r["username"], "count": r["cnt"]}
                 for r in cur.fetchall()
             ]
 
@@ -80,7 +80,7 @@ def get_job_activity_log(days: int = 30, limit: int = 50) -> list[dict]:
             cur.execute(
                 """SELECT j.tool, j.status, j.created_at, j.completed_at,
                           j.started_at, j.render_started_at, j.original_filename,
-                          u.display_name, u.ldap_username
+                          u.display_name, u.username
                    FROM jobs j
                    JOIN users u ON j.user_id = u.id
                    WHERE j.created_at >= NOW() - make_interval(days => %s)
@@ -96,7 +96,7 @@ def get_job_activity_log(days: int = 30, limit: int = 50) -> list[dict]:
                     duration_sec = (r["completed_at"] - beginn).total_seconds()
 
                 rows.append({
-                    "user": r["display_name"] or r["ldap_username"] or "Unbekannt",
+                    "user": r["display_name"] or r["username"] or "Unbekannt",
                     "tool": r["tool"],
                     "status": r["status"],
                     "filename": r["original_filename"],

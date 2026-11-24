@@ -16,7 +16,7 @@ type KontoZustand = "active" | "expired" | "disabled";
 
 type Konto = {
   id: number;
-  ldap_username: string;
+  username: string;
   created_at: string;
   access_expires_at: string | null;
   active: boolean | number;
@@ -71,7 +71,7 @@ export default function AccessCodeUsersDialog({ umfang, onClose }: Props) {
   useEffect(laden, [laden]);
 
   function kopierenNutzer(konto: Konto) {
-    copyTextFromPromise(Promise.resolve(konto.ldap_username));
+    copyTextFromPromise(Promise.resolve(konto.username));
     setKopiertNutzer(konto.id);
     setTimeout(() => setKopiertNutzer(null), 1500);
   }
@@ -161,7 +161,7 @@ export default function AccessCodeUsersDialog({ umfang, onClose }: Props) {
       : rueckfrage?.art === "delete"
         ? t("deleteAllText", { n: konten.length })
         : rueckfrage?.art === "deleteOne"
-          ? t("deleteUserText", { name: rueckfrage.konto.ldap_username })
+          ? t("deleteUserText", { name: rueckfrage.konto.username })
           : "";
 
   return (
@@ -235,7 +235,7 @@ export default function AccessCodeUsersDialog({ umfang, onClose }: Props) {
                           aria-label={t("copyUser")}
                           className="font-mono text-foreground-soft hover:text-kb inline-flex items-center gap-1.5 rounded focus:outline-none focus:ring-2 focus:ring-kb"
                         >
-                          {k.ldap_username}
+                          {k.username}
                           {kopiertNutzer === k.id && <Check size={12} weight="bold" className="text-kb" />}
                         </button>
                       </td>

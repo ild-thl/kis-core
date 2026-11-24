@@ -3,7 +3,7 @@ import { test, expect, request as playwrightRequest } from "@playwright/test";
 /** A stranger redeems an access code and lands inside the app, the admin side runs through the API. */
 
 const ADMIN = { username: process.env.E2E_USER ?? "a", password: process.env.E2E_PASS ?? "a" };
-// A per-run suffix keeps this free even though account deletion never clears the LDAP entry.
+// A per-run suffix keeps the name free across runs.
 const SUFFIX = Date.now().toString(36);
 
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -60,7 +60,7 @@ test("Zugangscode: ein Konto einlösen und die Startseite erreichen", async ({ p
     await admin.delete(`/api/admin/access-codes/${code.id}`);
     if (username) {
       const liste = await (await admin.get(`/api/admin/users?limit=100&q=${encodeURIComponent(username)}`)).json();
-      const konto = liste.users.find((u: { ldap_username: string }) => u.ldap_username === username);
+      const konto = liste.users.find((u: { username: string }) => u.username === username);
       if (konto) await admin.delete(`/api/admin/users/${konto.id}`);
     }
     await admin.dispose();

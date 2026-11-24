@@ -59,7 +59,6 @@ ROUTE = "src.features.ai_assistant.routes.language_training.diagnosis"
 @pytest.fixture
 def client(monkeypatch):
     # The variable keeps the request out of the database.
-    monkeypatch.setenv("LDAP_SERVER", "ldap://openldap")
 
     from src.app import app
     from src.dependencies import get_current_user, get_llm_client, get_settings

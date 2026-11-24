@@ -356,7 +356,7 @@ def reset_access_code_user_password(
         raise HTTPException(status_code=500, detail=t("access.passwordResetFailed", locale))
 
     logger.info("admin {} reset the password for user_id={}", admin.get("email"), user_id)
-    return {"username": konto["ldap_username"], "password": password}
+    return {"username": konto["username"], "password": password}
 
 
 @router.get("/access-codes/users/{user_id}/activity")

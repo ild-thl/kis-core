@@ -6,7 +6,7 @@ import { jobStatusDisplay } from "@/lib/jobStatusDisplay";
 
 export interface PendingUser {
   id: number;
-  ldap_username: string;
+  username: string;
   display_name: string;
   email: string | null;
   created_at: string;
@@ -14,7 +14,7 @@ export interface PendingUser {
 
 export interface AdminUser {
   id: number;
-  ldap_username: string;
+  username: string;
   display_name: string;
   email: string | null;
   active: number;

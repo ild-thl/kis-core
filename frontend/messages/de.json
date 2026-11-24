@@ -274,10 +274,6 @@
   },
   "imprint": {
     "title": "Impressum",
-    "lawHeading": "Angaben gemäß § 5 DDG:",
-    "contactHeading": "Kontakt:",
-    "phoneLabel": "Telefon:",
-    "emailLabel": "E-Mail:",
     "projectHeading": "Projekt:",
     "projectBody": "Entwicklung am Institut für Interaktive Systeme (ISy),\nTechnische Hochschule Lübeck."
   },
@@ -2258,10 +2254,10 @@
       "empty": "Es hat sich noch niemand als jemand anderes angemeldet.",
       "loadError": "Das Protokoll konnte nicht geladen werden."
     },
-    "createLdapUser": {
+    "createAccount": {
       "buttonLabel": "+ Benutzer anlegen",
-      "title": "LDAP-Benutzer anlegen",
-      "fieldUid": "Benutzername (uid)",
+      "title": "Benutzer anlegen",
+      "fieldUid": "Benutzername",
       "fieldUidHint": "Kleinbuchstaben, Zahlen, _ . -, 2-32 Zeichen",
       "fieldGivenName": "Vorname",
       "fieldSurname": "Nachname",
@@ -3518,6 +3514,26 @@
       "werkzeuge": "Dienste",
       "assistent": "Lernassistent",
       "gemeinsam": "Gemeinsam"
+    },
+    "operatorCard": {
+      "title": "Betreiber",
+      "description": "Angaben der Einrichtung, die diese Installation betreibt. Sie erscheinen in Impressum und Datenschutz, im Footer, auf den Plakaten und überall, wo eine Kontaktadresse steht.",
+      "missing": "Impressum oder Datenschutzerklärung fehlen. Die Seiten zeigen dann nur einen Hinweis.",
+      "email": "Kontakt-E-Mail",
+      "emailHint": "Erscheint bei der Anmeldung, auf der Seite zur Freischaltung und auf der Startseite.",
+      "imprint": "Impressum",
+      "privacy": "Datenschutzerklärung",
+      "german": "Deutsch",
+      "english": "Englisch",
+      "markdownHint": "Markdown: ## Überschrift, ### fette Zeile, - Liste, [Text](https://…). Bleibt Englisch leer, erscheint der deutsche Text.",
+      "logos": "Logos",
+      "logosHint": "Erscheinen im Footer und auf den Plakaten. PNG, JPEG, WebP oder SVG, höchstens 2 MB.",
+      "alt": "Name (Alternativtext)",
+      "href": "Link",
+      "size": "Größe im Footer",
+      "remove": "Logo entfernen",
+      "addLogo": "Logo hinzufügen",
+      "logoTooLarge": "Ein Logo darf höchstens {max} MB groß sein."
     }
   },
   "permissions": {
@@ -3528,42 +3544,11 @@
     }
   },
   "privacy": {
-    "title": "Datenschutzerklärung",
-    "controller": {
-      "heading": "1. Verantwortlicher",
-      "body": "Hamid Mergan\nMönkhofer Weg 239\n23562 Lübeck\nE-Mail: hamid.mergan@th-luebeck.de\nTelefon: +49 451 160818 81"
-    },
-    "data": {
-      "heading": "2. Welche Daten verarbeitet werden",
-      "intro": "Verarbeitet wird nur, was für den Betrieb der Plattform nötig ist:",
-      "item1": "Kontodaten wie Name, Benutzername und E-Mail-Adresse. Das Passwort wird nur als Hash gespeichert.",
-      "item2": "Inhalte, die Sie hochladen oder eingeben, und die daraus erzeugten Ergebnisse",
-      "item3": "Nutzungsdaten wie genutzte Dienste und Anwesenheitszeiten",
-      "item4": "Server-Logs mit IP-Adresse, Zeitpunkt und aufgerufener Seite",
-      "item5": "Bei einer Verlosung die E-Mail-Adresse, wenn Sie sie dort freiwillig angeben",
-      "outro": "Personen mit einer entsprechenden Berechtigung können diese Daten zur technischen Betreuung einsehen."
-    },
-    "cookies": {
-      "heading": "3. Cookies",
-      "body": "Die Plattform nutzt nur technisch notwendige Cookies und Speicher im Browser, für die Anmeldung und für Einstellungen. Tracking oder Analyse findet nicht statt."
-    },
-    "recipients": {
-      "heading": "4. Empfänger",
-      "body": "Für KI-Funktionen und Übersetzungen gehen Inhalte an Dienste der TH Lübeck (THL myLab) und der GWDG. Die Plattform läuft unter kis-isy.th-luebeck.de auf Servern der TH Lübeck. Die Testplattform unter kis-thl.de wird bei der Hetzner Online GmbH in Deutschland betrieben.\nEingebettete YouTube-Videos laden erst nach einer Bestätigung. Erst dann gehen Daten an YouTube (Google LLC, USA).\nLehrende können eigene Konten bei externen Anbietern verbinden. Inhalte gehen dann an diesen Anbieter, unter Umständen auch außerhalb der EU."
-    },
-    "retention": {
-      "heading": "5. Speicherdauer",
-      "body": "Daten bleiben gespeichert, bis das Konto oder die Inhalte gelöscht werden, spätestens bis zum Ende des Pilotprojekts. Befristete Zugänge werden nach Ablauf gelöscht, Server-Logs nach einigen Wochen. Auf Wunsch löschen wir früher."
-    },
-    "legalBasis": {
-      "heading": "6. Rechtsgrundlage",
-      "body": "Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der Plattform), für Server-Logs Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb). Eingebettete YouTube-Videos laden nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Die Übermittlung in die USA stützt sich auf den Angemessenheitsbeschluss der EU-Kommission (Art. 45 DSGVO, EU-US Data Privacy Framework). Die Teilnahme an einer Verlosung beruht auf Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO)."
-    },
-    "rights": {
-      "heading": "7. Ihre Rechte",
-      "body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15 bis 21 DSGVO). Eine Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen, für YouTube durch Löschen der Website-Daten in Ihrem Browser. Wenden Sie sich dazu an:",
-      "complaint": "Außerdem können Sie sich beim Unabhängigen Landeszentrum für Datenschutz Schleswig-Holstein (ULD) beschweren."
-    }
+    "title": "Datenschutzerklärung"
+  },
+  "legal": {
+    "imprintMissing": "Das Impressum wurde noch nicht hinterlegt.",
+    "privacyMissing": "Die Datenschutzerklärung wurde noch nicht hinterlegt."
   },
   "jobsStatus": {
     "translation": {

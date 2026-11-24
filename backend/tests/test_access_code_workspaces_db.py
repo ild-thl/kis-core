@@ -42,7 +42,7 @@ def aufbau(verbindung):
             konten = []
             for name in ("besitzer", "eins", "zwei"):
                 cur.execute(
-                    "INSERT INTO users (ldap_username, display_name, email, active, role) "
+                    "INSERT INTO users (username, display_name, email, active, role) "
                     "VALUES (%s, %s, %s, 1, 'staff') RETURNING id",
                     (f"test.ws.{name}.{kennung}", f"Test {name}", f"test.ws.{name}.{kennung}@demo.kis.local"),
                 )

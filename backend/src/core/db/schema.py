@@ -283,7 +283,7 @@ def _init_db(admin_email: Optional[str] = None) -> None:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id            SERIAL PRIMARY KEY,
-                    ldap_username TEXT NOT NULL UNIQUE,
+                    username      TEXT NOT NULL UNIQUE,
                     display_name  TEXT NOT NULL,
                     email         TEXT,
                     active        INTEGER NOT NULL DEFAULT 1,
@@ -291,6 +291,20 @@ def _init_db(admin_email: Optional[str] = None) -> None:
                     created_at    TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            # Accounts live in the database since LDAP was switched off, so the login name drops its LDAP prefix (idempotent).
+            cur.execute("""
+                SELECT
+                    EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema = 'public'
+                           AND table_name = 'users' AND column_name = 'ldap_username'),
+                    EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema = 'public'
+                           AND table_name = 'users' AND column_name = 'username')
+            """)
+            alt_da, neu_da = cur.fetchone()
+            if alt_da and not neu_da:
+                cur.execute("ALTER TABLE users RENAME COLUMN ldap_username TO username")
+            cur.execute("SELECT 1 FROM pg_constraint WHERE conname = 'users_ldap_username_key'")
+            if cur.fetchone():
+                cur.execute("ALTER TABLE users RENAME CONSTRAINT users_ldap_username_key TO users_username_key")
             cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'lecturer'")
             # The login checks against this column, NULL means no form login for this account.
             cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT")
@@ -430,7 +444,7 @@ def _init_db(admin_email: Optional[str] = None) -> None:
             """)
             # The inviter may disappear, the invitation stays.
             cur.execute("ALTER TABLE invites ALTER COLUMN created_by DROP NOT NULL")
-            # An invitation without a mail address is normal now, LDAP no longer demands one.
+            # An invitation without a mail address is normal, the login name is enough.
             cur.execute("ALTER TABLE invites ALTER COLUMN email DROP NOT NULL")
             cur.execute("CREATE INDEX IF NOT EXISTS invites_email_idx ON invites (LOWER(email))")
             # A reset link keeps the old password until the person sets a new one, only the hash of the key is stored.
