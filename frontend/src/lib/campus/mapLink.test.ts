@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapLink } from "./mapLink";
+import { mapFile, mapLink } from "./mapLink";
 
 describe("mapLink", () => {
   it("carries the language and keeps the path", () => {
@@ -21,5 +21,18 @@ describe("mapLink", () => {
   });
   it("returns a broken setting unchanged instead of throwing", () => {
     expect(mapLink("campus-map", "de")).toBe("campus-map");
+  });
+});
+
+describe("mapFile", () => {
+  it("finds files next to an index.html", () => {
+    expect(mapFile("https://s3.test/b/campus-map/index.html?lang=de", "preview.jpg")).toBe("https://s3.test/b/campus-map/preview.jpg");
+  });
+  it("treats an address without slash as a folder", () => {
+    expect(mapFile("https://map.test/campus-map", "preview.jpg")).toBe("https://map.test/campus-map/preview.jpg");
+    expect(mapFile("https://map.test/campus-map/", "preview.jpg")).toBe("https://map.test/campus-map/preview.jpg");
+  });
+  it("returns nothing for a broken setting", () => {
+    expect(mapFile("campus-map", "preview.jpg")).toBe("");
   });
 });

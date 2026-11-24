@@ -6,6 +6,6 @@ export default createMiddleware(routing);
 export const config = {
   // Match all pathnames except for backend rewrites, API routes, internals, and static files.
   matcher: [
-    "/((?!api|auth|health|docs|redoc|openapi|translate|trpc|campus-map|_next|_vercel|.*\\..*).*)",
+    "/((?!api|auth|health|docs|redoc|openapi|translate|trpc|_next|_vercel|.*\\..*).*)",
   ],
 };

@@ -2103,7 +2103,7 @@
         "exclude": "Addresses without",
         "excludeHint": "One pattern per line, for example /news/. Pages with this pattern are skipped.",
         "mapUrl": "Campus map address",
-        "mapHint": "The page of the campus map. Place cards in the chat open it at the right spot.",
+        "mapHint": "The page of the campus map. Place cards in the chat open it at the right spot. Places (places.json) and preview (preview.jpg) sit next to it. Empty means no map.",
         "mapEnabled": "Show campus map",
         "retention": "Keep chats",
         "retentionHint": "Days without activity after which a chat is deleted. 0 keeps all.",

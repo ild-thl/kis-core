@@ -395,15 +395,6 @@ const nextConfig: NextConfig = {
         source: "/openapi.json",
         destination: `${backendUrl}/openapi.json`,
       },
-      // Campus map: static folder under public/, Next does not resolve "/campus-map/" to index.html itself.
-      {
-        source: "/campus-map",
-        destination: "/campus-map/index.html",
-      },
-      {
-        source: "/campus-map/",
-        destination: "/campus-map/index.html",
-      },
     ];
   },
 };
