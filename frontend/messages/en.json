@@ -2098,7 +2098,7 @@
       },
       "campus": {
         "label": "Info assistant",
-        "sub": "Which web pages are refreshed at night, the link to the campus map, extra documents and how long chats are kept.",
+        "sub": "Which web pages are refreshed at night, extra documents and how long chats are kept.",
         "sitemapUrl": "Sitemap addresses",
         "sitemapHint": "The sitemaps of the university sites, one address per line. With sitemaps and start pages left empty, no web pages are fetched.",
         "startUrls": "Start pages without sitemap",
